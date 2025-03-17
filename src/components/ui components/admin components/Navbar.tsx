@@ -5,14 +5,18 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { motion } from "motion/react";
 import { Wallet, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useRef, useEffect, useTransition } from "react";
 import { NavItem } from "@/utils/types";
 import { adminNavbarValues } from "@/utils/constants/consts";
+import { logoutFunction } from "@/app/(auth)/login/__actions/authActions";
+import { toast } from "sonner";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const NavLink = ({ item }: { item: NavItem }) => {
     const isActive = pathname === item.href;
@@ -54,7 +58,30 @@ const Navbar = () => {
       </li>
     );
   };
-
+  const handleLogout = () => {
+    startTransition(async () => {
+      const res = await logoutFunction();
+      toast.loading("Logging out...", {
+        duration: 10000,
+        position: "top-center",
+        id: "logout-toast",
+      });
+      if (res.success) {
+        router.push("/");
+        toast.success("logged out successfully", {
+          duration: 2000,
+          position: "top-center",
+          id: "logout-toast",
+        });
+      } else {
+        toast.error("Failed to log out", {
+          duration: 2000,
+          position: "top-center",
+          id: "logout-toast",
+        });
+      }
+    });
+  };
   return (
     <nav className="sticky top-0 z-50 w-full bg-gradient-to-r from-background/5 via-background/10 to-background/1 shadow-accent-foreground/10 shadow-md border-b border-border/40 backdrop-blur-xl">
       <div className="container mx-auto px-4">
@@ -141,6 +168,8 @@ const Navbar = () => {
                     ))}
                   </nav>
                   <Button
+                    onClick={handleLogout}
+                    disabled={isPending}
                     variant="destructive"
                     size="lg"
                     className="w-full gap-2 bg-gradient-to-r from-destructive to-[#ef4444] hover:opacity-90 transition-opacity"
@@ -161,9 +190,11 @@ const Navbar = () => {
             transition={{ duration: 0.5 }}
           >
             <Button
+              onClick={handleLogout}
+              disabled={isPending}
               variant="destructive"
               size="lg"
-              className="gap-2 bg-gradient-to-r from-destructive to-[#ef4444] hover:opacity-90 transition-opacity"
+              className="gap-2 cursor-pointer bg-gradient-to-r from-destructive to-[#ef4444] hover:opacity-90 transition-opacity"
             >
               <LogOut className="w-4 h-4" />
               Logout
