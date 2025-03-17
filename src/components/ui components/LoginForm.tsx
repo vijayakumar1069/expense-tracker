@@ -59,10 +59,9 @@ export const LoginForm = () => {
           // Dismiss loading toast and show success
           toast.success("Welcome back!", {
             id: "login",
+            duration: 3000,
+            position: "top-center",
           });
-
-          // Refresh server-side data
-          router.refresh();
 
           // Redirect to dashboard
           router.push("/dashboard");

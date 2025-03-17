@@ -115,3 +115,8 @@ export async function loginFunction(data: LoginFormValues): Promise<LoginRespons
         }
     }
 }
+
+
+export async function logoutFunction() {
+
+}
