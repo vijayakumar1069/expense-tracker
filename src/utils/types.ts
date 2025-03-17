@@ -6,3 +6,9 @@ export interface NavItem {
     href: string;
     icon: LucideIcon;
 }
+
+export type AuthUser = {
+    id: string;
+    email: string;
+    sessionToken: string;
+};

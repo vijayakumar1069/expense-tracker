@@ -1,0 +1,307 @@
+"use server"
+
+
+import { requireAuth } from "@/lib/auth";
+import cloudinary from "@/lib/clodinary";
+import { prisma } from "@/utils/prisma";
+import { expenseFormSchema } from "@/utils/schema/expenseSchema";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+
+export async function createExpense(formData: FormData) {
+    try {
+        const user = await requireAuth();
+
+        // Parse and validate form data
+        const rawFormData = Object.fromEntries(formData.entries());
+        // const validatedData = expenseFormSchema.parse({
+        //     ...rawFormData,
+        //     // tax: rawFormData.tax ? Number(rawFormData.tax) : undefined,
+        // });
+        const validatedData = expenseFormSchema.parse(rawFormData)
+        let attachmentData = null;
+        const imageFile = formData.get("image") as File;
+
+        // Handle image upload if present
+        if (imageFile && imageFile.size > 0) {
+            try {
+                const bytes = await imageFile.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                const base64String = buffer.toString('base64');
+                const dataURI = `data:${imageFile.type};base64,${base64String}`;
+
+                const uploadResponse = await cloudinary.uploader.upload(dataURI, {
+                    folder: `expenses`,
+                    resource_type: "auto",
+                    transformation: [
+                        { quality: "auto:best" },
+                        { width: 1500, crop: "limit" }
+                    ],
+                });
+
+                attachmentData = {
+                    url: uploadResponse.secure_url,
+                };
+            } catch (error) {
+                console.error("Cloudinary upload error:", error);
+                throw new Error("Failed to upload image");
+            }
+        }
+
+        // Create expense with transaction
+        const expense = await prisma.$transaction(async (tx) => {
+            const createdExpense = await tx.expense.create({
+                data: {
+                    name: validatedData.name,
+                    description: validatedData.description,
+                    amount: parseFloat(validatedData.amount),
+                    // tax: validatedData.taxType,
+                    total: parseFloat(validatedData.total),
+                    date: new Date(validatedData.date),
+                    category: validatedData.category,
+                    userId: user.id,
+                    // Create payment method    
+                    paymentMethod: {
+                        create: {
+
+                            type: validatedData?.paymentMethodType,
+                            receivedBy: validatedData.receivedBy,
+                            bankName: validatedData.bankName,
+                            chequeNo: validatedData.chequeNo,
+                            chequeDate: validatedData.chequeDate
+                                ? new Date(validatedData.chequeDate)
+                                : null,
+                        },
+                    },
+                    // Create attachment if exists
+                    attachment: attachmentData
+                        ? {
+                            create: attachmentData,
+                        }
+                        : undefined,
+                },
+                include: {
+                    paymentMethod: true,
+                    attachment: true,
+                },
+            });
+
+            return createdExpense;
+
+        });
+        // Revalidate the expenses page
+        revalidatePath("/expenses");
+
+        return { success: true, data: expense };
+    } catch (error) {
+        console.error("Create expense error:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Failed to create expense",
+        };
+    }
+}
+
+// export async function deleteExpense(expenseId: string) {
+//     try {
+//         const session = await requireAuth();
+//         if (!session?.user) {
+//             throw new Error("Unauthorized");
+//         }
+
+//         // Get expense with attachment to check ownership and get attachment URL
+//         const expense = await prisma.expense.findUnique({
+//             where: { id: expenseId },
+//             include: { attachment: true },
+//         });
+
+//         if (!expense) {
+//             throw new Error("Expense not found");
+//         }
+
+//         if (expense.userId !== user.id) {
+//             throw new Error("Not authorized to delete this expense");
+//         }
+
+//         // Delete expense (will cascade to payment method and attachment)
+//         await prisma.expense.delete({
+//             where: { id: expenseId },
+//         });
+
+//         // If there was an attachment, delete from Cloudinary
+//         if (expense.attachment?.[0]?.url) {
+//             const publicId = expense.attachment[0].url
+//                 .split("/")
+//                 .pop()
+//                 ?.split(".")[0];
+//             if (publicId) {
+//                 await cloudinary.uploader.destroy(publicId);
+//             }
+//         }
+
+//         revalidatePath("/expenses");
+//         return { success: true };
+//     } catch (error) {
+//         console.error("Delete expense error:", error);
+//         return {
+//             success: false,
+//             error: error instanceof Error ? error.message : "Failed to delete expense",
+//         };
+//     }
+// }
+
+// export async function updateExpense(expenseId: string, formData: FormData) {
+//     try {
+//         const session = await auth();
+//         if (!session?.user) {
+//             throw new Error("Unauthorized");
+//         }
+
+//         // Validate ownership
+//         const existingExpense = await prisma.expense.findUnique({
+//             where: { id: expenseId },
+//             include: { attachment: true },
+//         });
+
+//         if (!existingExpense) {
+//             throw new Error("Expense not found");
+//         }
+
+//         if (existingExpense.userId !== user.id) {
+//             throw new Error("Not authorized to update this expense");
+//         }
+
+//         // Parse and validate form data
+//         const rawFormData = Object.fromEntries(formData.entries());
+//         const validatedData = ExpenseSchema.parse({
+//             ...rawFormData,
+//             tax: rawFormData.tax ? Number(rawFormData.tax) : undefined,
+//         });
+
+//         let attachmentData = null;
+//         const imageFile = formData.get("image") as File;
+
+//         // Handle image upload if new image is provided
+//         if (imageFile && imageFile.size > 0) {
+//             try {
+//                 const bytes = await imageFile.arrayBuffer();
+//                 const buffer = Buffer.from(bytes);
+//                 const base64String = buffer.toString('base64');
+//                 const dataURI = `data:${imageFile.type};base64,${base64String}`;
+
+//                 const uploadResponse = await cloudinary.uploader.upload(dataURI, {
+//                     folder: `expenses/${user.id}`,
+//                     resource_type: "auto",
+//                     transformation: [
+//                         { quality: "auto:best" },
+//                         { width: 1500, crop: "limit" }
+//                     ],
+//                 });
+
+//                 attachmentData = {
+//                     url: uploadResponse.secure_url,
+//                 };
+
+//                 // Delete old image if exists
+//                 if (existingExpense.attachment?.[0]?.url) {
+//                     const publicId = existingExpense.attachment[0].url
+//                         .split("/")
+//                         .pop()
+//                         ?.split(".")[0];
+//                     if (publicId) {
+//                         await cloudinary.uploader.destroy(publicId);
+//                     }
+//                 }
+//             } catch (error) {
+//                 console.error("Cloudinary upload error:", error);
+//                 throw new Error("Failed to upload image");
+//             }
+//         }
+
+//         // Update expense with transaction
+//         const updatedExpense = await prisma.$transaction(async (tx) => {
+//             // Update payment method
+//             await tx.paymentMethod.update({
+//                 where: { expenseId },
+//                 data: {
+//                     name: validatedData.paymentMethodName,
+//                     type: validatedData.paymentMethodType,
+//                     receivedBy: validatedData.receivedBy,
+//                     bankName: validatedData.bankName,
+//                     chequeNo: validatedData.chequeNo,
+//                     chequeDate: validatedData.chequeDate
+//                         ? new Date(validatedData.chequeDate)
+//                         : null,
+//                 },
+//             });
+
+//             // Update attachment if new image was uploaded
+//             if (attachmentData) {
+//                 await tx.attachment.upsert({
+//                     where: { expenseId },
+//                     create: {
+//                         ...attachmentData,
+//                         expenseId,
+//                     },
+//                     update: attachmentData,
+//                 });
+//             }
+
+//             // Update expense
+//             return await tx.expense.update({
+//                 where: { id: expenseId },
+//                 data: {
+//                     name: validatedData.name,
+//                     description: validatedData.description,
+//                     amount: parseFloat(validatedData.amount),
+//                     tax: validatedData.tax,
+//                     total: parseFloat(validatedData.total),
+//                     date: new Date(validatedData.date),
+//                     category: validatedData.category,
+//                 },
+//                 include: {
+//                     paymentMethod: true,
+//                     attachment: true,
+//                 },
+//             });
+//         });
+
+//         revalidatePath("/expenses");
+//         return { success: true, data: updatedExpense };
+//     } catch (error) {
+//         console.error("Update expense error:", error);
+//         return {
+//             success: false,
+//             error: error instanceof Error ? error.message : "Failed to update expense",
+//         };
+//     }
+// }
+
+// // Usage in your component:
+// // src/app/expenses/page.tsx
+// "use client";
+
+// import { createExpense, updateExpense, deleteExpense } from "@/lib/actions/expense";
+// import cloudinary from "@/lib/clodinary";
+// import { prisma } from "@/utils/prisma";
+// import { requireAuth } from "@/lib/auth";
+
+// export default function ExpensePage() {
+//     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+//         e.preventDefault();
+//         const formData = new FormData(e.currentTarget);
+//         const result = await createExpense(formData);
+//         if (result.success) {
+//             // Handle success
+//         } else {
+//             // Handle error
+//         }
+//     };
+
+//     return (
+//         <form onSubmit= { handleSubmit } >
+//         {/* Your form fields here */ }
+//         </form>
+//   );
+// }

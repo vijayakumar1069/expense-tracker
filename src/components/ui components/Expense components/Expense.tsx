@@ -16,6 +16,7 @@ const Expense = () => {
         <ExpenseDialog mode="add" />
       </div>
 
+      <ExpenseDialog mode="edit" />
       {/* Your expenses list/table goes here */}
     </div>
   );

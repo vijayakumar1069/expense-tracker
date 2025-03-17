@@ -35,7 +35,7 @@ model Expense {
   name            String
   description     String?
   amount          Float
-  tax            Int?
+  tax            String?
   total          Float
   date           DateTime
   user           User           @relation(fields: [userId], references: [id])
@@ -64,7 +64,7 @@ enum Role {
 }
 model PaymentMethod {
   id             String           @id @default(cuid())
-  name           String
+ 
   type           PaymentMethodType
   receivedBy     String?         // For BANK payments
   bankName       String?         // For BANK payments

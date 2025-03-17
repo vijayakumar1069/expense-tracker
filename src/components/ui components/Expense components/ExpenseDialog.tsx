@@ -62,10 +62,10 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
       amount: expense?.amount || "",
       taxType: expense?.taxType || "",
       total: expense?.total || "",
-      paymentMethod: expense?.paymentMethod || "",
+      paymentMethodType: expense?.paymentMethodType || "",
       receivedBy: expense?.receivedBy || "",
       bankName: expense?.bankName || "",
-      chequeNumber: expense?.chequeNumber || "",
+      chequeNo: expense?.chequeNo || "",
       chequeDate: expense?.chequeDate || "",
       date: expense?.date || new Date().toISOString().split("T")[0],
     },
@@ -243,7 +243,7 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
               {/* Payment Method */}
               <FormField
                 control={form.control}
-                name="paymentMethod"
+                name="paymentMethodType"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Payment Method</FormLabel>
@@ -270,7 +270,7 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
               />
 
               {/* Conditional Fields */}
-              {form.watch("paymentMethod") === "cash" && (
+              {form.watch("paymentMethodType") === "cash" && (
                 <FormField
                   control={form.control}
                   name="receivedBy"
@@ -286,7 +286,7 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
                 />
               )}
 
-              {form.watch("paymentMethod") === "bank" && (
+              {form.watch("paymentMethodType") === "bank" && (
                 <FormField
                   control={form.control}
                   name="bankName"
@@ -302,11 +302,11 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
                 />
               )}
 
-              {form.watch("paymentMethod") === "cheque" && (
+              {form.watch("paymentMethodType") === "cheque" && (
                 <>
                   <FormField
                     control={form.control}
-                    name="chequeNumber"
+                    name="chequeNo"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Cheque Number</FormLabel>

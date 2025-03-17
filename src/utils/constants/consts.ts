@@ -127,8 +127,8 @@ export const TAX_TYPES = [
 ];
 
 export const PAYMENT_METHODS = [
-    { id: "cash", name: "Cash" },
-    { id: "bank", name: "Bank" },
-    { id: "cheque", name: "Cheque" },
+    { id: "CASH", name: "CASH" },
+    { id: "BANK", name: "BANK" },
+    { id: "CHEQUE", name: "CHEQUE" },
 ];
 
