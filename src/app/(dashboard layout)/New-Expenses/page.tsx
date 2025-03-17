@@ -1,7 +1,9 @@
+import Expense from "@/components/ui components/Expense components/Expense";
+
 export default function New_Expenses_Page() {
   return (
     <div>
-      <h1>New Expenses</h1>
+      <Expense />
     </div>
   );
 }
