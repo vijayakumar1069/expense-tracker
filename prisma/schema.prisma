@@ -14,14 +14,20 @@ model User {
   email     String     @unique
   password  String
   role       Role       @default(USER)
-  // isVerified   Boolean    @default(false)
-  // resetToken   String?
-  // resetTokenExpiration DateTime?
-
-  // tokens        Token[]
+sessions        Session[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   expenses  Expense[]
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Expense {
