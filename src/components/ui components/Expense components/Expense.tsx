@@ -1,5 +1,5 @@
 import React from "react";
-import ExpenseDialog from "./ExpenseDialog";
+import TransActionDialog from "./TransActionDialog";
 
 const Expense = () => {
   //   const handleSubmit = (data: any) => {
@@ -13,10 +13,10 @@ const Expense = () => {
         <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-[#8b5cf6] bg-clip-text text-transparent">
           Expenses
         </h1>
-        <ExpenseDialog mode="add" />
+        <TransActionDialog mode="add" />
       </div>
 
-      <ExpenseDialog mode="edit" />
+      {/* <ExpenseDialog mode="edit" /> */}
       {/* Your expenses list/table goes here */}
     </div>
   );

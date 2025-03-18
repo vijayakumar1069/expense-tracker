@@ -31,7 +31,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         if (!session) {
             return null;
         }
-        console.log(session);
+
 
         return {
             id: session.user.id,

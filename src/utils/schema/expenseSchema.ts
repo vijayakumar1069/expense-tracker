@@ -2,6 +2,7 @@ import { z } from "zod";
 
 // Zod Schema
 export const expenseFormSchema = z.object({
+    transactionType: z.enum(["EXPENSE", "INCOME"]),
     name: z.string().min(2, "Name must be at least 2 characters"),
     description: z.string().optional(),
     category: z.string({
@@ -14,11 +15,12 @@ export const expenseFormSchema = z.object({
         required_error: "Please select a tax type",
     }),
     total: z.string(),
-    paymentMethodType: z.enum(["CASH", "BANK", "CHEQUE"]),
+    paymentMethodType: z.enum(["CASH", "BANK", "CHEQUE", "INVOICE"]),
     receivedBy: z.string().optional(),
     bankName: z.string().optional(),
     chequeNo: z.string().optional(),
     chequeDate: z.string().optional(),
+    invoiceNo: z.string().optional(),
     date: z.string({
         required_error: "Please select a date",
     }),

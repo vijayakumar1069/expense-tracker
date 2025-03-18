@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -36,39 +36,45 @@ import {
   CATEGORIES,
   PAYMENT_METHODS,
   TAX_TYPES,
+  TRANSACTION_TYPES,
 } from "@/utils/constants/consts";
 import { createExpense } from "@/app/(dashboard layout)/New-Expenses/__actions/newExpenseFun";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
-type ExpenseFormValues = z.infer<typeof expenseFormSchema>;
+type TransactionFormValues = z.infer<typeof expenseFormSchema>;
 
 interface ExpenseDialogProps {
   mode: "add" | "edit";
-  expense?: ExpenseFormValues;
+  transaction?: TransactionFormValues;
   //   onExpenseFormSubmit: (data: ExpenseFormValues) => void;
 }
 
-const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
+const TransActionDialog: React.FC<ExpenseDialogProps> = ({
   mode,
-  expense,
+  transaction,
   //   onExpenseFormSubmit,
 }) => {
   const [open, setOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const form = useForm<ExpenseFormValues>({
+  const form = useForm<TransactionFormValues>({
     resolver: zodResolver(expenseFormSchema),
     defaultValues: {
-      name: expense?.name || "",
-      description: expense?.description || "",
-      category: expense?.category || "",
-      amount: expense?.amount || "",
-      taxType: expense?.taxType || "",
-      total: expense?.total || "",
-      paymentMethodType: expense?.paymentMethodType || undefined,
-      receivedBy: expense?.receivedBy || "",
-      bankName: expense?.bankName || "",
-      chequeNo: expense?.chequeNo || "",
-      chequeDate: expense?.chequeDate || "",
-      date: expense?.date || new Date().toISOString().split("T")[0],
+      transactionType: transaction?.transactionType || "EXPENSE",
+      name: transaction?.name || "",
+      description: transaction?.description || "",
+      category: transaction?.category || "",
+      amount: transaction?.amount || "",
+      taxType: transaction?.taxType || "",
+      total: transaction?.total || "",
+      paymentMethodType: transaction?.paymentMethodType || undefined,
+      receivedBy: transaction?.receivedBy || "",
+      bankName: transaction?.bankName || "",
+      chequeNo: transaction?.chequeNo || "",
+      chequeDate: transaction?.chequeDate || "",
+      invoiceNo: transaction?.invoiceNo || "",
+      date: transaction?.date || new Date().toISOString().split("T")[0],
     },
   });
 
@@ -88,7 +94,7 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
     form.setValue("total", newTotal);
   };
 
-  const onFormSubmit = async (data: ExpenseFormValues) => {
+  const onFormSubmit = async (data: TransactionFormValues) => {
     try {
       // Convert form data to FormData object
       const formData = new FormData();
@@ -103,16 +109,32 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
           }
         }
       });
-
-      const res = await createExpense(formData);
-      console.log(res);
-      setOpen(false);
-      form.reset();
-    } catch (error) {
-      console.error("Error submitting form:", error);
+      startTransition(async () => {
+        // onExpenseFormSubmit(formData);
+        const res = await createExpense(formData);
+        if (!res.success) {
+          toast.error(res.error, {
+            duration: 5000,
+            position: "top-center",
+          });
+        } else {
+          toast.success("Transaction added successfully", {
+            duration: 5000,
+            position: "top-center",
+          });
+          setOpen(false);
+          form.reset();
+        }
+      });
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(errorMessage, {
+        duration: 5000,
+        position: "top-center",
+      });
     }
   };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -120,13 +142,13 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
           variant="default"
           className="bg-gradient-to-r from-primary to-[#8b5cf6] text-white hover:opacity-90"
         >
-          {mode === "add" ? "Add New Expense" : "Edit Expense"}
+          {mode === "add" ? "Add Transaction" : "Edit Transaction"}
         </Button>
       </DialogTrigger>
       <DialogContent className=" w-full sm:max-w-[700px] bg-primary-foreground p-5">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-[#8b5cf6] bg-clip-text text-transparent">
-            {mode === "add" ? "Add New Expense" : "Edit Expense"}
+            {mode === "add" ? "Add Transaction" : "Edit Transaction"}
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
@@ -135,6 +157,34 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
             className="space-y-5"
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-5">
+              <FormField
+                control={form.control}
+                name="transactionType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Transaction Type</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-primary/20 w-full">
+                          <SelectValue placeholder="Select Transaction type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {TRANSACTION_TYPES.map((type) => (
+                          <SelectItem key={type.id} value={type.id}>
+                            {type.id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               {/* Name */}
               <FormField
                 control={form.control}
@@ -155,13 +205,13 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
                 control={form.control}
                 name="category"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="lg:col-span-2">
                     <FormLabel>Category</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
-                      <FormControl>
+                      <FormControl className="w-full">
                         <SelectTrigger>
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
@@ -228,7 +278,7 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
                       }
                       defaultValue={field.value}
                     >
-                      <FormControl>
+                      <FormControl className="w-full">
                         <SelectTrigger>
                           <SelectValue placeholder="Select tax type" />
                         </SelectTrigger>
@@ -271,7 +321,7 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
                       onValueChange={field.onChange}
                       defaultValue={field.value}
                     >
-                      <FormControl>
+                      <FormControl className="w-full">
                         <SelectTrigger>
                           <SelectValue placeholder="Select payment method" />
                         </SelectTrigger>
@@ -351,6 +401,21 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
                   />
                 </>
               )}
+              {form.watch("paymentMethodType") === "INVOICE" && (
+                <FormField
+                  control={form.control}
+                  name="invoiceNo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Invoice Number</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               {/* Date */}
               <FormField
@@ -393,15 +458,27 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
               <Button
                 type="button"
                 variant="outline"
+                disabled={isPending}
                 onClick={() => setOpen(false)}
               >
                 Cancel
               </Button>
               <Button
+                disabled={isPending}
                 type="submit"
                 className="bg-gradient-to-r from-primary to-[#8b5cf6] text-white hover:opacity-90"
               >
-                {mode === "add" ? "Add Expense" : "Save Changes"}
+                {mode === "add" ? (
+                  isPending ? (
+                    <Loader2 className="animate-spin" />
+                  ) : (
+                    "Add Expense"
+                  )
+                ) : isPending ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  "Save Changes"
+                )}
               </Button>
             </div>
           </form>
@@ -410,4 +487,4 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
     </Dialog>
   );
 };
-export default ExpenseDialog;
+export default TransActionDialog;

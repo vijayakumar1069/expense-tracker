@@ -143,7 +143,7 @@ export async function logoutFunction(): Promise<ReturnResponse> {
         try {
             const secret = new TextEncoder().encode(process.env.JWT_SECRET);
             const decoded = await jwtVerify(sessionToken, secret);
-            console.log("Decoded JWT:", decoded);
+
 
             if (decoded) {
                 // Delete session from database using a transaction

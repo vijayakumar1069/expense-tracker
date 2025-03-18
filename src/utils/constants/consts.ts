@@ -130,5 +130,11 @@ export const PAYMENT_METHODS = [
     { id: "CASH", name: "CASH" },
     { id: "BANK", name: "BANK" },
     { id: "CHEQUE", name: "CHEQUE" },
+    { id: "INVOICE", name: "INVOICE" },
 ];
 
+
+export const TRANSACTION_TYPES = [
+    { id: "EXPENSE", name: "EXPENSE" },
+    { id: "INCOME", name: "INCOME" },
+];

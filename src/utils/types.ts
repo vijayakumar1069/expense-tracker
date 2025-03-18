@@ -16,5 +16,6 @@ export type AuthUser = {
 export enum PaymentMethodType {
     CASH = "CASH",
     BANK = "BANK",
-    CHEQUE = "CHEQUE"
+    CHEQUE = "CHEQUE",
+    INVOICE = "INVOICE",
 }

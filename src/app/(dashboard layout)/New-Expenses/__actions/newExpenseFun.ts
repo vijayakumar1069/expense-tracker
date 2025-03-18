@@ -5,16 +5,22 @@ import { requireAuth } from "@/lib/auth";
 import cloudinary from "@/lib/clodinary";
 import { prisma } from "@/utils/prisma";
 import { expenseFormSchema } from "@/utils/schema/expenseSchema";
-import { PaymentMethodType } from "@/utils/types";
+import { PaymentMethodType } from "@prisma/client";
+
 import { revalidatePath } from "next/cache";
 
 
 export async function createExpense(formData: FormData) {
     try {
         const user = await requireAuth();
+        if (!user) {
+            throw new Error("Authentication required");
+        }
+
 
         // Convert FormData to object for validation
         const formDataObj = {
+            transactionType: formData.get("transactionType"),
             name: formData.get("name"),
             description: formData.get("description"),
             category: formData.get("category"),
@@ -26,13 +32,16 @@ export async function createExpense(formData: FormData) {
             bankName: formData.get("bankName"),
             chequeNo: formData.get("chequeNo"),
             chequeDate: formData.get("chequeDate"),
+            invoiceNo: formData.get("invoiceNo"),
             date: formData.get("date"),
             image: formData.get("image"),
         };
 
         // Validate the data
         const validatedData = expenseFormSchema.parse(formDataObj);
-        console.log(validatedData)
+
+        console.log("Validated Data:", validatedData);
+
         let attachmentData = null;
         const imageFile = formData.get("image") as File;
 
@@ -63,11 +72,13 @@ export async function createExpense(formData: FormData) {
         }
 
         const expense = await prisma.$transaction(async (tx) => {
-            const createdExpense = await tx.expense.create({
+            const createdExpense = await tx.transaction.create({
                 data: {
                     name: validatedData.name,
+                    type: validatedData.transactionType,
                     description: validatedData.description,
                     amount: parseFloat(String(validatedData.amount)),
+                    tax: validatedData.taxType,
                     total: parseFloat(String(validatedData.total)),
                     date: new Date(String(validatedData.date)),
                     category: String(validatedData.category),
@@ -81,9 +92,10 @@ export async function createExpense(formData: FormData) {
                             chequeDate: validatedData.chequeDate
                                 ? new Date(String(validatedData.chequeDate))
                                 : null,
+                            invoiceNo: validatedData.invoiceNo,
                         },
                     },
-                    attachment: attachmentData
+                    attachments: attachmentData
                         ? {
                             create: attachmentData,
                         }
@@ -91,7 +103,7 @@ export async function createExpense(formData: FormData) {
                 },
                 include: {
                     paymentMethod: true,
-                    attachment: true,
+                    attachments: true,
                 },
             });
 
