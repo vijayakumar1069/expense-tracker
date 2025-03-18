@@ -110,7 +110,7 @@ export async function createExpense(formData: FormData) {
             return createdExpense;
         });
         // Revalidate the expenses page
-        revalidatePath("/expenses");
+        // revalidatePath("/expenses");
 
         return { success: true, data: expense };
     } catch (error) {

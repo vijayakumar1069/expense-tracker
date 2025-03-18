@@ -41,6 +41,9 @@ import {
 import { createExpense } from "@/app/(dashboard layout)/New-Expenses/__actions/newExpenseFun";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Transaction } from "@prisma/client";
+import { TransactionResponse } from "@/utils/types";
 
 type TransactionFormValues = z.infer<typeof expenseFormSchema>;
 
@@ -57,6 +60,7 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(expenseFormSchema),
@@ -93,13 +97,11 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
     const newTotal = calculateTotal(currentAmount, currentTaxType);
     form.setValue("total", newTotal);
   };
+  // const queryClient = useQueryClient();
 
-  const onFormSubmit = async (data: TransactionFormValues) => {
-    try {
-      // Convert form data to FormData object
+  const mutation = useMutation({
+    mutationFn: async (data: TransactionFormValues) => {
       const formData = new FormData();
-
-      // Append all fields to FormData
       Object.entries(data).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           if (key === "image" && value instanceof File) {
@@ -109,32 +111,128 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
           }
         }
       });
-      startTransition(async () => {
-        // onExpenseFormSubmit(formData);
-        const res = await createExpense(formData);
-        if (!res.success) {
-          toast.error(res.error, {
-            duration: 5000,
-            position: "top-center",
-          });
-        } else {
-          toast.success("Transaction added successfully", {
-            duration: 5000,
-            position: "top-center",
-          });
-          setOpen(false);
-          form.reset();
-        }
+      return createExpense(formData);
+    },
+    onMutate: async () => {
+      toast.loading("Adding transaction...", {
+        duration: 2000,
+        position: "top-center",
+        id: "add-transaction-toast",
       });
-    } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "An unknown error occurred";
-      toast.error(errorMessage, {
-        duration: 5000,
+
+      // Cancel any outgoing refetches for all transaction queries
+      await queryClient.cancelQueries({
+        queryKey: ["transactions"],
+        exact: false, // This will match all queries that start with "transactions"
+      });
+
+      // Get all existing transaction query data
+      const queryCache = queryClient.getQueryCache();
+      const transactionQueries = queryCache.findAll({
+        queryKey: ["transactions"],
+      });
+
+      const previousDataMap = new Map();
+
+      // Store all previous data
+      transactionQueries.forEach((query) => {
+        const data = query.state.data as TransactionResponse;
+        previousDataMap.set(query.queryKey, data?.transactions);
+      });
+
+      console.log("transactionQueries", transactionQueries);
+
+      // Update all transaction queries
+      // transactionQueries.forEach((query) => {
+      //   queryClient.setQueryData<TransactionResponse>(query.queryKey, (old) => {
+      //     if (!old) return old;
+      //     return {
+      //       ...old,
+      //       transactions: [
+      //         ...old.transactions,
+      //         {
+      //           ...newTransaction,
+      //           id: Date.now().toString(),
+      //           date: new Date(newTransaction.date).toISOString(),
+      //         } as Transaction,
+      //       ],
+      //       // summary: {
+      //       //   ...old.summary,
+      //       //   totalIncome:
+      //       //     newTransaction.type === "INCOME"
+      //       //       ? old.summary.totalIncome + Number(newTransaction.amount)
+      //       //       : old.summary.totalIncome,
+      //       //   totalExpense:
+      //       //     newTransaction.type === "EXPENSE"
+      //       //       ? old.summary.totalExpense + Number(newTransaction.amount)
+      //       //       : old.summary.totalExpense,
+      //       //   netAmount:
+      //       //     newTransaction.type === "INCOME"
+      //       //       ? old.summary.netAmount + Number(newTransaction.amount)
+      //       //       : old.summary.netAmount - Number(newTransaction.amount),
+      //       // },
+      //     };
+      //   });
+      // });
+
+      console.log("previousDataMap: " + previousDataMap);
+
+      return { previousDataMap };
+    },
+    onSuccess: () => {
+      toast.success("Transaction added successfully", {
+        id: "add-transaction-toast",
+        duration: 2500,
         position: "top-center",
       });
-    }
+
+      setOpen(false);
+      form.reset();
+
+      // Invalidate all transaction queries
+      queryClient.invalidateQueries({
+        queryKey: ["transactions"],
+        exact: false,
+      });
+    },
+    onError: (error, variables, context) => {
+      // Revert all optimistic updates
+      if (context?.previousDataMap) {
+        context.previousDataMap.forEach((data, queryKey) => {
+          queryClient.setQueryData(queryKey, data);
+        });
+      }
+
+      toast.error(
+        error instanceof Error ? error.message : "An unknown error occurred",
+        {
+          id: "add-transaction-toast",
+          duration: 2500,
+          position: "top-center",
+        }
+      );
+    },
+    onSettled: () => {
+      // Invalidate all transaction queries
+      queryClient.invalidateQueries({
+        queryKey: ["transactions"],
+        exact: false,
+      });
+    },
+  });
+
+  const onFormSubmit = async (data: TransactionFormValues) => {
+    startTransition(() => {
+      mutation.mutate(data);
+    });
   };
+
+  // const onFormSubmit = async (data: TransactionFormValues) => {
+  //   startTransition(() => {
+  //     mutation.mutate(data);
+  //   });
+  // };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>

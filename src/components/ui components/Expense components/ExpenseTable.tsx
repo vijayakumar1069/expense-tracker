@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableFooter,
   TableHead,
@@ -16,36 +15,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  ChevronLeft,
-  ChevronRight,
-  DollarSign,
-  Calendar,
-  Tag,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, DollarSign, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-interface TransactionResponse {
-  transactions: Transaction[];
-  pagination: {
-    totalPages: number;
-    totalItems: number;
-    currentPage: number;
-    itemsPerPage: number;
-  };
-  summary: {
-    totalIncome: number;
-    totalExpense: number;
-    netAmount: number;
-  };
-}
+import { CategoryBadge } from "./CategoryBadge";
+import { TransactionResponse } from "@/utils/types";
 
 const ITEMS_PER_PAGE = 5;
 
 const ExpenseTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, isLoading, isFetching } = useQuery<TransactionResponse>({
+  const { data, isLoading } = useQuery<TransactionResponse>({
     queryKey: ["transactions", currentPage],
     queryFn: async () => {
       const res = await fetch(
@@ -53,10 +33,11 @@ const ExpenseTable = () => {
       );
       return await res.json();
     },
-    // keepPreviousData: true,
-    // staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchInterval: 30000, // Refetch every 30 seconds
+    staleTime: 5 * 60 * 1000, // Consider data stale after 5 minutes
     // cacheTime: 30 * 60 * 1000, // Keep cache for 30 minutes
   });
+
   console.log(data);
 
   const getTransactionStatusColor = (type: string) => {
@@ -84,14 +65,14 @@ const ExpenseTable = () => {
       <CardContent className="p-6">
         <div className="rounded-md border">
           <Table>
-            <TableCaption>
+            {/* <TableCaption>
               Transaction History
               {isFetching && (
                 <span className="ml-2 inline-block">
                   <Skeleton className="h-4 w-4 rounded-full animate-pulse" />
                 </span>
               )}
-            </TableCaption>
+            </TableCaption> */}
             <TableHeader>
               <TableRow>
                 <TableHead>Transaction</TableHead>
@@ -117,7 +98,7 @@ const ExpenseTable = () => {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     <Badge
                       variant="outline"
                       className="flex items-center gap-1 w-fit"
@@ -125,7 +106,8 @@ const ExpenseTable = () => {
                       <Tag className="h-3 w-3" />
                       {transaction.category}
                     </Badge>
-                  </TableCell>
+                  </TableCell> */}
+                  <CategoryBadge categoryName={transaction.category} />
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />

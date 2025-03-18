@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         },
         skip,
         take: limit,
-        orderBy: { date: "desc" },
+        orderBy: { createdAt: "desc" },
         include: {
           paymentMethod: true,
           attachments: true,
