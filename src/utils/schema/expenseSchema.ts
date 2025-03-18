@@ -14,9 +14,7 @@ export const expenseFormSchema = z.object({
         required_error: "Please select a tax type",
     }),
     total: z.string(),
-    paymentMethodType: z.string({
-        required_error: "Please select a payment method",
-    }),
+    paymentMethodType: z.enum(["CASH", "BANK", "CHEQUE"]),
     receivedBy: z.string().optional(),
     bankName: z.string().optional(),
     chequeNo: z.string().optional(),

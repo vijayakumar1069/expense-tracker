@@ -37,6 +37,7 @@ import {
   PAYMENT_METHODS,
   TAX_TYPES,
 } from "@/utils/constants/consts";
+import { createExpense } from "@/app/(dashboard layout)/New-Expenses/__actions/newExpenseFun";
 
 type ExpenseFormValues = z.infer<typeof expenseFormSchema>;
 
@@ -62,7 +63,7 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
       amount: expense?.amount || "",
       taxType: expense?.taxType || "",
       total: expense?.total || "",
-      paymentMethodType: expense?.paymentMethodType || "",
+      paymentMethodType: expense?.paymentMethodType || undefined,
       receivedBy: expense?.receivedBy || "",
       bankName: expense?.bankName || "",
       chequeNo: expense?.chequeNo || "",
@@ -79,6 +80,7 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
 
   const handleAmountOrTaxChange = (field: string, value: string) => {
     form.setValue(field, value);
+    console.log(field, value);
     const currentAmount = field === "amount" ? value : form.getValues("amount");
     const currentTaxType =
       field === "taxType" ? value : form.getValues("taxType");
@@ -86,11 +88,29 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
     form.setValue("total", newTotal);
   };
 
-  const onFormSubmit = (data: ExpenseFormValues) => {
-    console.log("Form submitted:", data);
-    // onExpenseFormSubmit(data);
-    setOpen(false);
-    form.reset();
+  const onFormSubmit = async (data: ExpenseFormValues) => {
+    try {
+      // Convert form data to FormData object
+      const formData = new FormData();
+
+      // Append all fields to FormData
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          if (key === "image" && value instanceof File) {
+            formData.append(key, value);
+          } else {
+            formData.append(key, String(value));
+          }
+        }
+      });
+
+      const res = await createExpense(formData);
+      console.log(res);
+      setOpen(false);
+      form.reset();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
   return (
@@ -270,7 +290,7 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
               />
 
               {/* Conditional Fields */}
-              {form.watch("paymentMethodType") === "cash" && (
+              {form.watch("paymentMethodType") === "CASH" && (
                 <FormField
                   control={form.control}
                   name="receivedBy"
@@ -286,7 +306,7 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
                 />
               )}
 
-              {form.watch("paymentMethodType") === "bank" && (
+              {form.watch("paymentMethodType") === "BANK" && (
                 <FormField
                   control={form.control}
                   name="bankName"
@@ -301,8 +321,7 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
                   )}
                 />
               )}
-
-              {form.watch("paymentMethodType") === "cheque" && (
+              {form.watch("paymentMethodType") === "CHEQUE" && (
                 <>
                   <FormField
                     control={form.control}
@@ -391,5 +410,4 @@ const ExpenseDialog: React.FC<ExpenseDialogProps> = ({
     </Dialog>
   );
 };
-
 export default ExpenseDialog;

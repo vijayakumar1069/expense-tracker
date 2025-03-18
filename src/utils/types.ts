@@ -12,3 +12,9 @@ export type AuthUser = {
     email: string;
     sessionToken: string;
 };
+
+export enum PaymentMethodType {
+    CASH = "CASH",
+    BANK = "BANK",
+    CHEQUE = "CHEQUE"
+}

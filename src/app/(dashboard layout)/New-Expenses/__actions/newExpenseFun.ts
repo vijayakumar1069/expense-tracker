@@ -5,21 +5,34 @@ import { requireAuth } from "@/lib/auth";
 import cloudinary from "@/lib/clodinary";
 import { prisma } from "@/utils/prisma";
 import { expenseFormSchema } from "@/utils/schema/expenseSchema";
+import { PaymentMethodType } from "@/utils/types";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 
 
 export async function createExpense(formData: FormData) {
     try {
         const user = await requireAuth();
 
-        // Parse and validate form data
-        const rawFormData = Object.fromEntries(formData.entries());
-        // const validatedData = expenseFormSchema.parse({
-        //     ...rawFormData,
-        //     // tax: rawFormData.tax ? Number(rawFormData.tax) : undefined,
-        // });
-        const validatedData = expenseFormSchema.parse(rawFormData)
+        // Convert FormData to object for validation
+        const formDataObj = {
+            name: formData.get("name"),
+            description: formData.get("description"),
+            category: formData.get("category"),
+            amount: formData.get("amount"),
+            taxType: formData.get("taxType"),
+            total: formData.get("total"),
+            paymentMethodType: formData.get("paymentMethodType"),
+            receivedBy: formData.get("receivedBy"),
+            bankName: formData.get("bankName"),
+            chequeNo: formData.get("chequeNo"),
+            chequeDate: formData.get("chequeDate"),
+            date: formData.get("date"),
+            image: formData.get("image"),
+        };
+
+        // Validate the data
+        const validatedData = expenseFormSchema.parse(formDataObj);
+        console.log(validatedData)
         let attachmentData = null;
         const imageFile = formData.get("image") as File;
 
@@ -49,32 +62,27 @@ export async function createExpense(formData: FormData) {
             }
         }
 
-        // Create expense with transaction
         const expense = await prisma.$transaction(async (tx) => {
             const createdExpense = await tx.expense.create({
                 data: {
                     name: validatedData.name,
                     description: validatedData.description,
-                    amount: parseFloat(validatedData.amount),
-                    // tax: validatedData.taxType,
-                    total: parseFloat(validatedData.total),
-                    date: new Date(validatedData.date),
-                    category: validatedData.category,
+                    amount: parseFloat(String(validatedData.amount)),
+                    total: parseFloat(String(validatedData.total)),
+                    date: new Date(String(validatedData.date)),
+                    category: String(validatedData.category),
                     userId: user.id,
-                    // Create payment method    
                     paymentMethod: {
                         create: {
-
-                            type: validatedData?.paymentMethodType,
+                            type: validatedData.paymentMethodType as PaymentMethodType,
                             receivedBy: validatedData.receivedBy,
                             bankName: validatedData.bankName,
                             chequeNo: validatedData.chequeNo,
                             chequeDate: validatedData.chequeDate
-                                ? new Date(validatedData.chequeDate)
+                                ? new Date(String(validatedData.chequeDate))
                                 : null,
                         },
                     },
-                    // Create attachment if exists
                     attachment: attachmentData
                         ? {
                             create: attachmentData,
@@ -88,7 +96,6 @@ export async function createExpense(formData: FormData) {
             });
 
             return createdExpense;
-
         });
         // Revalidate the expenses page
         revalidatePath("/expenses");
