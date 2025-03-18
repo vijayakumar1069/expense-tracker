@@ -1,5 +1,7 @@
 import React from "react";
 import TransActionDialog from "./TransActionDialog";
+import ExpenseTable from "./ExpenseTable";
+// import { useQuery } from "@tanstack/react-query";
 
 const Expense = () => {
   //   const handleSubmit = (data: any) => {
@@ -15,6 +17,7 @@ const Expense = () => {
         </h1>
         <TransActionDialog mode="add" />
       </div>
+      <ExpenseTable />
 
       {/* <ExpenseDialog mode="edit" /> */}
       {/* Your expenses list/table goes here */}
