@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 
 import { expenseFormSchema } from "@/utils/schema/expenseSchema";
 
-import { createExpense } from "@/app/(dashboard layout)/New-Expenses/__actions/newExpenseFun";
+import { createExpense } from "@/app/(dashboard layout)/New-Expenses/__actions/transactionActions";
 import { toast } from "sonner";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -101,8 +101,6 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
         previousDataMap.set(query.queryKey, data?.transactions);
       });
 
-
-
       return { previousDataMap };
     },
     onSuccess: () => {
@@ -164,7 +162,12 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
             {mode === "add" ? "Add Transaction" : "Edit Transaction"}
           </Button>
         </DialogTrigger>
-        <DialogContent className="w-full sm:max-w-[700px] bg-primary-foreground p-5">
+        <DialogContent
+          className="w-full sm:max-w-[700px] bg-primary-foreground p-5"
+          onInteractOutside={(e) => {
+            e.preventDefault();
+          }}
+        >
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-[#8b5cf6] bg-clip-text text-transparent">
               {mode === "add" ? "Add Transaction" : "Edit Transaction"}

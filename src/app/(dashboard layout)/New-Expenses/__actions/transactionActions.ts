@@ -5,7 +5,8 @@ import { requireAuth } from "@/lib/auth";
 import cloudinary from "@/lib/clodinary";
 import { prisma } from "@/utils/prisma";
 import { expenseFormSchema } from "@/utils/schema/expenseSchema";
-import { PaymentMethodType } from "@prisma/client";
+import { PaymentMethodType, TransactionType } from "@prisma/client";
+import { z } from "zod";
 
 
 
@@ -168,157 +169,157 @@ export async function deleteExpense(transactionId: string) {
     }
 }
 
-// export async function updateExpense(expenseId: string, formData: FormData) {
-//     try {
-//         const session = await auth();
-//         if (!session?.user) {
-//             throw new Error("Unauthorized");
-//         }
 
-//         // Validate ownership
-//         const existingExpense = await prisma.expense.findUnique({
-//             where: { id: expenseId },
-//             include: { attachment: true },
-//         });
+export async function updateTransaction(transactionId: string, formData: FormData) {
+    try {
+        // Authentication check
+        const user = await requireAuth();
+        if (!user) {
+            return { success: false, error: "Authentication required" };
+        }
 
-//         if (!existingExpense) {
-//             throw new Error("Expense not found");
-//         }
+        // Convert FormData to object
+        const formDataObj = Object.fromEntries(formData.entries());
 
-//         if (existingExpense.userId !== user.id) {
-//             throw new Error("Not authorized to update this expense");
-//         }
+        // Parse and validate using zod schema
+        const validatedData = expenseFormSchema.parse(formDataObj);
 
-//         // Parse and validate form data
-//         const rawFormData = Object.fromEntries(formData.entries());
-//         const validatedData = ExpenseSchema.parse({
-//             ...rawFormData,
-//             tax: rawFormData.tax ? Number(rawFormData.tax) : undefined,
-//         });
+        // Check if transaction exists and verify ownership
+        const existingTransaction = await prisma.transaction.findUnique({
+            where: { id: transactionId },
+            include: {
+                paymentMethod: true,
+                attachments: true
+            },
+        });
 
-//         let attachmentData = null;
-//         const imageFile = formData.get("image") as File;
+        if (!existingTransaction) {
+            return { success: false, error: "Transaction not found" };
+        }
 
-//         // Handle image upload if new image is provided
-//         if (imageFile && imageFile.size > 0) {
-//             try {
-//                 const bytes = await imageFile.arrayBuffer();
-//                 const buffer = Buffer.from(bytes);
-//                 const base64String = buffer.toString('base64');
-//                 const dataURI = `data:${imageFile.type};base64,${base64String}`;
+        if (existingTransaction.userId !== user.id) {
+            return { success: false, error: "You don't have permission to update this transaction" };
+        }
 
-//                 const uploadResponse = await cloudinary.uploader.upload(dataURI, {
-//                     folder: `expenses/${user.id}`,
-//                     resource_type: "auto",
-//                     transformation: [
-//                         { quality: "auto:best" },
-//                         { width: 1500, crop: "limit" }
-//                     ],
-//                 });
+        // Handle image upload if provided
+        let attachmentData = null;
+        const imageFile = formData.get("image") as File;
 
-//                 attachmentData = {
-//                     url: uploadResponse.secure_url,
-//                 };
+        if (imageFile && imageFile.size > 0) {
+            try {
+                // Process image for upload
+                const bytes = await imageFile.arrayBuffer();
+                const buffer = Buffer.from(bytes);
+                const base64String = buffer.toString('base64');
+                const dataURI = `data:${imageFile.type};base64,${base64String}`;
 
-//                 // Delete old image if exists
-//                 if (existingExpense.attachment?.[0]?.url) {
-//                     const publicId = existingExpense.attachment[0].url
-//                         .split("/")
-//                         .pop()
-//                         ?.split(".")[0];
-//                     if (publicId) {
-//                         await cloudinary.uploader.destroy(publicId);
-//                     }
-//                 }
-//             } catch (error) {
-//                 console.error("Cloudinary upload error:", error);
-//                 throw new Error("Failed to upload image");
-//             }
-//         }
+                // Upload to Cloudinary with optimizations
+                const uploadResponse = await cloudinary.uploader.upload(dataURI, {
+                    folder: `expenses/${user.id}`,
+                    resource_type: "auto",
+                    transformation: [
+                        { quality: "auto:best" },
+                        { width: 1500, crop: "limit" }
+                    ],
+                });
 
-//         // Update expense with transaction
-//         const updatedExpense = await prisma.$transaction(async (tx) => {
-//             // Update payment method
-//             await tx.paymentMethod.update({
-//                 where: { expenseId },
-//                 data: {
-//                     name: validatedData.paymentMethodName,
-//                     type: validatedData.paymentMethodType,
-//                     receivedBy: validatedData.receivedBy,
-//                     bankName: validatedData.bankName,
-//                     chequeNo: validatedData.chequeNo,
-//                     chequeDate: validatedData.chequeDate
-//                         ? new Date(validatedData.chequeDate)
-//                         : null,
-//                 },
-//             });
+                attachmentData = {
+                    url: uploadResponse.secure_url,
+                };
 
-//             // Update attachment if new image was uploaded
-//             if (attachmentData) {
-//                 await tx.attachment.upsert({
-//                     where: { expenseId },
-//                     create: {
-//                         ...attachmentData,
-//                         expenseId,
-//                     },
-//                     update: attachmentData,
-//                 });
-//             }
+                // Clean up old image if it exists
+                if (existingTransaction.attachments?.[0]?.url) {
+                    const urlParts = existingTransaction.attachments[0].url.split("/");
+                    const publicId = urlParts[urlParts.length - 1].split(".")[0];
 
-//             // Update expense
-//             return await tx.expense.update({
-//                 where: { id: expenseId },
-//                 data: {
-//                     name: validatedData.name,
-//                     description: validatedData.description,
-//                     amount: parseFloat(validatedData.amount),
-//                     tax: validatedData.tax,
-//                     total: parseFloat(validatedData.total),
-//                     date: new Date(validatedData.date),
-//                     category: validatedData.category,
-//                 },
-//                 include: {
-//                     paymentMethod: true,
-//                     attachment: true,
-//                 },
-//             });
-//         });
+                    if (publicId) {
+                        await cloudinary.uploader.destroy(`expenses/${user.id}/${publicId}`);
+                    }
+                }
+            } catch (error) {
+                console.error("Image upload error:", error);
+                return { success: false, error: "Failed to upload image" };
+            }
+        }
 
-//         revalidatePath("/expenses");
-//         return { success: true, data: updatedExpense };
-//     } catch (error) {
-//         console.error("Update expense error:", error);
-//         return {
-//             success: false,
-//             error: error instanceof Error ? error.message : "Failed to update expense",
-//         };
-//     }
-// }
+        // Use transaction to ensure data consistency
+        const updatedTransaction = await prisma.$transaction(async (tx) => {
+            // 1. Update payment method
+            await tx.paymentMethod.update({
+                where: { transactionId },
+                data: {
+                    type: validatedData.paymentMethodType as PaymentMethodType,
+                    receivedBy: validatedData.receivedBy,
+                    bankName: validatedData.bankName,
+                    chequeNo: validatedData.chequeNo,
+                    chequeDate: validatedData.chequeDate
+                        ? new Date(String(validatedData.chequeDate))
+                        : null,
+                    invoiceNo: validatedData.invoiceNo,
+                },
+            });
 
-// // Usage in your component:
-// // src/app/expenses/page.tsx
-// "use client";
+            // 2. Handle attachment update
+            if (attachmentData) {
+                if (existingTransaction.attachments?.length > 0) {
+                    // Update existing attachment
+                    await tx.attachment.update({
+                        where: { id: existingTransaction.attachments[0].id },
+                        data: attachmentData,
+                    });
+                } else {
+                    // Create new attachment
+                    await tx.attachment.create({
+                        data: {
+                            ...attachmentData,
 
-// import { createExpense, updateExpense, deleteExpense } from "@/lib/actions/expense";
-// import cloudinary from "@/lib/clodinary";
-// import { prisma } from "@/utils/prisma";
-// import { requireAuth } from "@/lib/auth";
+                            transactionId,
+                        },
+                    });
+                }
+            }
 
-// export default function ExpensePage() {
-//     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-//         e.preventDefault();
-//         const formData = new FormData(e.currentTarget);
-//         const result = await createExpense(formData);
-//         if (result.success) {
-//             // Handle success
-//         } else {
-//             // Handle error
-//         }
-//     };
+            // 3. Update main transaction
+            return await tx.transaction.update({
+                where: { id: transactionId },
+                data: {
+                    name: validatedData.name,
+                    type: validatedData.transactionType as TransactionType,
+                    description: validatedData.description,
+                    amount: parseFloat(validatedData.amount),
+                    tax: validatedData.taxType,
+                    total: parseFloat(validatedData.total),
+                    date: new Date(validatedData.date),
+                    category: validatedData.category,
+                },
+                include: {
+                    paymentMethod: true,
+                    attachments: true,
+                },
+            });
+        });
 
-//     return (
-//         <form onSubmit= { handleSubmit } >
-//         {/* Your form fields here */ }
-//         </form>
-//   );
-// }
+        return {
+            success: true,
+            data: updatedTransaction
+        };
+    } catch (error) {
+        // Detailed error handling
+        if (error instanceof z.ZodError) {
+            return {
+                success: false,
+                error: "Validation error",
+                details: error.errors,
+            };
+        }
+
+        console.error("Transaction update error:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Failed to update transaction",
+        };
+    }
+}
+
+
+

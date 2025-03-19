@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { useTransition } from "react";
 import { z } from "zod";
 import { TransactionForm } from "./TransactionForm";
+import { updateTransaction } from "@/app/(dashboard layout)/New-Expenses/__actions/transactionActions";
 
 type TransactionFormValues = z.infer<typeof expenseFormSchema>;
 
@@ -117,7 +118,7 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
         }
       });
 
-      //   return updateTransaction(transactionId, formData);
+      return updateTransaction(transactionId, formData);
     },
     onMutate: async () => {
       toast.loading("Updating transaction...", {
@@ -195,11 +196,16 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm" variant="outline" className="mr-2">
-          <Pencil className="h-4 w-4 mr-1" />
-          Edit
+          <Pencil className="h-4 w-4 mr-1 text-white" />
+          <span className="text-white">Edit</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full sm:max-w-[700px] bg-primary-foreground p-5">
+      <DialogContent
+        className="w-full sm:max-w-[700px] bg-primary-foreground p-5"
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+      >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-[#8b5cf6] bg-clip-text text-transparent">
             Edit Transaction

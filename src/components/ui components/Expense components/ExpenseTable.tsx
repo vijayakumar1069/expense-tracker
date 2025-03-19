@@ -43,7 +43,6 @@ const ExpenseTable = () => {
     // cacheTime: 30 * 60 * 1000, // Keep cache for 30 minutes
   });
 
-
   const getTransactionStatusColor = (type: string) => {
     return type === "INCOME"
       ? "bg-green-500/10 text-green-500"
@@ -87,11 +86,11 @@ const ExpenseTable = () => {
                     key={transaction.id}
                     className="group hover:bg-muted/50 transition-colors"
                   >
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium max-w-40 text-wrap">
                       <div className="flex flex-col">
                         <span className="text-black">{transaction.name}</span>
                         {transaction.description && (
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-muted-foreground truncate text-wrap">
                             {transaction.description}
                           </span>
                         )}
