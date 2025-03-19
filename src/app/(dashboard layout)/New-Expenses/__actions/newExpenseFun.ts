@@ -7,7 +7,6 @@ import { prisma } from "@/utils/prisma";
 import { expenseFormSchema } from "@/utils/schema/expenseSchema";
 import { PaymentMethodType } from "@prisma/client";
 
-import { revalidatePath } from "next/cache";
 
 
 export async function createExpense(formData: FormData) {
@@ -40,7 +39,7 @@ export async function createExpense(formData: FormData) {
         // Validate the data
         const validatedData = expenseFormSchema.parse(formDataObj);
 
-        console.log("Validated Data:", validatedData);
+
 
         let attachmentData = null;
         const imageFile = formData.get("image") as File;
@@ -109,8 +108,7 @@ export async function createExpense(formData: FormData) {
 
             return createdExpense;
         });
-        // Revalidate the expenses page
-        // revalidatePath("/expenses");
+
 
         return { success: true, data: expense };
     } catch (error) {
@@ -122,53 +120,53 @@ export async function createExpense(formData: FormData) {
     }
 }
 
-// export async function deleteExpense(expenseId: string) {
-//     try {
-//         const session = await requireAuth();
-//         if (!session?.user) {
-//             throw new Error("Unauthorized");
-//         }
+export async function deleteExpense(transactionId: string) {
+    try {
+        const user = await requireAuth();
+        if (!user) {
+            throw new Error("Unauthorized");
+        }
 
-//         // Get expense with attachment to check ownership and get attachment URL
-//         const expense = await prisma.expense.findUnique({
-//             where: { id: expenseId },
-//             include: { attachment: true },
-//         });
+        // Get expense with attachment to check ownership and get attachment URL
+        const expense = await prisma.transaction.findUnique({
+            where: { id: transactionId },
+            include: { attachments: true },
+        });
 
-//         if (!expense) {
-//             throw new Error("Expense not found");
-//         }
+        if (!expense) {
+            throw new Error("Expense not found");
+        }
 
-//         if (expense.userId !== user.id) {
-//             throw new Error("Not authorized to delete this expense");
-//         }
+        if (expense.userId !== user.id) {
+            throw new Error("Not authorized to delete this expense");
+        }
 
-//         // Delete expense (will cascade to payment method and attachment)
-//         await prisma.expense.delete({
-//             where: { id: expenseId },
-//         });
+        // Delete expense (will cascade to payment method and attachment)
+        await prisma.transaction.delete({
+            where: { id: transactionId },
+        });
 
-//         // If there was an attachment, delete from Cloudinary
-//         if (expense.attachment?.[0]?.url) {
-//             const publicId = expense.attachment[0].url
-//                 .split("/")
-//                 .pop()
-//                 ?.split(".")[0];
-//             if (publicId) {
-//                 await cloudinary.uploader.destroy(publicId);
-//             }
-//         }
+        // If there was an attachment, delete from Cloudinary
+        if (expense.attachments?.[0]?.url) {
+            const publicId = expense.attachments[0].url
+                .split("/")
+                .pop()
+                ?.split(".")[0];
+            if (publicId) {
+                await cloudinary.uploader.destroy(publicId);
+            }
+        }
 
-//         revalidatePath("/expenses");
-//         return { success: true };
-//     } catch (error) {
-//         console.error("Delete expense error:", error);
-//         return {
-//             success: false,
-//             error: error instanceof Error ? error.message : "Failed to delete expense",
-//         };
-//     }
-// }
+
+        return { success: true };
+    } catch (error) {
+        console.error("Delete expense error:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Failed to delete expense",
+        };
+    }
+}
 
 // export async function updateExpense(expenseId: string, formData: FormData) {
 //     try {

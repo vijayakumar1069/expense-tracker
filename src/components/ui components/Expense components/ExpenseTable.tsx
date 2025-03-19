@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Transaction } from "@prisma/client";
+// import { Transaction } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,7 +18,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, DollarSign, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from "./CategoryBadge";
-import { TransactionResponse } from "@/utils/types";
+import {
+  TransactionResponse,
+  TransactionWithPaymentMethod,
+} from "@/utils/types";
+import DeleteTransactionButton from "./DeleteTransactionButton";
+import { TransActionEditButton } from "./transaction dialog/TransActionEditButton";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -38,7 +43,6 @@ const ExpenseTable = () => {
     // cacheTime: 30 * 60 * 1000, // Keep cache for 30 minutes
   });
 
-  console.log(data);
 
   const getTransactionStatusColor = (type: string) => {
     return type === "INCOME"
@@ -65,83 +69,79 @@ const ExpenseTable = () => {
       <CardContent className="p-6">
         <div className="rounded-md border">
           <Table>
-            {/* <TableCaption>
-              Transaction History
-              {isFetching && (
-                <span className="ml-2 inline-block">
-                  <Skeleton className="h-4 w-4 rounded-full animate-pulse" />
-                </span>
-              )}
-            </TableCaption> */}
             <TableHeader>
               <TableRow>
                 <TableHead>Transaction</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Payment Method</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data?.transactions.map((transaction: Transaction) => (
-                <TableRow
-                  key={transaction.id}
-                  className="group hover:bg-muted/50 transition-colors"
-                >
-                  <TableCell className="font-medium">
-                    <div className="flex flex-col">
-                      <span className="text-black">{transaction.name}</span>
-                      {transaction.description && (
-                        <span className="text-sm text-muted-foreground">
-                          {transaction.description}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  {/* <TableCell>
-                    <Badge
-                      variant="outline"
-                      className="flex items-center gap-1 w-fit"
-                    >
-                      <Tag className="h-3 w-3" />
-                      {transaction.category}
-                    </Badge>
-                  </TableCell> */}
-                  <CategoryBadge categoryName={transaction.category} />
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {format(new Date(transaction.date), "MMM dd, yyyy")}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="secondary"
-                      className={getTransactionStatusColor(transaction.type)}
-                    >
-                      {transaction.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div
-                      className={`flex items-center justify-end gap-1 font-medium ${
-                        transaction.type === "INCOME"
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }`}
-                    >
-                      {transaction.type === "INCOME" ? "+" : "-"}
-                      <DollarSign className="h-3 w-3" />
-                      {transaction?.amount.toFixed(2)}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {data?.transactions.map(
+                (transaction: TransactionWithPaymentMethod) => (
+                  <TableRow
+                    key={transaction.id}
+                    className="group hover:bg-muted/50 transition-colors"
+                  >
+                    <TableCell className="font-medium">
+                      <div className="flex flex-col">
+                        <span className="text-black">{transaction.name}</span>
+                        {transaction.description && (
+                          <span className="text-sm text-muted-foreground">
+                            {transaction.description}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+
+                    <CategoryBadge categoryName={transaction.category} />
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {format(new Date(transaction.date), "MMM dd, yyyy")}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="secondary"
+                        className={getTransactionStatusColor(transaction.type)}
+                      >
+                        {transaction.type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{transaction?.paymentMethod.type}</TableCell>
+                    <TableCell className="text-right">
+                      <div
+                        className={`flex items-center justify-end gap-1 font-medium ${
+                          transaction.type === "INCOME"
+                            ? "text-green-500"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {transaction.type === "INCOME" ? "+" : "-"}
+                        <DollarSign className="h-3 w-3" />
+                        {transaction?.amount.toFixed(2)}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {/* <Button size="sm" variant="outline">
+                      Edit
+                    </Button> */}
+                      <TransActionEditButton transactionId={transaction.id} />
+                      <DeleteTransactionButton transactionId={transaction.id} />
+                    </TableCell>
+                  </TableRow>
+                )
+              )}
             </TableBody>
             <TableFooter>
-              <TableRow>
-                <TableCell colSpan={4}>Total Amount</TableCell>
-                <TableCell className="text-right">
+              <TableRow className="bg-gray-100 w-full">
+                <TableCell colSpan={3}>Total Amount</TableCell>
+                <TableCell className="text-right" colSpan={3}>
                   <div className="flex items-center justify-end gap-1">
                     <DollarSign className="h-4 w-4" />
                     {data?.summary?.netAmount.toFixed(2)}

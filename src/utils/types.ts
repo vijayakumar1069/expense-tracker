@@ -1,6 +1,8 @@
 import { Transaction } from "@prisma/client";
 import { LucideIcon } from "lucide-react";
-
+import { z } from "zod";
+import { expenseFormSchema } from "./schema/expenseSchema";
+import { Transaction as PrismaTransaction } from "@prisma/client";
 // types/index.ts
 export interface NavItem {
     title: string;
@@ -22,7 +24,7 @@ export enum PaymentMethodType {
 }
 
 export interface TransactionResponse {
-    transactions: Transaction[];
+    transactions: TransactionWithPaymentMethod[];
     pagination: {
         totalPages: number;
         totalItems: number;
@@ -34,4 +36,34 @@ export interface TransactionResponse {
         totalExpense: number;
         netAmount: number;
     };
+}
+
+
+type PaymentMethod = {
+    id: string;
+    type: string;
+    receivedBy: string;
+    bankName: string;
+    chequeNo: string;
+    chequeDate: Date | null;
+    invoiceNo: string;
+    transactionId: string;
+    createdAt: Date;
+    updatedAt: Date;
+};
+export interface TransactionWithPaymentMethod extends PrismaTransaction {
+    paymentMethod: PaymentMethod;
+}
+export type TransactionFormValues = z.infer<typeof expenseFormSchema>;
+
+export interface ExpenseDialogProps {
+    mode: "add" | "edit";
+    transaction?: TransactionFormValues;
+}
+
+export interface FormSectionProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    form: any; // Replace with proper form type
+    isPending: boolean;
+    mode?: "add" | "edit";
 }

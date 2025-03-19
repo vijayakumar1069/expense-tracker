@@ -4,10 +4,7 @@ import ExpenseTable from "./ExpenseTable";
 // import { useQuery } from "@tanstack/react-query";
 
 const Expense = () => {
-  //   const handleSubmit = (data: any) => {
-  //     console.log("Form submitted:", data);
-  //     // Handle your form submission logic here
-  //   };
+
 
   return (
     <div className="p-6">
@@ -19,8 +16,6 @@ const Expense = () => {
       </div>
       <ExpenseTable />
 
-      {/* <ExpenseDialog mode="edit" /> */}
-      {/* Your expenses list/table goes here */}
     </div>
   );
 };

@@ -25,11 +25,11 @@ export const adminNavbarValues: NavItem[] = [
         href: "/New-Expenses",
         icon: Receipt
     },
-    {
-        title: "Income",
-        href: "/New-Incomes",
-        icon: Wallet
-    },
+    // {
+    //     title: "Income",
+    //     href: "/New-Incomes",
+    //     icon: Wallet
+    // },
     {
         title: "Invoices",
         href: "/New-Invoices",
