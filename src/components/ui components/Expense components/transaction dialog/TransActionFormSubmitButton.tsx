@@ -11,7 +11,7 @@ export const TransactionFormSubmitButton = ({
   return (
     <Button
       type="submit"
-      className="bg-gradient-to-r from-primary to-[#8b5cf6] w-24 h-8 rounded-md text-white font-bold text-sm"
+      className="bg-gradient-to-r from-primary to-[#8b5cf6] w-24 h-8 rounded-md text-white font-bold text-sm cursor-pointer"
       disabled={isPending}
     >
       {isPending ? (

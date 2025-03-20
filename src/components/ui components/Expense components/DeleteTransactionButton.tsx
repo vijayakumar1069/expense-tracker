@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { deleteExpense } from "@/app/(dashboard layout)/New-Expenses/__actions/transactionActions";
 import { Button } from "@/components/ui/button";
 import { TransactionResponse } from "@/utils/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -15,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { deleteExpense } from "@/app/(dashboard layout)/New-Transactions/__actions/transactionActions";
 
 interface DeleteTransactionButtonProps {
   transactionId: string;

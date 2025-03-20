@@ -19,6 +19,7 @@ export async function GET(
             where: { id },
             include: {
                 paymentMethod: true,
+                attachments: true,
             }
         });
 

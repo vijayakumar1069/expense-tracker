@@ -131,7 +131,7 @@ model Attachment {
   id            String      @id @default(cuid())
   url           String
   transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
- transactionId String         @unique
+ transactionId String        
 
   @@index([transactionId])
 }

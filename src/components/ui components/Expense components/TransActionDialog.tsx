@@ -16,12 +16,12 @@ import { Button } from "@/components/ui/button";
 
 import { expenseFormSchema } from "@/utils/schema/expenseSchema";
 
-import { createExpense } from "@/app/(dashboard layout)/New-Expenses/__actions/transactionActions";
 import { toast } from "sonner";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TransactionResponse } from "@/utils/types";
 import { TransactionForm } from "./transaction dialog/TransactionForm";
+import { createExpense } from "@/app/(dashboard layout)/New-Transactions/__actions/transactionActions";
 
 type TransactionFormValues = z.infer<typeof expenseFormSchema>;
 
@@ -57,21 +57,45 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
       chequeDate: transaction?.chequeDate || "",
       invoiceNo: transaction?.invoiceNo || "",
       date: transaction?.date || new Date().toISOString().split("T")[0],
+      attachments: mode === "edit" ? transaction?.attachments || [] : [],
+      images: [],
+      existingImages: [], // Keep this for schema compatibility
     },
   });
 
   const mutation = useMutation({
     mutationFn: async (data: TransactionFormValues) => {
       const formData = new FormData();
+
+      // Add regular form fields
       Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          if (key === "image" && value instanceof File) {
-            formData.append(key, value);
-          } else {
-            formData.append(key, String(value));
-          }
+        if (
+          value !== undefined &&
+          value !== null &&
+          key !== "images" &&
+          key !== "existingImages"
+        ) {
+          formData.append(key, String(value));
         }
       });
+      // Handle images separately and correctly
+      if (data.images && Array.isArray(data.images)) {
+        // Using append multiple times with same key creates an array on server
+        data.images.forEach((file: File) => {
+          if (file instanceof File) {
+            formData.append("images", file);
+          }
+        });
+      } else {
+        // IMPORTANT: If no images, send an empty array as JSON
+        formData.append("images", JSON.stringify([]));
+      }
+
+      // Handle existing images
+      if (data.existingImages && Array.isArray(data.existingImages)) {
+        formData.append("existingImages", JSON.stringify(data.existingImages));
+      }
+
       return createExpense(formData);
     },
     onMutate: async () => {

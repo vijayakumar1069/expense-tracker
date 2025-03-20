@@ -34,8 +34,7 @@ export async function GET(request: NextRequest) {
 
     // Parse and validate query parameters
     const { searchParams } = new URL(request.url);
-    console.log("searchParams", searchParams);
-    console.log("request.url", request.url);
+
     const validatedParams = QuerySchema.parse({
       page: searchParams.get("page") || undefined,
       limit: searchParams.get("limit") || undefined,
@@ -69,7 +68,7 @@ export async function GET(request: NextRequest) {
       sortBy,
       sortDirection
     } = validatedParams;
-    console.log("paymentMethodType:", paymentMethodType);
+
     // Build the where condition for Prisma
     const where: Prisma.TransactionWhereInput = {
       userId: user.id,
@@ -139,7 +138,7 @@ export async function GET(request: NextRequest) {
     }
 
     const skip = (page - 1) * limit;
-    console.log("where, orderBy, skip, limit:", where, orderBy, skip, limit);
+
 
     // Execute queries in parallel for better performance
     const [transactions, totalItems, aggregates] = await Promise.all([

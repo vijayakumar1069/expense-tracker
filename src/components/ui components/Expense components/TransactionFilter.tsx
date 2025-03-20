@@ -96,7 +96,6 @@ const TransactionFilter = ({
         ? format(filters.endDate, "yyyy-MM-dd")
         : undefined,
     };
-    console.log(filters);
 
     onFilterChange(formattedFilters);
     setIsOpen(false);
@@ -133,7 +132,7 @@ const TransactionFilter = ({
             ? format(filters.endDate, "yyyy-MM-dd")
             : undefined,
         };
-        console.log(formattedFilters);
+
         onFilterChange({ ...formattedFilters });
       }
     }, 500);

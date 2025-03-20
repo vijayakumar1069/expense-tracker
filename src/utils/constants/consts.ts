@@ -21,8 +21,8 @@ export const adminNavbarValues: NavItem[] = [
         icon: LayoutDashboard
     },
     {
-        title: "Expenses",
-        href: "/New-Expenses",
+        title: "Transactions",
+        href: "/New-Transactions",
         icon: Receipt
     },
     // {

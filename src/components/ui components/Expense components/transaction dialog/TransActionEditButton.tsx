@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { useTransition } from "react";
 import { z } from "zod";
 import { TransactionForm } from "./TransactionForm";
-import { updateTransaction } from "@/app/(dashboard layout)/New-Expenses/__actions/transactionActions";
+import { updateTransaction } from "@/app/(dashboard layout)/New-Transactions/__actions/transactionActions";
 
 type TransactionFormValues = z.infer<typeof expenseFormSchema>;
 
@@ -72,6 +72,8 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
       chequeDate: "",
       invoiceNo: "",
       date: new Date().toISOString().split("T")[0],
+      images: [],
+      existingImages: [],
     },
   });
 
@@ -99,24 +101,48 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
         date:
           new Date(transaction.date).toISOString().split("T")[0] ||
           new Date().toISOString().split("T")[0],
+        images: transaction.attachments || [],
+        existingImages: transaction.attachments || [],
+        attachments: transaction.attachments || [],
       };
       setFormValues(values);
       form.reset(values);
     }
-  }, [transaction, form]);
+  }, [transaction]);
 
   const mutation = useMutation({
     mutationFn: async (data: TransactionFormValues) => {
+      const formFieldData = form.getValues();
       const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          if (key === "image" && value instanceof File) {
-            formData.append(key, value);
-          } else {
-            formData.append(key, String(value));
-          }
+
+      // Add regular form fields
+      Object.entries(formFieldData).forEach(([key, value]) => {
+        if (
+          value !== undefined &&
+          value !== null &&
+          key !== "images" &&
+          key !== "existingImages"
+        ) {
+          formData.append(key, String(value));
         }
       });
+      // Handle images separately and correctly
+      if (formFieldData.images && Array.isArray(formFieldData.images)) {
+        // Using append multiple times with same key creates an array on server
+        formFieldData.images.forEach((file: File) => {
+          if (file instanceof File) {
+            formData.append("images", file);
+          }
+        });
+      } else {
+        // IMPORTANT: If no images, send an empty array as JSON
+        formData.append("images", JSON.stringify([]));
+      }
+
+      // Handle existing images
+      if (data.existingImages && Array.isArray(data.existingImages)) {
+        formData.append("existingImages", JSON.stringify(data.existingImages));
+      }
 
       return updateTransaction(transactionId, formData);
     },
@@ -223,6 +249,7 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
             isPending={isPending}
             mode="edit"
             initialValues={formValues}
+            id={transactionId}
           />
         )}
       </DialogContent>

@@ -24,5 +24,11 @@ export const expenseFormSchema = z.object({
     date: z.string({
         required_error: "Please select a date",
     }),
-    image: z.any().optional(),
+    // Updated to support multiple images
+    images: z.array(z.any()).optional().default([]),
+    // For existing images (when editing)
+    existingImages: z.array(z.string()).optional().default([]),
+    // For tracking deleted images
+    deleteImages: z.string().optional(),
+    // attachments?: z.array(z.any()).optional().default([]),
 });
