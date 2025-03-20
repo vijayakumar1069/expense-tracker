@@ -61,7 +61,7 @@ export const formatPaymentMethodName = (method: string) => {
 interface FilterState {
   type?: string;
   category?: string;
-  paymentMethod?: string;
+  paymentMethodType?: string;
   startDate?: string;
   endDate?: string;
   minAmount?: string;
@@ -73,7 +73,7 @@ interface FilterState {
 
 const ExpenseTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const limit = 2;
   const [filters, setFilters] = useState<FilterState>({
     sortBy: "createdAt",
     sortDirection: "desc",
@@ -92,8 +92,8 @@ const ExpenseTable = () => {
       // Add filter parameters if they exist
       if (filters.type) params.append("type", filters.type);
       if (filters.category) params.append("category", filters.category);
-      if (filters.paymentMethod)
-        params.append("paymentMethod", filters.paymentMethod);
+      if (filters.paymentMethodType)
+        params.append("paymentMethodType", filters.paymentMethodType);
       if (filters.startDate) params.append("startDate", filters.startDate);
       if (filters.endDate) params.append("endDate", filters.endDate);
       if (filters.minAmount) params.append("minAmount", filters.minAmount);
@@ -103,14 +103,15 @@ const ExpenseTable = () => {
       if (filters.sortDirection)
         params.append("sortDirection", filters.sortDirection);
 
-      const response = await fetch(`/api/transactions?${params.toString()}`);
+      const response = await fetch(
+        `/api/get-all-transactions?${params.toString()}`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch transactions");
       }
       return response.json();
     },
   });
- 
 
   // Handler for filter changes
   const handleFilterChange = (newFilters: FilterState) => {
@@ -145,7 +146,7 @@ const ExpenseTable = () => {
   }
 
   return (
-    <Card className="w-full overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950">
+    <Card className="w-full relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950">
       <TransactionFilter
         onFilterChange={handleFilterChange}
         initialFilters={filters}

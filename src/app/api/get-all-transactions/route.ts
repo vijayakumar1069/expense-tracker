@@ -1,19 +1,17 @@
-// app/api/transactions/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { z } from "zod";
 import { prisma } from "@/utils/prisma";
-import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 
 // Input validation schema - extended to include all filter parameters
 const QuerySchema = z.object({
   page: z.string().transform(Number).default("1"),
   limit: z.string().transform(Number).default("10"),
-  type: z.string().optional(),
+  type: z.enum(['INCOME', 'EXPENSE']).optional(),
   category: z.string().optional(),
-  paymentMethodId: z.string().optional(),
+
+  paymentMethodType: z.enum(['CASH', 'BANK', 'CHEQUE', 'INVOICE']).optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   minAmount: z.string().transform(val => val ? parseFloat(val) : undefined).optional(),
@@ -36,20 +34,25 @@ export async function GET(request: NextRequest) {
 
     // Parse and validate query parameters
     const { searchParams } = new URL(request.url);
+    console.log("searchParams", searchParams);
+    console.log("request.url", request.url);
     const validatedParams = QuerySchema.parse({
-      page: searchParams.get("page"),
-      limit: searchParams.get("limit"),
-      type: searchParams.get("type"),
-      category: searchParams.get("category"),
-      paymentMethodId: searchParams.get("paymentMethod"),
-      startDate: searchParams.get("startDate"),
-      endDate: searchParams.get("endDate"),
-      minAmount: searchParams.get("minAmount"),
-      maxAmount: searchParams.get("maxAmount"),
-      search: searchParams.get("search"),
+      page: searchParams.get("page") || undefined,
+      limit: searchParams.get("limit") || undefined,
+      type: searchParams.get("type") || undefined,
+      category: searchParams.get("category") || undefined,
+
+      paymentMethodType: searchParams.get("paymentMethodType") || undefined,
+      startDate: searchParams.get("startDate") || undefined,
+      endDate: searchParams.get("endDate") || undefined,
+      minAmount: searchParams.get("minAmount") || undefined,
+      maxAmount: searchParams.get("maxAmount") || undefined,
+      search: searchParams.get("search") || undefined,
       sortBy: searchParams.get("sortBy") || "createdAt",
       sortDirection: searchParams.get("sortDirection") || "desc",
     });
+
+
 
     const {
       page,
@@ -57,6 +60,7 @@ export async function GET(request: NextRequest) {
       type,
       category,
 
+      paymentMethodType,
       startDate,
       endDate,
       minAmount,
@@ -65,7 +69,7 @@ export async function GET(request: NextRequest) {
       sortBy,
       sortDirection
     } = validatedParams;
-
+    console.log("paymentMethodType:", paymentMethodType);
     // Build the where condition for Prisma
     const where: Prisma.TransactionWhereInput = {
       userId: user.id,
@@ -74,7 +78,6 @@ export async function GET(request: NextRequest) {
     // Add type filter
     if (type) {
       where.type = type as Prisma.EnumTransactionTypeFilter;
-
     }
 
     // Add category filter    
@@ -82,7 +85,15 @@ export async function GET(request: NextRequest) {
       where.category = category;
     }
 
+    // Add payment method filter (by ID)
 
+
+    // Add payment method type filter
+    if (paymentMethodType) {
+      where.paymentMethod = {
+        type: paymentMethodType
+      };
+    }
 
     // Add date range filters
     if (startDate || endDate) {
@@ -128,6 +139,7 @@ export async function GET(request: NextRequest) {
     }
 
     const skip = (page - 1) * limit;
+    console.log("where, orderBy, skip, limit:", where, orderBy, skip, limit);
 
     // Execute queries in parallel for better performance
     const [transactions, totalItems, aggregates] = await Promise.all([
@@ -161,8 +173,6 @@ export async function GET(request: NextRequest) {
     // Calculate total income and expenses
     const totalIncome = aggregates.find(agg => agg.type === "INCOME")?._sum.amount ?? 0;
     const totalExpenses = aggregates.find(agg => agg.type === "EXPENSE")?._sum.amount ?? 0;
-
-    console.log(transactions)
 
     return NextResponse.json({
       transactions,

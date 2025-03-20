@@ -1,4 +1,3 @@
-import { Transaction } from "@prisma/client";
 import { LucideIcon } from "lucide-react";
 import { z } from "zod";
 import { expenseFormSchema } from "./schema/expenseSchema";
@@ -20,7 +19,7 @@ export interface categoryType {
     id: string, name: string, icon: LucideIcon, color: string
 
 }
-export interface PaymenTsype {
+export interface PaymentType {
     id: string, name: string
 }
 export enum PaymentMethodType {

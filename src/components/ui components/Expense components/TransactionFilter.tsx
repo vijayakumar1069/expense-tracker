@@ -1,7 +1,12 @@
 // TransactionFilter.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  useState,
+  useEffect,
+  ForwardRefExoticComponent,
+  RefAttributes,
+} from "react";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
@@ -15,11 +20,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
-import { CalendarIcon, Filter, X } from "lucide-react";
+import { CalendarIcon, Filter, LucideProps, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
-import { categoryType, PaymenTsype } from "@/utils/types";
-import { PAYMENT_METHODS } from "@/utils/constants/consts";
+
+import { PaymentType } from "@/utils/types";
+import { CATEGORIES, PAYMENT_METHODS } from "@/utils/constants/consts";
 import {
   Popover,
   PopoverContent,
@@ -30,7 +35,7 @@ interface FilterProps {
   onFilterChange: (filters: {
     type?: string;
     category?: string;
-    paymentMethod?: string;
+    paymentMethodType?: string;
     startDate?: string;
     endDate?: string;
     minAmount?: string;
@@ -42,7 +47,7 @@ interface FilterProps {
   initialFilters?: {
     type?: string;
     category?: string;
-    paymentMethod?: string;
+    paymentMethodType?: string;
     startDate?: string;
     endDate?: string;
     minAmount?: string;
@@ -60,7 +65,7 @@ const TransactionFilter = ({
   const [filters, setFilters] = useState({
     type: initialFilters.type || "",
     category: initialFilters.category || "",
-    paymentMethod: initialFilters.paymentMethod || "",
+    paymentMethodType: initialFilters.paymentMethodType || "",
     startDate: initialFilters.startDate
       ? new Date(initialFilters.startDate)
       : undefined,
@@ -72,16 +77,6 @@ const TransactionFilter = ({
     search: initialFilters.search || "",
     sortBy: initialFilters.sortBy || "createdAt",
     sortDirection: initialFilters.sortDirection || ("desc" as "asc" | "desc"),
-  });
-
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const response = await fetch("/api/categories");
-      if (!response.ok) return [];
-      const data = await response.json();
-      return data;
-    },
   });
 
   const handleFilterChange = (
@@ -101,6 +96,7 @@ const TransactionFilter = ({
         ? format(filters.endDate, "yyyy-MM-dd")
         : undefined,
     };
+    console.log(filters);
 
     onFilterChange(formattedFilters);
     setIsOpen(false);
@@ -110,7 +106,7 @@ const TransactionFilter = ({
     const resetValues = {
       type: "",
       category: "",
-      paymentMethod: "",
+      paymentMethodType: "",
       startDate: undefined,
       endDate: undefined,
       minAmount: "",
@@ -137,12 +133,13 @@ const TransactionFilter = ({
             ? format(filters.endDate, "yyyy-MM-dd")
             : undefined,
         };
+        console.log(formattedFilters);
         onFilterChange({ ...formattedFilters });
       }
     }, 500);
 
     return () => clearTimeout(debounceTimer);
-  }, [filters.search]);
+  }, [filters, onFilterChange, initialFilters.search]);
 
   return (
     <div className="py-4 px-6">
@@ -184,7 +181,13 @@ const TransactionFilter = ({
               ) && <span className="ml-1 rounded-full bg-primary w-2 h-2" />}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[340px] p-0" align="end">
+          <PopoverContent
+            className="w-[340px] p-0"
+            align="end"
+            onInteractOutside={(e) => {
+              e.preventDefault();
+            }}
+          >
             <Card className="border-0">
               <CardContent className="p-4 grid gap-4">
                 <div className="space-y-2">
@@ -197,7 +200,7 @@ const TransactionFilter = ({
                       <SelectValue placeholder="All Types" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Types</SelectItem>
+                      <SelectItem value="all-type">All Types</SelectItem>
                       <SelectItem value="INCOME">Income</SelectItem>
                       <SelectItem value="EXPENSE">Expense</SelectItem>
                     </SelectContent>
@@ -216,30 +219,44 @@ const TransactionFilter = ({
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Categories</SelectItem>
-                      {categories?.map((category: categoryType) => (
-                        <SelectItem key={category.id} value={category.name}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="all-categories">
+                        All Categories
+                      </SelectItem>
+                      {CATEGORIES?.map(
+                        (category: {
+                          id: number;
+                          name: string;
+                          icon: ForwardRefExoticComponent<
+                            Omit<LucideProps, "ref"> &
+                              RefAttributes<SVGSVGElement>
+                          >;
+                          color: string;
+                        }) => (
+                          <SelectItem key={category.id} value={category.name}>
+                            {category.name}
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="paymentMethod">Payment Method</Label>
+                  <Label htmlFor="paymentMethodType">Payment Method</Label>
                   <Select
-                    value={filters.paymentMethod}
+                    value={filters.paymentMethodType}
                     onValueChange={(value) =>
-                      handleFilterChange("paymentMethod", value)
+                      handleFilterChange("paymentMethodType", value)
                     }
                   >
-                    <SelectTrigger id="paymentMethod">
+                    <SelectTrigger id="paymentMethodType">
                       <SelectValue placeholder="All Payment Methods" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Payment Methods</SelectItem>
-                      {PAYMENT_METHODS?.map((method: PaymenTsype) => (
+                      <SelectItem value="all-payment-methods">
+                        All Payment Methods
+                      </SelectItem>
+                      {PAYMENT_METHODS?.map((method: PaymentType) => (
                         <SelectItem key={method.id} value={method.id}>
                           {method.name}
                         </SelectItem>
