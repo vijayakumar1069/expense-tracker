@@ -11,7 +11,7 @@ import { FormSectionProps } from "@/utils/types";
 export const DateImageSection: React.FC<FormSectionProps> = ({ form }) => {
   return (
     <>
-      {/* Date */}
+      {/* Date Input */}
       <FormField
         control={form.control}
         name="date"
@@ -19,7 +19,11 @@ export const DateImageSection: React.FC<FormSectionProps> = ({ form }) => {
           <FormItem>
             <FormLabel>Date</FormLabel>
             <FormControl>
-              <Input type="date" {...field} value={field.value || ""} />
+              <Input
+                type="date"
+                {...field}
+                value={field.value ?? ""} // Use nullish coalescing
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -30,7 +34,7 @@ export const DateImageSection: React.FC<FormSectionProps> = ({ form }) => {
       <FormField
         control={form.control}
         name="image"
-        render={({ field: { onChange, ...field } }) => (
+        render={({ field: { onChange } }) => (
           <FormItem>
             <FormLabel>Upload Image</FormLabel>
             <FormControl>
@@ -38,7 +42,8 @@ export const DateImageSection: React.FC<FormSectionProps> = ({ form }) => {
                 type="file"
                 accept="image/*"
                 onChange={(e) => onChange(e.target.files?.[0])}
-                {...field}
+
+                // Remove the value prop for file inputs
               />
             </FormControl>
             <FormMessage />

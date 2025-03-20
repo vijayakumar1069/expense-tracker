@@ -70,11 +70,11 @@ const DeleteTransactionButton: React.FC<DeleteTransactionButtonProps> = ({
                 (acc, curr) => acc - Number(curr.amount),
                 data.summary.totalIncome
               ),
-            totalExpense: data.transactions
+            totalExpenses: data.transactions
               .filter((t) => t.id === transactionId && t.type === "EXPENSE")
               .reduce(
                 (acc, curr) => acc - Number(curr.amount),
-                data.summary.totalExpense
+                data.summary.totalExpenses
               ),
             netAmount: data.transactions
               .filter((t) => t.id === transactionId)

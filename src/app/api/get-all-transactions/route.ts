@@ -1,15 +1,26 @@
 // app/api/transactions/route.ts
-import { NextRequest, NextResponse } from "next/server";
 
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { z } from "zod";
 import { prisma } from "@/utils/prisma";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 
-// Input validation schema
+// Input validation schema - extended to include all filter parameters
 const QuerySchema = z.object({
   page: z.string().transform(Number).default("1"),
-  limit: z.string().transform(Number).default("2"),
+  limit: z.string().transform(Number).default("10"),
+  type: z.string().optional(),
+  category: z.string().optional(),
+  paymentMethodId: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  minAmount: z.string().transform(val => val ? parseFloat(val) : undefined).optional(),
+  maxAmount: z.string().transform(val => val ? parseFloat(val) : undefined).optional(),
+  search: z.string().optional(),
+  sortBy: z.enum(['date', 'amount', 'name', 'createdAt']).default('createdAt'),
+  sortDirection: z.enum(['asc', 'desc']).default('desc'),
 });
 
 export async function GET(request: NextRequest) {
@@ -23,45 +34,124 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Parse query parameters
+    // Parse and validate query parameters
     const { searchParams } = new URL(request.url);
     const validatedParams = QuerySchema.parse({
       page: searchParams.get("page"),
       limit: searchParams.get("limit"),
+      type: searchParams.get("type"),
+      category: searchParams.get("category"),
+      paymentMethodId: searchParams.get("paymentMethod"),
+      startDate: searchParams.get("startDate"),
+      endDate: searchParams.get("endDate"),
+      minAmount: searchParams.get("minAmount"),
+      maxAmount: searchParams.get("maxAmount"),
+      search: searchParams.get("search"),
+      sortBy: searchParams.get("sortBy") || "createdAt",
+      sortDirection: searchParams.get("sortDirection") || "desc",
     });
 
-    const { page, limit } = validatedParams;
+    const {
+      page,
+      limit,
+      type,
+      category,
+
+      startDate,
+      endDate,
+      minAmount,
+      maxAmount,
+      search,
+      sortBy,
+      sortDirection
+    } = validatedParams;
+
+    // Build the where condition for Prisma
+    const where: Prisma.TransactionWhereInput = {
+      userId: user.id,
+    };
+
+    // Add type filter
+    if (type) {
+      where.type = type as Prisma.EnumTransactionTypeFilter;
+
+    }
+
+    // Add category filter    
+    if (category) {
+      where.category = category;
+    }
+
+
+
+    // Add date range filters
+    if (startDate || endDate) {
+      where.date = {};
+      if (startDate) {
+        where.date.gte = new Date(startDate);
+      }
+      if (endDate) {
+        where.date.lte = new Date(endDate);
+      }
+    }
+
+    // Add amount range filters
+    if (minAmount !== undefined || maxAmount !== undefined) {
+      where.amount = {};
+      if (minAmount !== undefined) {
+        where.amount.gte = minAmount;
+      }
+      if (maxAmount !== undefined) {
+        where.amount.lte = maxAmount;
+      }
+    }
+
+    // Add search filter
+    if (search) {
+      where.OR = [
+        { name: { contains: search } },
+        { description: { contains: search } }
+      ];
+    }
+
+    // Build the orderBy parameter based on sortBy and sortDirection
+    let orderBy: Prisma.TransactionOrderByWithRelationInput = { createdAt: 'desc' };
+
+    if (sortBy === 'date') {
+      orderBy = { date: sortDirection };
+    } else if (sortBy === 'amount') {
+      orderBy = { amount: sortDirection };
+    } else if (sortBy === 'name') {
+      orderBy = { name: sortDirection };
+    } else {
+      orderBy = { createdAt: sortDirection };
+    }
+
     const skip = (page - 1) * limit;
 
     // Execute queries in parallel for better performance
     const [transactions, totalItems, aggregates] = await Promise.all([
-      // Get paginated transactions
+      // Get filtered and paginated transactions
       prisma.transaction.findMany({
-        where: {
-          userId: user.id,
-        },
+        where,
         skip,
         take: limit,
-        orderBy: { createdAt: "desc" },
+        orderBy,
         include: {
           paymentMethod: true,
           attachments: true,
         },
       }),
 
-      // Get total count for user's transactions
+      // Get total count for user's filtered transactions
       prisma.transaction.count({
-        where: {
-          userId: user.id,
-        },
+        where,
       }),
 
-      // Get aggregated amounts by type
+      // Get aggregated amounts by type with the same filters
       prisma.transaction.groupBy({
         by: ["type"],
-        where: {
-          userId: user.id,
-        },
+        where,
         _sum: {
           amount: true,
         },
@@ -71,7 +161,9 @@ export async function GET(request: NextRequest) {
     // Calculate total income and expenses
     const totalIncome = aggregates.find(agg => agg.type === "INCOME")?._sum.amount ?? 0;
     const totalExpenses = aggregates.find(agg => agg.type === "EXPENSE")?._sum.amount ?? 0;
-    revalidatePath("/New-Expenses");
+
+    console.log(transactions)
+
     return NextResponse.json({
       transactions,
       pagination: {
@@ -89,7 +181,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error("Transaction fetch error:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid query parameters", details: error.errors },
@@ -102,166 +194,5 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+
 }
-
-// Handle POST requests for creating new transactions
-// export async function POST(request: NextRequest) {
-//   try {
-//     const user = await requireAuth();
-//     if (!user) {
-//       return NextResponse.json(
-//         { error: "Unauthorized" },
-//         { status: 401 }
-//       );
-//     }
-
-//     const body = await request.json();
-
-//     // Create transaction with associated payment method
-//     const transaction = await prisma.transaction.create({
-//       data: {
-//         ...body,
-//         userId: user.id,
-//         paymentMethod: {
-//           create: body.paymentMethod,
-//         },
-//       },
-//       include: {
-//         paymentMethod: true,
-//         attachments: true,
-//       },
-//     });
-
-//     return NextResponse.json(transaction, { status: 201 });
-
-//   } catch (error) {
-//     console.error("Transaction creation error:", error);
-//     return NextResponse.json(
-//       { error: "Failed to create transaction" },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-// Add PUT method for updating transactions
-// export async function PUT(request: NextRequest) {
-//   try {
-//     const user = await requireAuth();
-//     if (!user) {
-//       return NextResponse.json(
-//         { error: "Unauthorized" },
-//         { status: 401 }
-//       );
-//     }
-
-//     const { searchParams } = new URL(request.url);
-//     const transactionId = searchParams.get("id");
-    
-//     if (!transactionId) {
-//       return NextResponse.json(
-//         { error: "Transaction ID is required" },
-//         { status: 400 }
-//       );
-//     }
-
-//     const body = await request.json();
-
-//     // Verify transaction belongs to user
-//     const existingTransaction = await prisma.transaction.findFirst({
-//       where: {
-//         id: transactionId,
-//         userId: user.id,
-//       },
-//     });
-
-//     if (!existingTransaction) {
-//       return NextResponse.json(
-//         { error: "Transaction not found" },
-//         { status: 404 }
-//       );
-//     }
-
-//     // Update transaction and payment method
-//     const updatedTransaction = await prisma.transaction.update({
-//       where: {
-//         id: transactionId,
-//       },
-//       data: {
-//         ...body,
-//         paymentMethod: body.paymentMethod ? {
-//           update: body.paymentMethod,
-//         } : undefined,
-//       },
-//       include: {
-//         paymentMethod: true,
-//         attachments: true,
-//       },
-//     });
-
-//     return NextResponse.json(updatedTransaction);
-
-//   } catch (error) {
-//     console.error("Transaction update error:", error);
-//     return NextResponse.json(
-//       { error: "Failed to update transaction" },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-// Add DELETE method
-// export async function DELETE(request: NextRequest) {
-//   try {
-//     const user = await requireAuth();
-//     if (!user) {
-//       return NextResponse.json(
-//         { error: "Unauthorized" },
-//         { status: 401 }
-//       );
-//     }
-
-//     const { searchParams } = new URL(request.url);
-//     const transactionId = searchParams.get("id");
-
-//     if (!transactionId) {
-//       return NextResponse.json(
-//         { error: "Transaction ID is required" },
-//         { status: 400 }
-//       );
-//     }
-
-//     // Verify transaction belongs to user
-//     const existingTransaction = await prisma.transaction.findFirst({
-//       where: {
-//         id: transactionId,
-//         userId: user.id,
-//       },
-//     });
-
-//     if (!existingTransaction) {
-//       return NextResponse.json(
-//         { error: "Transaction not found" },
-//         { status: 404 }
-//       );
-//     }
-
-//     // Delete transaction (will cascade delete payment method and attachments)
-//     await prisma.transaction.delete({
-//       where: {
-//         id: transactionId,
-//       },
-//     });
-
-//     return NextResponse.json(
-//       { message: "Transaction deleted successfully" },
-//       { status: 200 }
-//     );
-
-//   } catch (error) {
-//     console.error("Transaction deletion error:", error);
-//     return NextResponse.json(
-//       { error: "Failed to delete transaction" },
-//       { status: 500 }
-//     );
-//   }
-// }

@@ -16,6 +16,13 @@ export type AuthUser = {
     sessionToken: string;
 };
 
+export interface categoryType {
+    id: string, name: string, icon: LucideIcon, color: string
+
+}
+export interface PaymenTsype {
+    id: string, name: string
+}
 export enum PaymentMethodType {
     CASH = "CASH",
     BANK = "BANK",
@@ -33,7 +40,7 @@ export interface TransactionResponse {
     };
     summary: {
         totalIncome: number;
-        totalExpense: number;
+        totalExpenses: number;
         netAmount: number;
     };
 }

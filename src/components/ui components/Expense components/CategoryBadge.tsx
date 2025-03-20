@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { TableCell } from "@/components/ui/table";
+
 import { CATEGORIES } from "@/utils/constants/consts";
 import { Receipt } from "lucide-react";
 
@@ -23,19 +23,17 @@ export const CategoryBadge = ({ categoryName }: { categoryName: string }) => {
   const Icon = category.icon;
 
   return (
-    <TableCell className="">
-      <Badge
-        variant="outline"
-        className="flex items-center gap-1 w-fit p-2"
-        style={{
-          borderColor: category.color + "40",
-          color: category.color,
-          backgroundColor: category.color + "10",
-        }}
-      >
-        <Icon className="h-3 w-3" />
-        {category.name}
-      </Badge>
-    </TableCell>
+    <Badge
+      variant="outline"
+      className="flex items-center gap-1 w-fit p-2"
+      style={{
+        borderColor: category.color + "40",
+        color: category.color,
+        backgroundColor: category.color + "10",
+      }}
+    >
+      <Icon className="h-3 w-3" />
+      {category.name}
+    </Badge>
   );
 };
