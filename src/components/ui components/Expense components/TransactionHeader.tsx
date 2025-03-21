@@ -1,14 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import {
-  DownloadCloud,
-  Activity,
-  Bell,
-  FileText,
-  ChevronDown,
-  Filter,
-} from "lucide-react";
+import { DownloadCloud, Activity, Bell, FileText, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

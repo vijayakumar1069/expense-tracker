@@ -73,3 +73,10 @@ export interface FormSectionProps {
     isPending: boolean;
     mode?: "add" | "edit";
 }
+
+export type UpdateTransactionResult = {
+    success: boolean;
+    data?: unknown;
+    error?: string;
+    details?: z.ZodIssue[];
+};

@@ -5,6 +5,7 @@ import { requireAuth } from "@/lib/auth";
 import cloudinary from "@/lib/clodinary";
 import { prisma } from "@/utils/prisma";
 import { expenseFormSchema } from "@/utils/schema/expenseSchema";
+import { UpdateTransactionResult } from "@/utils/types";
 import { PaymentMethodType, TransactionType } from "@prisma/client";
 import { z } from "zod";
 
@@ -182,8 +183,10 @@ export async function deleteExpense(transactionId: string) {
     }
 }
 
-
-export async function updateTransaction(transactionId: string, formData: FormData) {
+export async function updateTransaction(
+    transactionId: string,
+    formData: FormData
+): Promise<UpdateTransactionResult> {
     try {
         // Authentication check
         const user = await requireAuth();
@@ -191,22 +194,20 @@ export async function updateTransaction(transactionId: string, formData: FormDat
             return { success: false, error: "Authentication required" };
         }
 
+        // Extract image files and deleted images
         const imageFiles = formData.getAll("imageFiles") as File[];
+        const deleteImagesStr = formData.get("deleteImages") as string | null;
 
-        // Handle deleted images
-        const deleteImagesStr = formData.get("deleteImages");
-
+        // Process form data
         const formDataObj: Record<string, string | string[] | File[]> = {};
+
         for (const [key, value] of formData.entries()) {
             // Skip the images field as we handle it separately
             if (key === "images") continue;
 
             // Special handling for existingImages - convert from string to array
-            if (key === "existingImages") {
-                if (typeof value === "string") {
-                    // Convert comma-separated string to array, or use empty array if no value
-                    formDataObj[key] = value ? value.split(",") : [];
-                }
+            if (key === "existingImages" && typeof value === "string") {
+                formDataObj[key] = value ? value.split(",") : [];
                 continue;
             }
 
@@ -218,8 +219,9 @@ export async function updateTransaction(transactionId: string, formData: FormDat
         formDataObj.images = imageFiles.length > 0 ? imageFiles : [];
 
         // Parse and validate using zod schema
+        let validatedData;
         try {
-            const validatedData = expenseFormSchema.parse(formDataObj);
+            validatedData = expenseFormSchema.parse(formDataObj);
         } catch (validationError) {
             if (validationError instanceof z.ZodError) {
                 return {
@@ -273,19 +275,18 @@ export async function updateTransaction(transactionId: string, formData: FormDat
                     newAttachments.push({
                         url: uploadResponse.secure_url,
                     });
-                } catch (error) {
-                    return { success: false, error: "Failed to upload image" };
+                } catch (error: unknown) {
+                    return { success: false, error: error instanceof Error ? error.message : "Failed to process image" };
                 }
             }
         }
 
         // Process deleted images
-        const imagesToDelete = deleteImagesStr ? String(deleteImagesStr).split(",") : [];
+        const imagesToDelete = deleteImagesStr ? deleteImagesStr.split(",").filter(Boolean) : [];
 
         // Use transaction to ensure data consistency
         const updatedTransaction = await prisma.$transaction(async (tx) => {
             // 1. Update payment method
-            const validatedData = expenseFormSchema.parse(formDataObj);
             await tx.paymentMethod.update({
                 where: { transactionId },
                 data: {
@@ -303,33 +304,30 @@ export async function updateTransaction(transactionId: string, formData: FormDat
             // 2. Delete attachments marked for deletion
             if (imagesToDelete.length > 0) {
                 for (const attachmentId of imagesToDelete) {
-                    if (!attachmentId.trim()) continue;
-
                     // Get the attachment to delete
                     const attachmentToDelete = await tx.attachment.findUnique({
                         where: { id: attachmentId }
                     });
 
-                    if (attachmentToDelete) {
-                        // Extract Cloudinary public ID to delete the resource
-                        if (attachmentToDelete.url) {
-                            try {
-                                const urlParts = attachmentToDelete.url.split("/");
-                                const publicId = urlParts[urlParts.length - 1].split(".")[0];
+                    if (attachmentToDelete?.url) {
+                        try {
+                            // Extract Cloudinary public ID to delete the resource
+                            const urlParts = attachmentToDelete.url.split("/");
+                            const fileName = urlParts[urlParts.length - 1];
+                            const publicId = fileName.split(".")[0];
 
-                                if (publicId) {
-                                    await cloudinary.uploader.destroy(`transactions/${user.id}/${publicId}`);
-                                }
-                            } catch {
-                                // Continue with DB deletion even if Cloudinary fails
+                            if (publicId) {
+                                await cloudinary.uploader.destroy(`transactions/${user.id}/${publicId}`);
                             }
+                        } catch {
+                            // Continue with DB deletion even if Cloudinary fails
                         }
-
-                        // Delete from database
-                        await tx.attachment.delete({
-                            where: { id: attachmentId }
-                        });
                     }
+
+                    // Delete from database
+                    await tx.attachment.delete({
+                        where: { id: attachmentId }
+                    });
                 }
             }
 
@@ -350,10 +348,10 @@ export async function updateTransaction(transactionId: string, formData: FormDat
                     name: validatedData.name,
                     type: validatedData.transactionType as TransactionType,
                     description: validatedData.description,
-                    amount: parseFloat(validatedData.amount),
-                    tax: validatedData.taxType,
-                    total: parseFloat(validatedData.total),
-                    date: new Date(validatedData.date),
+                    amount: parseFloat(String(validatedData.amount)),
+                    tax: validatedData.taxType as string,
+                    total: parseFloat(String(validatedData.total)),
+                    date: new Date(String(validatedData.date)),
                     category: validatedData.category,
                 },
                 include: {
@@ -361,13 +359,14 @@ export async function updateTransaction(transactionId: string, formData: FormDat
                     attachments: true,
                 },
             });
-
         });
+
         return {
             success: true,
             data: updatedTransaction
         };
-    } catch (error) {
+
+    } catch (error: unknown) {
         // Detailed error handling
         if (error instanceof z.ZodError) {
             return {
@@ -382,6 +381,7 @@ export async function updateTransaction(transactionId: string, formData: FormDat
             error: error instanceof Error ? error.message : "Failed to update transaction",
         };
     }
+
 }
 
 
