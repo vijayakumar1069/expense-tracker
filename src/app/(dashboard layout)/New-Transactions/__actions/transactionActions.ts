@@ -227,7 +227,7 @@ export async function updateTransaction(
                 return {
                     success: false,
                     error: "Validation error",
-                    details: validationError.errors,
+
                 };
             }
             throw validationError;
@@ -372,7 +372,7 @@ export async function updateTransaction(
             return {
                 success: false,
                 error: "Validation error",
-                details: error.errors,
+
             };
         }
 

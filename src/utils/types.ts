@@ -44,6 +44,27 @@ export interface TransactionResponse {
     };
 }
 
+export interface Client {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    userId: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ClientResponse {
+    data: Client[];
+    pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}
+
 
 type PaymentMethod = {
     id: string;
@@ -78,5 +99,17 @@ export type UpdateTransactionResult = {
     success: boolean;
     data?: unknown;
     error?: string;
-    details?: z.ZodIssue[];
+
 };
+
+
+
+export const clientSchema = z.object({
+    id: z.string().optional(),
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    email: z.string().email("Please enter a valid email address"),
+    phone: z.string().min(10, "Phone must be at least 10 characters"),
+    address: z.string().min(5, "Address must be at least 5 characters"),
+});
+
+export type ClientFormValues = z.infer<typeof clientSchema>;
