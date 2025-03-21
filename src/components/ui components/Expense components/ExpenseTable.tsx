@@ -14,13 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, DollarSign, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from "./CategoryBadge";
@@ -42,6 +36,7 @@ import {
   FileDigit,
 } from "lucide-react";
 import TransactionFilter from "./TransactionFilter";
+import TransactionHeader from "./TransactionHeader";
 
 // Helper function to format payment method names
 export const formatPaymentMethodName = (method: string) => {
@@ -151,14 +146,7 @@ const ExpenseTable = () => {
         onFilterChange={handleFilterChange}
         initialFilters={filters}
       />
-      <CardHeader className="px-6 pt-2 pb-0">
-        <CardTitle className="text-xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-          Transaction History
-        </CardTitle>
-        <CardDescription className="text-muted-foreground">
-          Manage and track your financial activities
-        </CardDescription>
-      </CardHeader>
+      <TransactionHeader currentFilters={filters} />
 
       <CardContent className="p-6">
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">

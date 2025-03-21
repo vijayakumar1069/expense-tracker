@@ -320,7 +320,7 @@ export async function updateTransaction(transactionId: string, formData: FormDat
                                 if (publicId) {
                                     await cloudinary.uploader.destroy(`transactions/${user.id}/${publicId}`);
                                 }
-                            } catch (error) {
+                            } catch {
                                 // Continue with DB deletion even if Cloudinary fails
                             }
                         }
@@ -361,8 +361,8 @@ export async function updateTransaction(transactionId: string, formData: FormDat
                     attachments: true,
                 },
             });
-        });
 
+        });
         return {
             success: true,
             data: updatedTransaction

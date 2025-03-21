@@ -57,7 +57,6 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
       chequeDate: transaction?.chequeDate || "",
       invoiceNo: transaction?.invoiceNo || "",
       date: transaction?.date || new Date().toISOString().split("T")[0],
-      attachments: mode === "edit" ? transaction?.attachments || [] : [],
       images: [],
       existingImages: [], // Keep this for schema compatibility
     },
