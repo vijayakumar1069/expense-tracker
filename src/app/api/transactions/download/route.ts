@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/utils/prisma";
 import { Prisma } from "@prisma/client";
 import * as XLSX from 'xlsx';
+import { randomUUID } from "crypto";
 
 // Updated validation schema with only CSV format
 const QuerySchema = z.object({
@@ -156,7 +157,7 @@ export async function GET(request: NextRequest) {
 
         // Create filename with date
         const date = new Date().toISOString().split('T')[0];
-        const filename = `transactions_report_${date}.csv`;
+        const filename = randomUUID() + '_transactions_' + date + '.csv';
 
         return new NextResponse(csvData, {
             headers: {
