@@ -27,7 +27,14 @@ export const expenseFormSchema = z.object({
     // Updated to support multiple images
     images: z.array(z.any()).optional().default([]),
     // For existing images (when editing)
-    existingImages: z.array(z.string()).optional().default([]),
+    existingImages: z.array(z.union([
+        z.string(),
+        z.object({
+            id: z.string(),
+            url: z.string().optional(),
+            // Add other attachment fields if needed
+        })
+    ])).optional(),
     // For tracking deleted images
     deleteImages: z.string().optional(),
     // attachments?: z.array(z.any()).optional().default([]),

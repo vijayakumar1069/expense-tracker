@@ -80,6 +80,13 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
   // Update form values when transaction data is loaded
   useEffect(() => {
     if (transaction) {
+      // Store the full attachment objects for UI purposes
+      const fullAttachments = transaction.attachments || [];
+
+      // Extract just IDs for form validation
+      const attachmentIds = fullAttachments.map(
+        (att: { id: string }) => att.id
+      );
       const values = {
         transactionType: transaction.type || "EXPENSE",
         name: transaction.name || "",
@@ -102,50 +109,63 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
           new Date(transaction.date).toISOString().split("T")[0] ||
           new Date().toISOString().split("T")[0],
         images: transaction.attachments || [],
-        existingImages: transaction.attachments || [],
-        attachments: transaction.attachments || [],
+        // For display in the UI
+        attachments: fullAttachments,
+
+        // For form validation - just the IDs as strings
+        existingImages: attachmentIds,
       };
       setFormValues(values);
       form.reset(values);
     }
-  }, [transaction]);
+  }, [form, transaction]);
 
   const mutation = useMutation({
+    // In TransActionEditButton.tsx - update your mutation function
     mutationFn: async (data: TransactionFormValues) => {
-      const formFieldData = form.getValues();
+      // Create FormData object
       const formData = new FormData();
 
       // Add regular form fields
-      Object.entries(formFieldData).forEach(([key, value]) => {
+      Object.entries(data).forEach(([key, value]) => {
         if (
           value !== undefined &&
           value !== null &&
           key !== "images" &&
-          key !== "existingImages"
+          key !== "existingImages" &&
+          key !== "attachments"
         ) {
           formData.append(key, String(value));
         }
       });
-      // Handle images separately and correctly
-      if (formFieldData.images && Array.isArray(formFieldData.images)) {
-        // Using append multiple times with same key creates an array on server
-        formFieldData.images.forEach((file: File) => {
+
+      // Get the actual File objects directly from the form
+      const imageFiles = form.getValues("images");
+
+      // Directly check if files exist and are File objects
+      if (imageFiles && Array.isArray(imageFiles)) {
+        imageFiles.forEach((file, index) => {
           if (file instanceof File) {
-            formData.append("images", file);
+            // Use a different field name to avoid schema validation issues
+            formData.append("imageFiles", file);
+          } else {
+            console.warn(`Image ${index} is not a File object:`, file);
           }
         });
-      } else {
-        // IMPORTANT: If no images, send an empty array as JSON
-        formData.append("images", JSON.stringify([]));
       }
 
-      // Handle existing images
+      // Handle existing images - convert from array to comma-separated string
       if (data.existingImages && Array.isArray(data.existingImages)) {
-        formData.append("existingImages", JSON.stringify(data.existingImages));
+        // Convert objects to IDs if needed
+        const existingIds = data.existingImages.map((img) =>
+          typeof img === "string" ? img : img.id
+        );
+        formData.append("existingImages", existingIds.join(","));
       }
 
       return updateTransaction(transactionId, formData);
     },
+
     onMutate: async () => {
       toast.loading("Updating transaction...", {
         duration: 2000,
@@ -249,7 +269,6 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
             isPending={isPending}
             mode="edit"
             initialValues={formValues}
-            id={transactionId}
           />
         )}
       </DialogContent>

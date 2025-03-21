@@ -9,7 +9,6 @@ import { DateImageSection } from "./DateImageSection";
 import { TransactionFormSubmitButton } from "./TransActionFormSubmitButton";
 import { useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { updateTransaction } from "@/app/(dashboard layout)/New-Transactions/__actions/transactionActions";
 // import { UseFormReturn } from "react-hook-form";
 
 export const TransactionForm: React.FC<{
@@ -18,23 +17,29 @@ export const TransactionForm: React.FC<{
   isPending: boolean;
   mode: "add" | "edit";
   initialValues?: TransactionFormValues;
-  id?: string;
+
   //   setOpen: (open: boolean) => void;
-}> = ({ form, onSubmit, isPending, mode, initialValues, id }) => {
+}> = ({ form, onSubmit, isPending, mode, initialValues }) => {
   useEffect(() => {
     if (initialValues) {
       // Only set values that are empty or different
-      Object.entries(initialValues).forEach(([key, value]) => {
-        if (
-          value &&
-          form.getValues(key as keyof TransactionFormValues) !== value
-        ) {
-          form.setValue(key as keyof TransactionFormValues, value);
-        }
-      });
+      // Object.entries(initialValues).forEach(([key, value]) => {
+      //   if (
+      //     value &&
+      //     form.getValues(key as keyof TransactionFormValues) !== value
+      //   ) {
+      //     form.setValue(key as keyof TransactionFormValues, value);
+      //   }
+      // });
+      form.reset(initialValues);
     }
-  }, [form, mode, initialValues]);
-
+  }, [form, initialValues]);
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      // Form watching without console logs
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">

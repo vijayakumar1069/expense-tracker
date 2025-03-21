@@ -185,27 +185,18 @@ export async function deleteExpense(transactionId: string) {
 
 export async function updateTransaction(transactionId: string, formData: FormData) {
     try {
-        console.log("=========== UPDATE TRANSACTION START ===========");
-        console.log("TransactionId:", transactionId);
-        console.log("FormData keys:", [...formData.keys()]);
-
         // Authentication check
         const user = await requireAuth();
         if (!user) {
-            console.log("Authentication failed");
             return { success: false, error: "Authentication required" };
         }
-        console.log("User authenticated:", user.id);
 
-        // Get all image files (not just the first one)
-        const imageFiles = formData.getAll("images");
-        console.log("Number of new images:", imageFiles.length);
+        const imageFiles = formData.getAll("imageFiles") as File[];
 
         // Handle deleted images
         const deleteImagesStr = formData.get("deleteImages");
-        console.log("Images to delete:", deleteImagesStr);
 
-        const formDataObj: any = {};
+        const formDataObj: Record<string, string | string[] | File[]> = {};
         for (const [key, value] of formData.entries()) {
             // Skip the images field as we handle it separately
             if (key === "images") continue;
@@ -215,28 +206,21 @@ export async function updateTransaction(transactionId: string, formData: FormDat
                 if (typeof value === "string") {
                     // Convert comma-separated string to array, or use empty array if no value
                     formDataObj[key] = value ? value.split(",") : [];
-                    console.log("Parsed existingImages:", formDataObj[key]);
                 }
                 continue;
             }
 
             // Store other fields normally
-            formDataObj[key] = value;
+            formDataObj[key] = value as string;
         }
 
         // Add images array to formDataObj for validation
         formDataObj.images = imageFiles.length > 0 ? imageFiles : [];
 
-        console.log("FormData object keys:", Object.keys(formDataObj));
-
         // Parse and validate using zod schema
         try {
             const validatedData = expenseFormSchema.parse(formDataObj);
-            console.log("Validation succeeded");
-            console.log("Transaction type:", validatedData.transactionType);
-            console.log("Amount:", validatedData.amount);
         } catch (validationError) {
-            console.error("Validation error:", validationError);
             if (validationError instanceof z.ZodError) {
                 return {
                     success: false,
@@ -257,26 +241,19 @@ export async function updateTransaction(transactionId: string, formData: FormDat
         });
 
         if (!existingTransaction) {
-            console.log("Transaction not found");
             return { success: false, error: "Transaction not found" };
         }
 
         if (existingTransaction.userId !== user.id) {
-            console.log("Permission denied");
             return { success: false, error: "You don't have permission to update this transaction" };
         }
 
-        console.log("Existing transaction found:", existingTransaction.id);
-        console.log("Existing attachments:", existingTransaction.attachments.length);
-
         // Process all new images
-        const newAttachments = [];
+        const newAttachments: { url: string }[] = [];
 
         for (const imageFile of imageFiles) {
             if (imageFile instanceof File && imageFile.size > 0) {
                 try {
-                    console.log("Processing new image:", imageFile.name, "Size:", imageFile.size);
-
                     // Process image for upload
                     const bytes = await imageFile.arrayBuffer();
                     const buffer = Buffer.from(bytes);
@@ -293,23 +270,17 @@ export async function updateTransaction(transactionId: string, formData: FormDat
                         ],
                     });
 
-                    console.log("Image uploaded to Cloudinary:", uploadResponse.secure_url);
-
                     newAttachments.push({
                         url: uploadResponse.secure_url,
                     });
                 } catch (error) {
-                    console.error("Image upload error:", error);
                     return { success: false, error: "Failed to upload image" };
                 }
             }
         }
 
-        console.log("New attachments to add:", newAttachments.length);
-
         // Process deleted images
         const imagesToDelete = deleteImagesStr ? String(deleteImagesStr).split(",") : [];
-        console.log("Images to delete (IDs):", imagesToDelete);
 
         // Use transaction to ensure data consistency
         const updatedTransaction = await prisma.$transaction(async (tx) => {
@@ -328,7 +299,6 @@ export async function updateTransaction(transactionId: string, formData: FormDat
                     invoiceNo: validatedData.invoiceNo,
                 },
             });
-            console.log("Payment method updated");
 
             // 2. Delete attachments marked for deletion
             if (imagesToDelete.length > 0) {
@@ -341,8 +311,6 @@ export async function updateTransaction(transactionId: string, formData: FormDat
                     });
 
                     if (attachmentToDelete) {
-                        console.log("Deleting attachment:", attachmentId);
-
                         // Extract Cloudinary public ID to delete the resource
                         if (attachmentToDelete.url) {
                             try {
@@ -351,10 +319,8 @@ export async function updateTransaction(transactionId: string, formData: FormDat
 
                                 if (publicId) {
                                     await cloudinary.uploader.destroy(`transactions/${user.id}/${publicId}`);
-                                    console.log("Deleted from Cloudinary:", publicId);
                                 }
                             } catch (error) {
-                                console.error("Error deleting from Cloudinary:", error);
                                 // Continue with DB deletion even if Cloudinary fails
                             }
                         }
@@ -376,7 +342,6 @@ export async function updateTransaction(transactionId: string, formData: FormDat
                     },
                 });
             }
-            console.log("New attachments added:", newAttachments.length);
 
             // 4. Update main transaction
             return await tx.transaction.update({
@@ -398,19 +363,13 @@ export async function updateTransaction(transactionId: string, formData: FormDat
             });
         });
 
-        console.log("Transaction updated successfully");
-        console.log("Updated attachments count:", updatedTransaction.attachments.length);
-
         return {
             success: true,
             data: updatedTransaction
         };
     } catch (error) {
         // Detailed error handling
-        console.error("Transaction update error:", error);
-
         if (error instanceof z.ZodError) {
-            console.log("Zod validation error:", error.errors);
             return {
                 success: false,
                 error: "Validation error",
@@ -422,11 +381,8 @@ export async function updateTransaction(transactionId: string, formData: FormDat
             success: false,
             error: error instanceof Error ? error.message : "Failed to update transaction",
         };
-    } finally {
-        console.log("=========== UPDATE TRANSACTION END ===========");
     }
 }
-
 
 
 

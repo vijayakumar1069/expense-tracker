@@ -28,8 +28,7 @@ export const DateImageSection: React.FC<FormSectionProps> = ({
 
   useEffect(() => {
     if (mode === "edit") {
-      const existingAttachments = form.getValues("existingImages") || [];
-  
+      const existingAttachments = form.getValues("attachments") || [];
 
       if (
         Array.isArray(existingAttachments) &&
@@ -45,9 +44,10 @@ export const DateImageSection: React.FC<FormSectionProps> = ({
         );
       }
     }
-  }, [mode, form]);
+  }, [form, mode]);
 
   // Handle file selection
+  // Make this change to ensure files are set correctly
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
 
@@ -66,14 +66,14 @@ export const DateImageSection: React.FC<FormSectionProps> = ({
     const updatedPreviews = [...previewImages, ...newPreviews];
     setPreviewImages(updatedPreviews);
 
-    // Update form value - only update with the File objects
+    // Update form value with ALL file objects (including newly added ones)
     const allFiles = updatedPreviews
-      .filter((preview) => preview.file)
+      .filter((preview) => preview.file instanceof File)
       .map((preview) => preview.file);
 
     form.setValue("images", allFiles);
 
-    // Reset input value to allow selecting the same file again
+    // Reset input
     e.target.value = "";
   };
 
@@ -124,15 +124,15 @@ export const DateImageSection: React.FC<FormSectionProps> = ({
     form.setValue("images", remainingFiles, { shouldValidate: true });
   };
   // Cleanup URLs on unmount
-  useEffect(() => {
-    return () => {
-      previewImages.forEach((preview) => {
-        if (preview.url && preview.url.startsWith("blob:")) {
-          URL.revokeObjectURL(preview.url);
-        }
-      });
-    };
-  }, [previewImages]);
+  // useEffect(() => {
+  //   return () => {
+  //     previewImages.forEach((preview) => {
+  //       if (preview.url && preview.url.startsWith("blob:")) {
+  //         URL.revokeObjectURL(preview.url);
+  //       }
+  //     });
+  //   };
+  // }, []);
 
   return (
     <div className="lg:col-span-2">
