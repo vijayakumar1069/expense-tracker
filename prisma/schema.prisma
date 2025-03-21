@@ -8,76 +8,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// model User {
-//   id        String     @id @default(cuid())
 
-//   email     String     @unique
-//   password  String
-//   role       Role       @default(USER)
-//   sessions  Session[]
-//   createdAt DateTime   @default(now())
-//   updatedAt DateTime   @updatedAt
-//   expenses  Expense[]
-// }
-
-// model Session {
-//   id        String   @id
-//   userId    String
-//   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   expiresAt DateTime
-//   createdAt DateTime @default(now())
-
-//   @@index([userId])
-// }
-
-// model Expense {
-//   id              String         @id @unique @default(cuid())
-//   name            String
-//   description     String?
-//   amount          Float
-//   tax            String?
-//   total          Float
-//   date           DateTime
-//   user           User           @relation(fields: [userId], references: [id])
-//   userId         String
-//   paymentMethod  PaymentMethod?  // Optional because PaymentMethod will be created after Expense
-//   attachment   Attachment[]
-//   category       String
-
-//   @@index([userId])
-// }
-// model Attachment {
-//   id        String     @id @default(cuid())
-//   url       String
-//   expense   Expense    @relation(fields: [expenseId], references: [id])
-//   expenseId String    @unique
-// }
-// enum PaymentMethodType {
-//   CASH
-//   BANK
-//   CHEQUE
-// }
-
-// enum Role { 
-//   USER
-//   ADMIN
-// }
-// model PaymentMethod {
-//   id             String           @id @default(cuid())
- 
-//   type           PaymentMethodType
-//   receivedBy     String?         // For BANK payments
-//   bankName       String?         // For BANK payments
-//   chequeNo       String?         // For CHEQUE payments
-//   chequeDate     DateTime?       // For CHEQUE payments
-//   expense        Expense         @relation(fields: [expenseId], references: [id])
-//   expenseId      String          @unique
-//   createdAt   DateTime        @default(now())
-//   updatedAt   DateTime        @updatedAt
-
-
-//   @@index([type])
-// }
 
 
 // Transaction type enum to distinguish between income and expense
@@ -168,6 +99,7 @@ model User {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   clients     Client[]
+  invoice     Invoice[]
 
 }
 
@@ -192,7 +124,57 @@ model Client{
   updatedAt DateTime @updatedAt @default(now())
   user User @relation(fields: [userId], references: [id])
   userId String
+  invoice Invoice[]
+
 
   
 }
 
+model Invoice{
+  id String @id @default(cuid())
+  clientName String
+  clientEmail String
+  clientPhone String
+  clientAddress String
+  invoiceNumber String @unique 
+  dueDate DateTime
+  client Client @relation(fields: [clientId], references: [id])
+  clientId String
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  status InvoiceStatus @default(DRAFT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+  invoiceContents InvoiceContents[]
+  subtotal Float
+  taxRate Float @default(0)
+  taxAmount Float @default(0)
+  invoiceTotal Float  
+
+   @@index([clientId])  // Add this
+  @@index([userId])    // Add this
+
+
+}
+
+model InvoiceContents{
+  id String @id @default(cuid())
+  description String
+  quantity Float
+  price Float
+  total Float
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+  invoiceId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+    @@index([invoiceId])  // Add this
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}

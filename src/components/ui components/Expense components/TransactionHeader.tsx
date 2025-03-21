@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { DownloadCloud, Activity, Bell, FileText, Filter } from "lucide-react";
+import { DownloadCloud, Activity, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -113,7 +113,7 @@ const TransactionHeader = ({ currentFilters = {} }) => {
           </div>
 
           <div className="flex items-center gap-3 ml-auto">
-            <Button
+            {/* <Button
               variant="outline"
               size="icon"
               className="rounded-full w-10 h-10 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm"
@@ -130,7 +130,7 @@ const TransactionHeader = ({ currentFilters = {} }) => {
               className="rounded-full w-10 h-10 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm"
             >
               <Bell size={16} className="text-slate-600 dark:text-slate-400" />
-            </Button>
+            </Button> */}
 
             <Button
               onClick={handleDownload}
@@ -170,10 +170,6 @@ const TransactionHeader = ({ currentFilters = {} }) => {
                 Transfers
               </span>
             </div>
-          </div>
-
-          <div className="text-xs text-muted-foreground bg-white dark:bg-slate-800/50 p-2.5 px-4 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800 font-medium">
-            Last updated: Today, 2:30 PM
           </div>
         </div>
       </CardHeader>
