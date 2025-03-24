@@ -1,7 +1,7 @@
 import { LucideIcon } from "lucide-react";
 import { z } from "zod";
 import { expenseFormSchema } from "./schema/expenseSchema";
-import { Transaction as PrismaTransaction } from "@prisma/client";
+import { Invoice, Transaction as PrismaTransaction } from "@prisma/client";
 // types/index.ts
 export interface NavItem {
     title: string;
@@ -57,6 +57,15 @@ export interface Client {
 
 export interface ClientResponse {
     data: Client[];
+    pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}
+export interface InvoiceResponse {
+    data: Invoice[];
     pagination: {
         total: number;
         page: number;
