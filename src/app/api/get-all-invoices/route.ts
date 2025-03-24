@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         const skip = (page - 1) * limit;
 
         // Get clients from database with pagination
-        const [clients, total] = await Promise.all([
+        const [invoices, total] = await Promise.all([
             prisma.invoice.findMany({
                 where,
                 skip,
@@ -73,14 +73,19 @@ export async function GET(request: NextRequest) {
                 orderBy:
                 {
                     createdAt: "desc"
+                },
+                include: {
+                    invoiceContents: true,
+                    client: true,
                 }
+
             }),
             prisma.invoice.count({ where }),
         ]);
 
         // Return successful response with pagination metadata
         return NextResponse.json({
-            data: clients,
+            data: invoices,
             pagination: {
                 total,
                 page,

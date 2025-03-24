@@ -1,4 +1,5 @@
 "use client";
+
 import {
   FormControl,
   FormField,
@@ -15,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -26,16 +27,35 @@ import {
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { generateInvoiceNumber } from "../../__actions/invoiceActions";
+import { UseFormReturn } from "react-hook-form";
+import { InvoiceFormValues } from "../InvoiceForm";
 
-export function InvoiceDetails({ form }) {
+export function InvoiceDetails({
+  form,
+}: {
+  form: UseFormReturn<InvoiceFormValues>;
+}) {
   useEffect(() => {
     const getInvoice = async () => {
       const res = await generateInvoiceNumber();
 
-      form.setValue("invoiceNumber", res.data?.invoiceNumber);
+      if (res.success && typeof res.data === "string") {
+        form.setValue("invoiceNumber", res.data);
+      }
     };
     getInvoice();
   }, [form]);
+
+  // Convert any string dates to Date objects when the form initializes
+  useEffect(() => {
+    const dueDateValue = form.getValues("dueDate");
+
+    // If dueDate exists and is a string, convert it to a Date object
+    if (dueDateValue && typeof dueDateValue === "string") {
+      form.setValue("dueDate", parseISO(dueDateValue));
+    }
+  }, [form]);
+
   return (
     <div className="grid gap-4 md:grid-cols-2 mt-6">
       <FormField
@@ -105,7 +125,9 @@ export function InvoiceDetails({ form }) {
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value}
+                  selected={
+                    field.value instanceof Date ? field.value : undefined
+                  }
                   onSelect={field.onChange}
                   initialFocus
                 />

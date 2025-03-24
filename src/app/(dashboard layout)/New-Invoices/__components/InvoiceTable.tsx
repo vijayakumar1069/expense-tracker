@@ -29,6 +29,7 @@ import { Invoice } from "@prisma/client";
 // import { toast } from "sonner";
 import { InvoiceResponse } from "@/utils/types";
 import InvoiceDialog from "./InvoiceDialog";
+import InvoiceFilter from "./InvoiceFilter";
 
 // Define proper types for client data and API responses
 
@@ -48,7 +49,7 @@ const InvoiceTable = () => {
 
   // Query for fetching clients with TanStack Query
   const { data, isLoading, isError } = useQuery<InvoiceResponse>({
-    queryKey: ["clients", filters, currentPage, limit],
+    queryKey: ["invoices", filters, currentPage, limit],
     queryFn: async () => {
       // Build query parameters
       const params = new URLSearchParams({
@@ -111,7 +112,7 @@ const InvoiceTable = () => {
 
   return (
     <div>
-      {/* <ClientFilters onFilterChange={setFilters} /> */}
+      <InvoiceFilter onFilterChange={setFilters} />
 
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">Invoice List</h2>

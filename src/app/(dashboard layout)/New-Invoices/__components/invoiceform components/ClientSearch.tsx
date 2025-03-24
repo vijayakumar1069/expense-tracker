@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,38 +24,56 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-// Mock client data - replace with actual API call
-const mockClients = [
-  {
-    id: "1",
-    name: "Acme Corporation",
-    email: "info@acme.com",
-    phone: "123-456-7890",
-    address: "123 Business Ave, Suite 456, New York, NY 10001",
-  },
-  {
-    id: "2",
-    name: "TechStart Inc",
-    email: "contact@techstart.io",
-    phone: "555-123-4567",
-    address: "789 Innovation Way, San Francisco, CA 94107",
-  },
-  {
-    id: "3",
-    name: "Global Solutions Ltd",
-    email: "hello@globalsolutions.com",
-    phone: "888-555-1212",
-    address: "456 Enterprise Blvd, Chicago, IL 60601",
-  },
-];
+// Client interface
+interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+}
 
-export function ClientSearch({ form }) {
+export function ClientSearch({ form }: { form: any }) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  // We'll use a single source of truth instead of separate filter state
+  // Fetch clients when search query changes
+  useEffect(() => {
+    const fetchClients = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Use a timeout to debounce the requests
+        const timeout = setTimeout(async () => {
+          const response = await fetch(
+            `/api/search-clients?query=${encodeURIComponent(searchQuery)}`
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch clients");
+          }
+
+          const data = await response.json();
+          setClients(data);
+          setLoading(false);
+        }, 300); // 300ms debounce
+
+        return () => clearTimeout(timeout);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+        setLoading(false);
+      }
+    };
+
+    fetchClients();
+  }, [searchQuery]);
+
   const handleSelect = (clientId: string) => {
-    const selectedClient = mockClients.find((client) => client.id === clientId);
+    const selectedClient = clients.find((client) => client.id === clientId);
     if (selectedClient) {
       // Update form fields with selected client data
       form.setValue("clientId", selectedClient.id);
@@ -63,7 +81,6 @@ export function ClientSearch({ form }) {
       form.setValue("clientEmail", selectedClient.email);
       form.setValue("clientPhone", selectedClient.phone);
       form.setValue("clientAddress", selectedClient.address);
-      setValue(selectedClient.id);
     }
     setOpen(false);
   };
@@ -86,56 +103,47 @@ export function ClientSearch({ form }) {
           </FormControl>
         </PopoverTrigger>
         <PopoverContent className="w-[400px] p-0">
-          {/* Let Command handle filtering internally */}
-          <Command
-            filter={(value, search) => {
-              // Custom filter function that checks both name and ID
-              if (!search) return 1;
-
-              // Check if any client property matches
-              const client = mockClients.find((c) => c.id === value);
-              if (!client) return 0;
-
-              // Search client name (case insensitive)
-              const nameMatch = client.name
-                .toLowerCase()
-                .includes(search.toLowerCase());
-
-              // Search client email (case insensitive)
-              const emailMatch = client.email
-                .toLowerCase()
-                .includes(search.toLowerCase());
-
-              return nameMatch || emailMatch ? 1 : 0;
-            }}
-          >
-            <CommandInput placeholder="Search clients..." />
+          <Command>
+            <CommandInput
+              placeholder="Search clients..."
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+            />
             <CommandList>
-              <CommandEmpty>No clients found.</CommandEmpty>
-              <CommandGroup className="max-h-[300px] overflow-auto">
-                {mockClients.map((client) => (
-                  <CommandItem
-                    key={client.id}
-                    value={client.id} // Use ID as the value for filtering
-                    onSelect={() => handleSelect(client.id)}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        form.watch("clientId") === client.id
-                          ? "opacity-100"
-                          : "opacity-0"
-                      )}
-                    />
-                    <div className="flex flex-col">
-                      <span>{client.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {client.email}
-                      </span>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+              {loading ? (
+                <div className="flex items-center justify-center p-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : error ? (
+                <CommandEmpty>Error: {error}</CommandEmpty>
+              ) : clients.length === 0 ? (
+                <CommandEmpty>No clients found.</CommandEmpty>
+              ) : (
+                <CommandGroup className="max-h-[300px] overflow-auto">
+                  {clients.map((client) => (
+                    <CommandItem
+                      key={client.id}
+                      value={client.id}
+                      onSelect={() => handleSelect(client.id)}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          form.watch("clientId") === client.id
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                      <div className="flex flex-col">
+                        <span>{client.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {client.email}
+                        </span>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>

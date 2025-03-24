@@ -1,5 +1,6 @@
 // InvoiceSummary.tsx
 "use client";
+
 import { useEffect } from "react";
 import {
   FormControl,
@@ -10,18 +11,33 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-export function InvoiceSummary({ form }: { form: any }) {
-  // Recalculate tax and total whenever subtotal or tax rate changes
+import { UseFormReturn } from "react-hook-form";
+import { InvoiceFormValues } from "../InvoiceForm";
+
+export function InvoiceSummary({
+  form,
+}: {
+  form: UseFormReturn<InvoiceFormValues>; // Properly type the form
+}) {
+  // We don't need the tax recalculation here since InvoiceContentsList is handling it
+  // But we'll add a subscription to watch for taxRate changes just to be safe
   useEffect(() => {
-    const subtotal = form.watch("subtotal") || 0;
-    const taxRate = form.watch("taxRate") || 0;
+    const subscription = form.watch((value, { name }) => {
+      if (name === "taxRate") {
+        // Only handle tax rate changes here
+        const subtotal = form.getValues("subtotal") || 0;
+        const taxRate = form.getValues("taxRate") || 0;
 
-    const taxAmount = subtotal * (taxRate / 100);
-    form.setValue("taxAmount", taxAmount);
+        const taxAmount = subtotal * (taxRate / 100);
+        form.setValue("taxAmount", taxAmount, { shouldValidate: true });
 
-    const total = subtotal + taxAmount;
-    form.setValue("invoiceTotal", total);
-  }, [form.watch("subtotal"), form.watch("taxRate"), form]);
+        const total = subtotal + taxAmount;
+        form.setValue("invoiceTotal", total, { shouldValidate: true });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   return (
     <Card className="mt-6">

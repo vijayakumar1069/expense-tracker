@@ -1,41 +1,72 @@
 // InvoiceContentsItem.tsx
 "use client";
-import { useEffect } from "react";
+
 import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+import { UseFormReturn } from "react-hook-form";
+import { InvoiceFormValues } from "../InvoiceForm";
 
-export function InvoiceContentsItem({ form, index, remove }) {
-  const watchQuantity = form.watch(`invoiceContents.${index}.quantity`);
-  const watchPrice = form.watch(`invoiceContents.${index}.price`);
+export function InvoiceContentsItem({
+  form,
+  index,
+  remove,
+}: {
+  form: UseFormReturn<InvoiceFormValues>;
+  index: number;
+  remove: () => void;
+}) {
+  // Calculate item total when quantity or price changes
+  const calculateItemTotal = () => {
+    const quantity = form.getValues(`invoiceContents.${index}.quantity`) || 0;
+    const price = form.getValues(`invoiceContents.${index}.price`) || 0;
+    const total = quantity * price;
 
-  useEffect(() => {
-    // Calculate line item total whenever quantity or price changes
-    if (watchQuantity && watchPrice) {
-      const total = parseFloat(watchQuantity) * parseFloat(watchPrice);
-      form.setValue(`invoiceContents.${index}.total`, total);
-    }
-  }, [watchQuantity, watchPrice, form, index]);
+    form.setValue(`invoiceContents.${index}.total`, total, {
+      shouldValidate: true,
+    });
+  };
+
+  // Handle quantity changes
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.valueAsNumber || 0;
+    form.setValue(`invoiceContents.${index}.quantity`, value, {
+      shouldValidate: true,
+    });
+
+    // Calculate the total after setting the quantity
+    setTimeout(calculateItemTotal, 0);
+  };
+
+  // Handle price changes
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.valueAsNumber || 0;
+    form.setValue(`invoiceContents.${index}.price`, value, {
+      shouldValidate: true,
+    });
+
+    // Calculate the total after setting the price
+    setTimeout(calculateItemTotal, 0);
+  };
 
   return (
-    <div className="grid grid-cols-12 gap-2 items-end mb-2">
-      <div className="col-span-4">
+    <div className="grid grid-cols-12 gap-2 items-start">
+      <div className="col-span-5">
         <FormField
           control={form.control}
           name={`invoiceContents.${index}.description`}
           render={({ field }) => (
             <FormItem>
-              {index === 0 && (
-                <div className="text-xs mb-2 font-medium">Description</div>
-              )}
+              <FormLabel>Description</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Item description" />
+                <Input {...field} placeholder="Description" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -49,19 +80,15 @@ export function InvoiceContentsItem({ form, index, remove }) {
           name={`invoiceContents.${index}.quantity`}
           render={({ field }) => (
             <FormItem>
-              {index === 0 && (
-                <div className="text-xs mb-2 font-medium">Qty</div>
-              )}
+              <FormLabel>Quantity</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   type="number"
                   min="0"
                   step="1"
-                  placeholder="0"
-                  onChange={(e) => {
-                    field.onChange(e.target.valueAsNumber || 0);
-                  }}
+                  placeholder="Qty"
+                  onChange={handleQuantityChange}
                 />
               </FormControl>
               <FormMessage />
@@ -76,19 +103,15 @@ export function InvoiceContentsItem({ form, index, remove }) {
           name={`invoiceContents.${index}.price`}
           render={({ field }) => (
             <FormItem>
-              {index === 0 && (
-                <div className="text-xs mb-2 font-medium">Price</div>
-              )}
+              <FormLabel>Price</FormLabel>
               <FormControl>
                 <Input
                   {...field}
                   type="number"
                   min="0"
                   step="1"
-                  placeholder="0.00"
-                  onChange={(e) => {
-                    field.onChange(e.target.valueAsNumber || 0);
-                  }}
+                  placeholder="Price"
+                  onChange={handlePriceChange}
                 />
               </FormControl>
               <FormMessage />
@@ -97,15 +120,13 @@ export function InvoiceContentsItem({ form, index, remove }) {
         />
       </div>
 
-      <div className="col-span-3">
+      <div className="col-span-2">
         <FormField
           control={form.control}
           name={`invoiceContents.${index}.total`}
           render={({ field }) => (
             <FormItem>
-              {index === 0 && (
-                <div className="text-xs mb-2 font-medium">Total</div>
-              )}
+              <FormLabel>Total</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -121,16 +142,14 @@ export function InvoiceContentsItem({ form, index, remove }) {
       </div>
 
       <div className="col-span-1">
-        {index === 0 && <div className="text-xs mb-2 font-medium">&nbsp;</div>}
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          onClick={() => remove(index)}
-          className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30"
+          onClick={remove}
+          className="h-10 w-10"
         >
           <Trash2 className="h-4 w-4" />
-          <span className="sr-only">Remove item</span>
         </Button>
       </div>
     </div>

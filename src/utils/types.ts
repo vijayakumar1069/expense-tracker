@@ -114,11 +114,11 @@ export type UpdateTransactionResult = {
 
 
 export const clientSchema = z.object({
-    id: z.string().optional(),
+    clientId: z.string().optional(),
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Please enter a valid email address"),
     phone: z.string().min(10, "Phone must be at least 10 characters"),
-    address: z.string().min(5, "Address must be at least 5 characters"),
+    address: z.string().min(5, "Address must be at least 5 characters").optional(),
 });
 
 export type ClientFormValues = z.infer<typeof clientSchema>;

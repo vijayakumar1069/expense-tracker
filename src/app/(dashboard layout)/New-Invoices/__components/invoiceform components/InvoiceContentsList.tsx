@@ -1,13 +1,12 @@
-// InvoiceContentsList.tsx with fixed calculation
 "use client";
 
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useFieldArray, UseFormReturn } from "react-hook-form"; // Added UseFormReturn type
+import { useFieldArray, UseFormReturn, useWatch } from "react-hook-form"; // Added useWatch
 import { InvoiceContentsItem } from "./InvoiceContentsItem";
 import { PlusCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { InvoiceFormValues } from "../InvoiceForm"; // Import your form type
+import { InvoiceFormValues } from "../InvoiceForm";
 
 export function InvoiceContentsList({
   form,
@@ -19,6 +18,17 @@ export function InvoiceContentsList({
     name: "invoiceContents",
   });
 
+  // Watch the invoice contents and tax rate
+  const invoiceContents = useWatch({
+    control: form.control,
+    name: "invoiceContents",
+  });
+
+  const taxRate = useWatch({
+    control: form.control,
+    name: "taxRate",
+  });
+
   // Add empty line item if none exist
   useEffect(() => {
     if (fields.length === 0) {
@@ -26,49 +36,25 @@ export function InvoiceContentsList({
     }
   }, [fields.length, append]);
 
-  // Calculate subtotal whenever line items change
+  // Calculate totals when invoice contents or tax rate changes
   useEffect(() => {
-    // Subscribe to changes in the invoiceContents array
-    const subscription = form.watch((value, { name }) => {
-      // Only run calculations when invoiceContents or taxRate changes
-      if (
-        name?.startsWith("invoiceContents") ||
-        name === "taxRate" ||
-        name === undefined // Initial load
-      ) {
-        calculateTotals();
-      }
-    });
+    // Calculate subtotal
+    const subtotal = invoiceContents.reduce(
+      (sum, item) => sum + (item?.quantity || 0) * (item?.price || 0),
+      0
+    );
 
-    // Initial calculation
-    calculateTotals();
+    // Update subtotal in form WITHOUT triggering validation (to avoid loops)
+    form.setValue("subtotal", subtotal, { shouldValidate: false });
 
-    // Cleanup subscription
-    return () => subscription.unsubscribe();
+    // Calculate tax
+    const taxAmount = subtotal * ((taxRate || 0) / 100);
+    form.setValue("taxAmount", taxAmount, { shouldValidate: false });
 
-    // Define calculation function inside useEffect to avoid dependencies issues
-    function calculateTotals() {
-      const contents = form.getValues("invoiceContents");
-
-      // Calculate subtotal
-      const subtotal = contents.reduce(
-        (sum, item) => sum + (item.quantity * item.price || 0),
-        0
-      );
-
-      // Update subtotal in form
-      form.setValue("subtotal", subtotal, { shouldValidate: true });
-
-      // Calculate tax
-      const taxRate = form.getValues("taxRate") || 0;
-      const taxAmount = subtotal * (taxRate / 100);
-      form.setValue("taxAmount", taxAmount, { shouldValidate: true });
-
-      // Calculate total
-      const total = subtotal + taxAmount;
-      form.setValue("invoiceTotal", total, { shouldValidate: true });
-    }
-  }, [form]);
+    // Calculate total
+    const total = subtotal + taxAmount;
+    form.setValue("invoiceTotal", total, { shouldValidate: false });
+  }, [form, invoiceContents, taxRate]);
 
   return (
     <Card className="mt-6">

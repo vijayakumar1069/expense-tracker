@@ -9,7 +9,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-export function ClientDetails({ form }) {
+export function ClientDetails({ form }: { form: any }) {
   return (
     <div className="grid gap-4 mt-4">
       <FormField

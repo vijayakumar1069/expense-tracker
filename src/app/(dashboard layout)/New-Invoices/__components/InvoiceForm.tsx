@@ -8,16 +8,15 @@ import { Form } from "@/components/ui/form";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+
 } from "@/components/ui/card";
 import { ClientSearch } from "./invoiceform components/ClientSearch";
 import { ClientDetails } from "./invoiceform components/ClientDetails";
 import { InvoiceDetails } from "./invoiceform components/InvoiceDetails";
 import { InvoiceContentsList } from "./invoiceform components/InvoiceContentsList";
-import { InvoiceContentsItem } from "./invoiceform components/InvoiceContentsItem";
+// import { InvoiceContentsItem } from "./invoiceform components/InvoiceContentsItem";
 import { InvoiceSummary } from "./invoiceform components/InvoiceSummary";
+import { useEffect } from "react";
 
 // Define the form schema
 const invoiceItemSchema = z.object({
@@ -80,6 +79,29 @@ export default function InvoiceForm({
       ...defaultValues,
     },
   });
+  // Add this code inside your InvoiceForm component, just after your form initialization
+  useEffect(() => {
+    // Trigger initial calculation
+    const contents = form.getValues("invoiceContents");
+
+    // Calculate subtotal
+    const subtotal = contents.reduce(
+      (sum, item) => sum + (item.quantity * item.price || 0),
+      0
+    );
+
+    // Update subtotal in form
+    form.setValue("subtotal", subtotal, { shouldValidate: true });
+
+    // Calculate tax
+    const taxRate = form.getValues("taxRate") || 0;
+    const taxAmount = subtotal * (taxRate / 100);
+    form.setValue("taxAmount", taxAmount, { shouldValidate: true });
+
+    // Calculate total
+    const total = subtotal + taxAmount;
+    form.setValue("invoiceTotal", total, { shouldValidate: true });
+  }, [form]);
 
   const handleSubmit = (data: InvoiceFormValues) => {
     onSubmit(data);
@@ -87,7 +109,7 @@ export default function InvoiceForm({
 
   return (
     // This outer div constrains the height to the viewport
-    <div className="h-[calc(100vh-2rem)] max-h-[900px] flex flex-col">
+    <div className="h-[calc(80vh-2rem)] max-h-[900px] flex flex-col">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
@@ -96,14 +118,14 @@ export default function InvoiceForm({
           {/* This card will take the full height of the parent */}
           <Card className="max-w-7xl mx-auto h-full flex flex-col">
             {/* Fixed height header */}
-            <CardHeader className="px-4 md:px-6 flex-shrink-0">
+            {/* <CardHeader className="px-4 md:px-6 flex-shrink-0">
               <CardTitle className="text-xl md:text-2xl">
                 Create Invoice
               </CardTitle>
               <CardDescription className="text-sm md:text-base">
                 Generate a new invoice for your client
               </CardDescription>
-            </CardHeader>
+            </CardHeader> */}
 
             {/* Scrollable content area */}
             <CardContent className="p-0 flex-1 overflow-y-auto">

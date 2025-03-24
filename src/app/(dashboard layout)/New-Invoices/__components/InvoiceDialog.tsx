@@ -58,24 +58,32 @@ const InvoiceDialog = ({
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<string | null>(null);
-
-  // Set edit mode based on if we're adding a new invoice or viewing existing
+  console.log(invoice);
   const isNewInvoice = !invoice?.id;
 
-  // Reset edit mode when dialog opens/closes
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      // Small delay to avoid visual glitch during closing animation
       setTimeout(() => setIsEditMode(isNewInvoice), 100);
     } else {
       setIsEditMode(isNewInvoice);
     }
     onOpenChange(open);
   };
-
   // Add invoice mutation
   const addMutation = useMutation({
-    mutationFn: (data: InvoiceFormValues) => createInvoice(data),
+    mutationFn: (data: InvoiceFormValues) => {
+      const formattedData = {
+        ...data,
+        invoiceContents: data.invoiceContents.map((item) => ({
+          ...item,
+          id: crypto.randomUUID(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          invoiceId: crypto.randomUUID(),
+        })),
+      };
+      return createInvoice(formattedData);
+    },
     onMutate: async (newInvoiceData) => {
       toast.loading("Adding invoice...", {
         id: "add-invoice-toast",
@@ -96,7 +104,6 @@ const InvoiceDialog = ({
       invoiceQueries.forEach((query) => {
         previousDataMap.set(query.queryKey, query.state.data);
       });
-
       // Create optimistic invoice
       const optimisticInvoice = {
         id: crypto.randomUUID(),
@@ -142,10 +149,20 @@ const InvoiceDialog = ({
     },
   });
 
-  // Update invoice mutation
   const updateMutation = useMutation({
-    mutationFn: (data: InvoiceFormValues & { id: string }) =>
-      updateInvoice(data),
+    mutationFn: (data: InvoiceFormValues & { id: string }) => {
+      const formattedData = {
+        ...data,
+        invoiceContents: data.invoiceContents.map((item) => ({
+          ...item,
+          id: item.id || crypto.randomUUID(),
+          createdAt: item.createdAt || new Date(),
+          updatedAt: new Date(),
+          invoiceId: data.id,
+        })),
+      };
+      return updateInvoice(formattedData);
+    },
     onMutate: async (updatedInvoiceData) => {
       toast.loading("Updating invoice...", {
         id: "update-invoice-toast",
@@ -207,7 +224,6 @@ const InvoiceDialog = ({
     },
   });
 
-  // Delete invoice mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteInvoice(id),
     onMutate: async (invoiceId) => {
@@ -268,10 +284,17 @@ const InvoiceDialog = ({
   });
 
   const handleSubmit = (data: InvoiceFormValues) => {
+    console.log(invoice);
     if (invoice?.id) {
+      console.log("editing");
       updateMutation.mutate({ ...data, id: invoice.id });
+      setIsEditMode(false);
+      onOpenChange(false);
     } else {
+      console.log("adding");
       addMutation.mutate(data);
+      setIsEditMode(false);
+      onOpenChange(false);
     }
   };
 
@@ -291,7 +314,6 @@ const InvoiceDialog = ({
     }
   };
 
-  // Render invoice details (read-only mode)
   const renderInvoiceDetails = () => {
     if (!invoice) return null;
 
@@ -322,21 +344,6 @@ const InvoiceDialog = ({
             </span>
           </div>
         </div>
-
-        {/* <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Issue Date
-            </h3>
-            <p className="text-base">{invoice?.createdAt}</p>
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Due Date
-            </h3>
-            <p className="text-base">{invoice.dueDate}</p>
-          </div>
-        </div> */}
 
         <div className="space-y-1">
           <h3 className="text-sm font-medium text-muted-foreground">Client</h3>
@@ -411,7 +418,6 @@ const InvoiceDialog = ({
           renderInvoiceDetails()
         )}
 
-        {/* Footer only shows in view mode */}
         {!isNewInvoice && !isEditMode && (
           <DialogFooter className="flex justify-between sm:justify-between">
             <div>
@@ -455,8 +461,6 @@ const InvoiceDialog = ({
             </div>
           </DialogFooter>
         )}
-
-        {/* Cancel button for edit mode */}
         {!isNewInvoice && isEditMode && (
           <div className="flex justify-end mt-4">
             <Button
@@ -469,8 +473,6 @@ const InvoiceDialog = ({
           </div>
         )}
       </DialogContent>
-
-      {/* Delete confirmation dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[425px] bg-white">
           <DialogHeader>
@@ -503,5 +505,4 @@ const InvoiceDialog = ({
     </Dialog>
   );
 };
-
 export default InvoiceDialog;

@@ -136,7 +136,7 @@ model Invoice{
   clientEmail String
   clientPhone String
   clientAddress String
-  invoiceNumber String @unique 
+  invoiceNumber String  
   dueDate DateTime
   client Client @relation(fields: [clientId], references: [id])
   clientId String
@@ -164,7 +164,7 @@ model InvoiceContents{
   quantity Float
   price Float
   total Float
-  invoice Invoice @relation(fields: [invoiceId], references: [id])
+  invoice Invoice @relation(fields: [invoiceId], references: [id] , onDelete: Cascade)
   invoiceId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())

@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { InvoiceStatus } from "@prisma/client";
-import { redirect } from "next/navigation";
+
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/utils/prisma";
 
@@ -42,7 +42,7 @@ const invoiceSchema = z.object({
 type ActionResponse = {
     success: boolean;
     error?: string;
-    data?: any;
+    data?: unknown;
 };
 
 /**
@@ -62,14 +62,16 @@ const getCurrentUser = async () => {
  */
 export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Promise<ActionResponse> {
     try {
+        console.log("Creating invoice...");
+        console.log(formData);
         // Validate input data
         const validatedData = invoiceSchema.parse(formData);
-
+        console.log("Validated data:", validatedData);
         // Get current user
-        const userId = await getCurrentUser();
+        const user = await getCurrentUser();
 
         // Check if invoice number is unique
-        const existingInvoice = await prisma.invoice.findUnique({
+        const existingInvoice = await prisma.invoice.findFirst({
             where: { invoiceNumber: validatedData.invoiceNumber },
         });
 
@@ -97,7 +99,7 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                     taxRate: validatedData.taxRate,
                     taxAmount: validatedData.taxAmount,
                     invoiceTotal: validatedData.invoiceTotal,
-                    userId: userId.id,
+                    userId: user.id,
                     // Create the invoice contents
                     invoiceContents: {
                         create: validatedData.invoiceContents.map(item => ({
@@ -117,7 +119,7 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
         });
 
         // Revalidate the invoices page to reflect the changes
-        revalidatePath("/invoices");
+        revalidatePath("/New-Invoices");
 
         return {
             success: true,
@@ -177,8 +179,10 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
  */
 export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Promise<ActionResponse> {
     try {
+        console.log("Updating invoice...");
         // Validate input data
         const validatedData = invoiceSchema.parse(formData);
+
 
         // Ensure ID exists for update
         if (!validatedData.id) {
@@ -208,20 +212,9 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                 error: "Invoice not found or you don't have permission to update it"
             };
         }
+        console.log("Existing invoice found:", existingInvoice.invoiceNumber);
+        console.log("Validated data:", validatedData);
 
-        // Check if invoice number is unique (if changed)
-        if (validatedData.invoiceNumber !== existingInvoice.invoiceNumber) {
-            const invoiceWithSameNumber = await prisma.invoice.findUnique({
-                where: { invoiceNumber: validatedData.invoiceNumber },
-            });
-
-            if (invoiceWithSameNumber && invoiceWithSameNumber.id !== validatedData.id) {
-                return {
-                    success: false,
-                    error: "Invoice number already exists. Please use a different number."
-                };
-            }
-        }
 
         // Update the invoice in a transaction
         const updatedInvoice = await prisma.$transaction(async (prisma) => {
@@ -243,7 +236,7 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                     clientEmail: validatedData.clientEmail,
                     clientPhone: validatedData.clientPhone,
                     clientAddress: validatedData.clientAddress,
-                    invoiceNumber: validatedData.invoiceNumber,
+                    invoiceNumber: existingInvoice.invoiceNumber,
                     dueDate: validatedData.dueDate,
                     status: validatedData.status,
                     subtotal: validatedData.subtotal,
@@ -268,9 +261,7 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
             return invoice;
         });
 
-        // Revalidate the invoices page to reflect the changes
-        revalidatePath("/invoices");
-        revalidatePath(`/invoices/${validatedData.id}`);
+        console.log("Invoice updated successfully:", updatedInvoice);
 
         return {
             success: true,
@@ -284,12 +275,13 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
         };
     }
 }
-
 /**
  * Delete an invoice
  */
 export async function deleteInvoice(id: string): Promise<ActionResponse> {
     try {
+        console.log("Deleting invoice...");
+        console.log("Deleting invoice with ID:", id);
         // Get current user
         const user = await getCurrentUser();
 
@@ -430,15 +422,15 @@ export async function deleteInvoice(id: string): Promise<ActionResponse> {
 export async function getClientSuggestions(searchTerm: string): Promise<ActionResponse> {
     try {
         // Get current user
-        const userId = await getCurrentUser();
+        const user = await getCurrentUser();
 
         // Search for clients matching the search term
         const clients = await prisma.client.findMany({
             where: {
-                userId,
+                userId: user.id,
                 OR: [
-                    { name: { contains: searchTerm, mode: 'insensitive' } },
-                    { email: { contains: searchTerm, mode: 'insensitive' } },
+                    { name: { contains: searchTerm, } },
+                    { email: { contains: searchTerm, } },
                 ]
             },
             select: {
@@ -478,7 +470,7 @@ export async function generateInvoiceNumber(): Promise<ActionResponse> {
             orderBy: { createdAt: 'desc' },
             select: { invoiceNumber: true },
         });
-
+        console.log(latestInvoice);
         // Generate a new invoice number
         let newNumber = 1;
 
@@ -496,7 +488,7 @@ export async function generateInvoiceNumber(): Promise<ActionResponse> {
 
         return {
             success: true,
-            data: { invoiceNumber }
+            data: invoiceNumber
         };
     } catch (error) {
         console.error("Error generating invoice number:", error);
@@ -536,8 +528,7 @@ export async function createInvoiceAction(formData: FormData) {
             return { error: result.error };
         }
 
-        // Redirect to the invoice details page on success
-        redirect(`/invoices/${result.data.id}`);
+
     } catch (error) {
         console.error("Error in createInvoiceAction:", error);
         return {
