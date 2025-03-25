@@ -30,7 +30,7 @@ import { Client, ClientResponse } from "@/utils/types";
 
 // Define proper types for client data and API responses
 
-const ClientTable = () => {
+const ClientTable = (): JSX.Element => {
   const [filters, setFilters] = useState<{ name?: string; email?: string }>({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -155,9 +155,9 @@ const ClientTable = () => {
                     <TableCell>{client.phone}</TableCell>
                     <TableCell
                       className="max-w-xs truncate"
-                      title={client.address}
+                      title={client.country}
                     >
-                      {client.address}
+                      {client.country}
                     </TableCell>
                     {/* <TableCell className="text-right space-x-2">
                       <Button
@@ -234,5 +234,4 @@ const ClientTable = () => {
     </div>
   );
 };
-
 export default ClientTable;

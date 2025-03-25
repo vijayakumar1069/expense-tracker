@@ -24,37 +24,37 @@ export function InvoiceContentsItem({
   remove: () => void;
 }) {
   // Calculate item total when quantity or price changes
-  const calculateItemTotal = () => {
-    const quantity = form.getValues(`invoiceContents.${index}.quantity`) || 0;
-    const price = form.getValues(`invoiceContents.${index}.price`) || 0;
-    const total = quantity * price;
+  // const calculateItemTotal = () => {
+  //   const quantity = form.getValues(`invoiceContents.${index}.quantity`) || 0;
+  //   const price = form.getValues(`invoiceContents.${index}.price`) || 0;
+  //   const total = quantity * price;
 
-    form.setValue(`invoiceContents.${index}.total`, total, {
-      shouldValidate: true,
-    });
-  };
+  //   form.setValue(`invoiceContents.${index}.total`, total, {
+  //     shouldValidate: true,
+  //   });
+  // };
 
   // Handle quantity changes
-  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.valueAsNumber || 0;
-    form.setValue(`invoiceContents.${index}.quantity`, value, {
-      shouldValidate: true,
-    });
+  // const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.valueAsNumber || 0;
+  //   form.setValue(`invoiceContents.${index}.quantity`, value, {
+  //     shouldValidate: true,
+  //   });
 
-    // Calculate the total after setting the quantity
-    setTimeout(calculateItemTotal, 0);
-  };
+  //   // Calculate the total after setting the quantity
+  //   setTimeout(calculateItemTotal, 0);
+  // };
 
   // Handle price changes
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.valueAsNumber || 0;
-    form.setValue(`invoiceContents.${index}.price`, value, {
-      shouldValidate: true,
-    });
+  // const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.valueAsNumber || 0;
+  //   form.setValue(`invoiceContents.${index}.price`, value, {
+  //     shouldValidate: true,
+  //   });
 
-    // Calculate the total after setting the price
-    setTimeout(calculateItemTotal, 0);
-  };
+  //   // Calculate the total after setting the price
+  //   setTimeout(calculateItemTotal, 0);
+  // };
 
   return (
     <div className="grid grid-cols-12 gap-2 items-start">
@@ -74,7 +74,7 @@ export function InvoiceContentsItem({
         />
       </div>
 
-      <div className="col-span-2">
+      {/* <div className="col-span-2">
         <FormField
           control={form.control}
           name={`invoiceContents.${index}.quantity`}
@@ -118,7 +118,7 @@ export function InvoiceContentsItem({
             </FormItem>
           )}
         />
-      </div>
+      </div> */}
 
       <div className="col-span-2">
         <FormField

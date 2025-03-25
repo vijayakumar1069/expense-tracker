@@ -60,7 +60,7 @@ export async function addClient(
  * Update an existing client
  */
 export async function updateClient(
-    client: ClientFormValues
+    client: ClientFormValues & { id: string }
 ): Promise<UpdateTransactionResult> {
     try {
         // Authenticate user
@@ -73,7 +73,7 @@ export async function updateClient(
         }
 
         // Ensure client ID exists
-        if (!client.id) {
+        if (!client?.id) {
             return {
                 success: false,
                 error: "Client ID is required for updates",
@@ -109,7 +109,12 @@ export async function updateClient(
                 name: validatedData.name,
                 email: validatedData.email,
                 phone: validatedData.phone,
-                address: validatedData.address,
+                streetName: validatedData.streetName,
+                city: validatedData.city,
+                state: validatedData.state,
+                zip: validatedData.zip,
+                country: validatedData.country,
+
             },
         });
 
@@ -135,7 +140,6 @@ export async function updateClient(
         };
     }
 }
-
 /**
  * Delete an existing client
  */

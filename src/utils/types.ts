@@ -49,7 +49,12 @@ export interface Client {
     name: string;
     email: string;
     phone: string;
-    address: string;
+    streetName: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+
     userId: string;
     createdAt: string;
     updatedAt: string;
@@ -118,7 +123,13 @@ export const clientSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Please enter a valid email address"),
     phone: z.string().min(10, "Phone must be at least 10 characters"),
-    address: z.string().min(5, "Address must be at least 5 characters").optional(),
+    streetName: z.string().min(5, "Address must be at least 5 characters"),
+    city: z.string().min(3, "City must be at least 3 characters"),
+    state: z.string().min(3, "State must be at least 3 characters"),
+    zip: z.string().min(5, "Zip code must be at least 5 characters"),
+    country: z.string().min(3, "Country must be at least 3 characters"),
+
+
 });
 
 export type ClientFormValues = z.infer<typeof clientSchema>;

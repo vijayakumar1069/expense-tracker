@@ -119,7 +119,12 @@ model Client{
   name String
   email String @unique
   phone String
-  address String
+  streetName String
+  city String
+  state String
+  zip String
+  country String
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
   user User @relation(fields: [userId], references: [id])
@@ -135,7 +140,12 @@ model Invoice{
   clientName String
   clientEmail String
   clientPhone String
-  clientAddress String
+  clientStreetName String
+  clientCity String
+  clientState String
+  clientZip String
+  clientCountry String
+
   invoiceNumber String  
   dueDate DateTime
   client Client @relation(fields: [clientId], references: [id])
@@ -161,8 +171,7 @@ model Invoice{
 model InvoiceContents{
   id String @id @default(cuid())
   description String
-  quantity Float
-  price Float
+
   total Float
   invoice Invoice @relation(fields: [invoiceId], references: [id] , onDelete: Cascade)
   invoiceId String

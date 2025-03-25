@@ -37,6 +37,20 @@ const ClientDialog = ({
   // Set edit mode based on if we're adding a new client or viewing existing
   const isNewClient = !client?.id;
 
+  // Transform client data to match form values format
+  const formDefaultValues = client
+    ? {
+        name: client.name,
+        email: client.email,
+        phone: client.phone,
+        streetName: client.streetName || "",
+        city: client.city || "",
+        state: client.state || "",
+        zip: client.zip || "",
+        country: client.country || "",
+      }
+    : undefined;
+
   // Reset edit mode when dialog opens/closes
   const handleOpenChange = (open: boolean) => {
     if (!open) {
@@ -78,7 +92,10 @@ const ClientDialog = ({
         name: newClientData.name,
         email: newClientData.email,
         phone: newClientData.phone,
-        address: newClientData.address,
+        streetName: newClientData.streetName,
+        city: newClientData.city,
+        zipCode: newClientData.zip,
+        country: newClientData.country,
         userId: "optimistic-user",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -288,17 +305,18 @@ const ClientDialog = ({
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground">Address</h3>
-          <p className="text-base whitespace-pre-wrap">{client.address}</p>
+          <h3 className="text-sm font-medium text-muted-foreground">
+            StreetName
+          </h3>
+          <p className="text-base whitespace-pre-wrap">{client.streetName}</p>
         </div>
       </div>
     );
   };
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="sm:max-w-md bg-primary-foreground"
+        className="sm:max-w-4xl bg-primary-foreground"
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
@@ -308,23 +326,24 @@ const ClientDialog = ({
             {isNewClient
               ? "Add New Client"
               : isEditMode
-              ? "Edit Client"
-              : "Client Details"}
+                ? "Edit Client"
+                : "Client Details"}
           </DialogTitle>
           <DialogDescription>
             {isNewClient
               ? "Fill out the form below to add a new client."
               : isEditMode
-              ? "Update the client's information below."
-              : "View client information below."}
+                ? "Update the client's information below."
+                : "View client information below."}
           </DialogDescription>
         </DialogHeader>
 
         {isEditMode || isNewClient ? (
           <ClientForm
-            defaultValues={client}
+            defaultValues={formDefaultValues}
             onSubmit={handleSubmit}
             isSubmitting={addMutation.isPending || updateMutation.isPending}
+            isEditMode={isEditMode}
           />
         ) : (
           renderClientDetails()
@@ -411,5 +430,4 @@ const ClientDialog = ({
     </Dialog>
   );
 };
-
 export default ClientDialog;
