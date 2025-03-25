@@ -4,7 +4,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-
+import { Buffer } from "buffer";
 import { InvoiceStatus } from "@prisma/client";
 
 import { requireAuth } from "@/lib/auth";
@@ -154,7 +154,8 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
         let pdfBuffer: Buffer;
         try {
             // Use our server-compatible PDF generator instead of client component
-            pdfBuffer = await generateInvoicePDF(newInvoice);
+            const pdfData = await generateInvoicePDF(newInvoice);
+            pdfBuffer = Buffer.from(pdfData);
         } catch (error) {
             console.error("PDF generation failed:", error);
             throw new Error("Failed to generate invoice PDF");
