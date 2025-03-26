@@ -72,7 +72,7 @@ const InvoiceDialog = ({
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<string | null>(null);
-  console.log(invoice);
+
   const isNewInvoice = !invoice?.id;
 
   const handleOpenChange = (open: boolean) => {
@@ -358,7 +358,7 @@ const InvoiceDialog = ({
           <p className="text-base font-medium">{invoice.clientName}</p>
           <p className="text-sm">{invoice.clientEmail}</p>
           <p className="text-sm">{invoice.clientPhone}</p>
-          <p className="text-sm whitespace-pre-wrap">{invoice.clientAddress}</p>
+          <p className="text-sm whitespace-pre-wrap">{invoice.clientCountry}</p>
         </div>
 
         <div className="space-y-3">
@@ -368,9 +368,7 @@ const InvoiceDialog = ({
               <div key={index} className="p-3 flex justify-between">
                 <div>
                   <p className="font-medium">{item.description}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {item.quantity} × {item.price}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{item.total}</p>
                 </div>
                 <p className="font-medium">{item.total}</p>
               </div>
@@ -404,15 +402,15 @@ const InvoiceDialog = ({
             {isNewInvoice
               ? "Create New Invoice"
               : isEditMode
-              ? "Edit Invoice"
-              : "Invoice Details"}
+                ? "Edit Invoice"
+                : "Invoice Details"}
           </DialogTitle>
           <DialogDescription>
             {isNewInvoice
               ? "Fill out the form below to create a new invoice."
               : isEditMode
-              ? "Update the invoice information below."
-              : `Invoice #${invoice?.invoiceNumber}`}
+                ? "Update the invoice information below."
+                : `Invoice #${invoice?.invoiceNumber}`}
           </DialogDescription>
         </DialogHeader>
 

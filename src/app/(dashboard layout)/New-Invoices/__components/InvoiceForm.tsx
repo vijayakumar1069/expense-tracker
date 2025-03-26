@@ -5,11 +5,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ClientSearch } from "./invoiceform components/ClientSearch";
 import { ClientDetails } from "./invoiceform components/ClientDetails";
 import { InvoiceDetails } from "./invoiceform components/InvoiceDetails";
@@ -21,8 +17,7 @@ import { useEffect } from "react";
 // Define the form schema
 const invoiceItemSchema = z.object({
   description: z.string().min(1, "Description is required"),
-  quantity: z.number().min(0.01, "Quantity must be greater than 0"),
-  price: z.number().min(0, "Price cannot be negative"),
+
   total: z.number(),
 });
 
@@ -31,7 +26,11 @@ const invoiceSchema = z.object({
   clientName: z.string().min(1, "Client name is required"),
   clientEmail: z.string().email("Invalid email address"),
   clientPhone: z.string().min(1, "Phone is required"),
-  clientAddress: z.string().min(1, "Address is required"),
+  clientStreetName: z.string().min(1, "Address is required"),
+  clientCity: z.string().min(1, "City is required"),
+  clientState: z.string().min(1, "State is required"),
+  clientZip: z.string().min(1, "Zip code is required"),
+  clientCountry: z.string().min(1, "Country is required"),
   invoiceNumber: z.string().min(1, "Invoice number is required"),
   dueDate: z.date({
     required_error: "Due date is required",
@@ -67,11 +66,15 @@ export default function InvoiceForm({
       clientName: "",
       clientEmail: "",
       clientPhone: "",
-      clientAddress: "",
+      clientStreetName: "",
+      clientCity: "",
+      clientState: "",
+      clientZip: "",
+      clientCountry: "",
       invoiceNumber: "",
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default to 30 days from now
       status: "DRAFT",
-      invoiceContents: [{ description: "", quantity: 0, price: 0, total: 0 }],
+      invoiceContents: [{ description: "", total: 0 }],
       subtotal: 0,
       taxRate: 0,
       taxAmount: 0,
@@ -85,10 +88,7 @@ export default function InvoiceForm({
     const contents = form.getValues("invoiceContents");
 
     // Calculate subtotal
-    const subtotal = contents.reduce(
-      (sum, item) => sum + (item.quantity * item.price || 0),
-      0
-    );
+    const subtotal = contents.reduce((sum, item) => sum + (item.total || 0), 0);
 
     // Update subtotal in form
     form.setValue("subtotal", subtotal, { shouldValidate: true });
@@ -116,20 +116,10 @@ export default function InvoiceForm({
           className="flex-1 flex flex-col h-full"
         >
           {/* This card will take the full height of the parent */}
-          <Card className="max-w-7xl mx-auto h-full flex flex-col">
-            {/* Fixed height header */}
-            {/* <CardHeader className="px-4 md:px-6 flex-shrink-0">
-              <CardTitle className="text-xl md:text-2xl">
-                Create Invoice
-              </CardTitle>
-              <CardDescription className="text-sm md:text-base">
-                Generate a new invoice for your client
-              </CardDescription>
-            </CardHeader> */}
-
+          <Card className="max-w-7xl mx-auto h-full flex flex-col py-2">
             {/* Scrollable content area */}
             <CardContent className="p-0 flex-1 overflow-y-auto">
-              <div className="p-4 md:p-6 space-y-6">
+              <div className="p-4 md:pX-6 space-y-6">
                 {/* Client and invoice details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-4">
@@ -142,10 +132,10 @@ export default function InvoiceForm({
                 </div>
 
                 {/* Invoice items */}
-                <div className="w-full">
+                <div className="w-full ">
                   <InvoiceContentsList form={form} />
                 </div>
-                <div className="w-full">
+                <div className="">
                   <InvoiceSummary form={form} />
                 </div>
               </div>
@@ -162,8 +152,8 @@ export default function InvoiceForm({
                   {isSubmitting
                     ? "Submitting..."
                     : defaultValues?.clientId
-                    ? "Update Invoice"
-                    : "Create Invoice"}
+                      ? "Update Invoice"
+                      : "Create Invoice"}
                 </Button>
               </div>
             </div>

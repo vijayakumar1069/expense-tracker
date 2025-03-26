@@ -1,3 +1,4 @@
+"use server"
 import { prisma } from "@/utils/prisma";
 import { AuthUser } from "@/utils/types";
 import { jwtVerify } from "jose";
@@ -8,6 +9,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
     try {
         const sessionConst = await cookies()
         const sessionToken = sessionConst.get("Expense-tracker-session")?.value;
+
 
         if (!sessionToken) {
             return null;
@@ -33,6 +35,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         }
 
 
+
         return {
             id: session.user.id,
             email: session.user.email,
@@ -47,6 +50,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
 // Middleware to check authentication
 export async function requireAuth() {
     const user = await getAuthUser();
+
     if (!user) {
         redirect("/login");
     }

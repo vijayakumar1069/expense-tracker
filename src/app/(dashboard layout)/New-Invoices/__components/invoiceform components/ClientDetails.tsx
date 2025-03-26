@@ -1,4 +1,5 @@
 "use client";
+
 import {
   FormControl,
   FormField,
@@ -7,11 +8,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ClientDetails({ form }: { form: any }) {
   return (
-    <div className="grid gap-4 mt-4">
+    <div className="grid grid-cols-2 gap-4 mt-4">
+      {/* Client Email */}
       <FormField
         control={form.control}
         name="clientEmail"
@@ -26,6 +28,7 @@ export function ClientDetails({ form }: { form: any }) {
         )}
       />
 
+      {/* Client Phone */}
       <FormField
         control={form.control}
         name="clientPhone"
@@ -40,18 +43,75 @@ export function ClientDetails({ form }: { form: any }) {
         )}
       />
 
+      {/* Street Name */}
       <FormField
         control={form.control}
-        name="clientAddress"
+        name="clientStreetName"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Client Address</FormLabel>
+            <FormLabel>Street Name</FormLabel>
             <FormControl>
-              <Textarea
-                {...field}
-                readOnly
-                className="bg-muted resize-none h-20"
-              />
+              <Input {...field} readOnly className="bg-muted" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* City */}
+      <FormField
+        control={form.control}
+        name="clientCity"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>City</FormLabel>
+            <FormControl>
+              <Input {...field} readOnly className="bg-muted" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* ZIP Code */}
+      <FormField
+        control={form.control}
+        name="clientZip"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>ZIP Code</FormLabel>
+            <FormControl>
+              <Input {...field} readOnly className="bg-muted" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* State */}
+      <FormField
+        control={form.control}
+        name="clientState"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>State</FormLabel>
+            <FormControl>
+              <Input {...field} readOnly className="bg-muted" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Country */}
+      <FormField
+        control={form.control}
+        name="clientCountry"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Country</FormLabel>
+            <FormControl>
+              <Input {...field} readOnly className="bg-muted" />
             </FormControl>
             <FormMessage />
           </FormItem>

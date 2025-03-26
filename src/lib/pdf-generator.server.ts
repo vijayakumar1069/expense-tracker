@@ -125,9 +125,10 @@ export async function generateInvoicePDF(invoice: any) {
             color: colors.primary
         });
 
-        page.drawText("INVOICE", {
+        page.drawRectangle("INVOICE", {
             x: width - margin.right - 42,
             y: height - 33,
+
             size: 8,
             font: boldFont,
             color: colors.accent
@@ -217,7 +218,7 @@ export async function generateInvoicePDF(invoice: any) {
             color: colors.primary
         });
 
-        const clientAddressLines = invoice.clientAddress.split("\n");
+        const clientAddressLines = invoice.clientCountry.split("\n");
         let addressY = y - 55;
 
         // Ensure we don't overflow the bill-to box
@@ -284,7 +285,7 @@ export async function generateInvoicePDF(invoice: any) {
 
         invoice.invoiceContents.forEach((item: any, index: number) => {
             const rowY = y - 25 - (index * rowHeight); // Start below header with consistent spacing
-            const total = item.quantity * item.price;
+            const total = item.total;
             subtotal += total;
 
             // Row background with proper height and subtle gradient
@@ -340,25 +341,7 @@ export async function generateInvoicePDF(invoice: any) {
                 color: colors.primary
             });
 
-            // Quantity - right aligned in its column
-            const qtyText = item.quantity.toString();
-            page.drawText(qtyText, {
-                x: headers[1].x + colWidths.qty / 6 - (qtyText.length * 1), // Center in column
-                y: textY,
-                size: fontSize.base,
-                font: regularFont,
-                color: colors.primary
-            });
 
-            // Unit price - right aligned
-            const priceText = `${item.price.toFixed(2)}`;
-            page.drawText(priceText, {
-                x: headers[2].x + 5,
-                y: textY,
-                size: fontSize.base,
-                font: regularFont,
-                color: colors.primary
-            });
 
             // Total - right aligned
             const totalText = `Rs.${total.toFixed(2)}`;

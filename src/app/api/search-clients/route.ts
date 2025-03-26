@@ -24,7 +24,10 @@ export async function GET(req: NextRequest) {
                 { name: { contains: query } },
                 { email: { contains: query } },
                 { phone: { contains: query } },
-                { address: { contains: query } },
+                { streetName: { contains: query } },
+                { city: { contains: query } },
+                { state: { contains: query } },
+                { zip: { contains: query } },
             ],
         },
     });

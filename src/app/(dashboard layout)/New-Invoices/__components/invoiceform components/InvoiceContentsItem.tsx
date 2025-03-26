@@ -1,4 +1,3 @@
-// InvoiceContentsItem.tsx
 "use client";
 
 import {
@@ -23,42 +22,9 @@ export function InvoiceContentsItem({
   index: number;
   remove: () => void;
 }) {
-  // Calculate item total when quantity or price changes
-  // const calculateItemTotal = () => {
-  //   const quantity = form.getValues(`invoiceContents.${index}.quantity`) || 0;
-  //   const price = form.getValues(`invoiceContents.${index}.price`) || 0;
-  //   const total = quantity * price;
-
-  //   form.setValue(`invoiceContents.${index}.total`, total, {
-  //     shouldValidate: true,
-  //   });
-  // };
-
-  // Handle quantity changes
-  // const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = e.target.valueAsNumber || 0;
-  //   form.setValue(`invoiceContents.${index}.quantity`, value, {
-  //     shouldValidate: true,
-  //   });
-
-  //   // Calculate the total after setting the quantity
-  //   setTimeout(calculateItemTotal, 0);
-  // };
-
-  // Handle price changes
-  // const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const value = e.target.valueAsNumber || 0;
-  //   form.setValue(`invoiceContents.${index}.price`, value, {
-  //     shouldValidate: true,
-  //   });
-
-  //   // Calculate the total after setting the price
-  //   setTimeout(calculateItemTotal, 0);
-  // };
-
   return (
     <div className="grid grid-cols-12 gap-2 items-start">
-      <div className="col-span-5">
+      <div className="col-span-8">
         <FormField
           control={form.control}
           name={`invoiceContents.${index}.description`}
@@ -74,53 +40,7 @@ export function InvoiceContentsItem({
         />
       </div>
 
-      {/* <div className="col-span-2">
-        <FormField
-          control={form.control}
-          name={`invoiceContents.${index}.quantity`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Quantity</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="number"
-                  min="0"
-                  step="1"
-                  placeholder="Qty"
-                  onChange={handleQuantityChange}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      <div className="col-span-2">
-        <FormField
-          control={form.control}
-          name={`invoiceContents.${index}.price`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Price</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="number"
-                  min="0"
-                  step="1"
-                  placeholder="Price"
-                  onChange={handlePriceChange}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div> */}
-
-      <div className="col-span-2">
+      <div className="col-span-3">
         <FormField
           control={form.control}
           name={`invoiceContents.${index}.total`}
@@ -129,10 +49,12 @@ export function InvoiceContentsItem({
               <FormLabel>Total</FormLabel>
               <FormControl>
                 <Input
+                  type="number"
                   {...field}
-                  readOnly
-                  className="bg-muted"
-                  value={field.value?.toFixed(2) || "0.00"}
+                  placeholder="0.00"
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value) || 0); // Convert to number here
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -141,15 +63,15 @@ export function InvoiceContentsItem({
         />
       </div>
 
-      <div className="col-span-1">
+      <div className="col-span-1 flex items-center justify-center mt-6">
         <Button
           type="button"
           variant="ghost"
           size="icon"
           onClick={remove}
-          className="h-10 w-10"
+          className="h-10 w-10 bg-red-400 hover:bg-red-500"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-4 w-4 text-red-900 hover:text-red-700" />
         </Button>
       </div>
     </div>

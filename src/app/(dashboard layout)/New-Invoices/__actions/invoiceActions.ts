@@ -21,8 +21,8 @@ import { generateInvoicePDF } from "@/lib/pdf-generator.server";
 const invoiceItemSchema = z.object({
     id: z.string().optional(), // For updates
     description: z.string().min(1, "Description is required"),
-    quantity: z.number().min(0.01, "Quantity must be greater than 0"),
-    price: z.number().min(0, "Price cannot be negative"),
+
+
     total: z.number(),
 });
 
@@ -32,12 +32,16 @@ const invoiceSchema = z.object({
     clientName: z.string().min(1, "Client name is required"),
     clientEmail: z.string().email("Invalid email address"),
     clientPhone: z.string().min(1, "Phone is required"),
-    clientAddress: z.string().min(1, "Address is required"),
+    clientStreetName: z.string().min(1, "Address is required"),
+    clientCity: z.string().min(1, "City is required"),
+    clientState: z.string().min(1, "State is required"),
+    clientZip: z.string().min(1, "Zip code is required"),
+    clientCountry: z.string().min(1, "Country is required"),
     invoiceNumber: z.string().min(1, "Invoice number is required"),
     dueDate: z.date({
         required_error: "Due date is required",
     }),
-    status: z.nativeEnum(InvoiceStatus).default("DRAFT"),
+    status: z.nativeEnum(InvoiceStatus).default("SENT"),
     invoiceContents: z.array(invoiceItemSchema).min(1, "At least one item is required"),
     subtotal: z.number().min(0),
     taxRate: z.number().min(0).max(100),
@@ -64,6 +68,7 @@ const getCurrentUser = async () => {
 
     return user;
 };
+
 /**
  * Create a new invoice
  */
@@ -71,6 +76,7 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
     try {
         // Validate input data
         const validatedData = invoiceSchema.parse(formData);
+        console.log("Validated Data:", validatedData);
 
         // Get current user
         const user = await getCurrentUser();
@@ -96,7 +102,11 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                     clientName: validatedData.clientName,
                     clientEmail: validatedData.clientEmail,
                     clientPhone: validatedData.clientPhone,
-                    clientAddress: validatedData.clientAddress,
+                    clientStreetName: validatedData.clientStreetName,
+                    clientCity: validatedData.clientCity,
+                    clientState: validatedData.clientState,
+                    clientZip: validatedData.clientZip,
+                    clientCountry: validatedData.clientCountry,
                     invoiceNumber: validatedData.invoiceNumber,
                     dueDate: validatedData.dueDate,
                     status: validatedData.status,
@@ -109,8 +119,7 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                     invoiceContents: {
                         create: validatedData.invoiceContents.map(item => ({
                             description: item.description,
-                            quantity: item.quantity,
-                            price: item.price,
+
                             total: item.total,
                         }))
                     }
@@ -288,7 +297,12 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                     clientName: validatedData.clientName,
                     clientEmail: validatedData.clientEmail,
                     clientPhone: validatedData.clientPhone,
-                    clientAddress: validatedData.clientAddress,
+                    clientStreetName: validatedData.clientStreetName,
+
+                    clientCity: validatedData.clientCity,
+                    clientState: validatedData.clientState,
+                    clientZip: validatedData.clientZip,
+                    clientCountry: validatedData.clientCountry,
                     invoiceNumber: existingInvoice.invoiceNumber,
                     dueDate: validatedData.dueDate,
                     status: validatedData.status,
@@ -300,8 +314,7 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                     invoiceContents: {
                         create: validatedData.invoiceContents.map(item => ({
                             description: item.description,
-                            quantity: item.quantity,
-                            price: item.price,
+
                             total: item.total,
                         }))
                     }
@@ -472,42 +485,42 @@ export async function deleteInvoice(id: string): Promise<ActionResponse> {
 /**
  * Get client suggestions based on search term
  */
-export async function getClientSuggestions(searchTerm: string): Promise<ActionResponse> {
-    try {
-        // Get current user
-        const user = await getCurrentUser();
+// export async function getClientSuggestions(searchTerm: string): Promise<ActionResponse> {
+//     try {
+//         // Get current user
+//         const user = await getCurrentUser();
 
-        // Search for clients matching the search term
-        const clients = await prisma.client.findMany({
-            where: {
-                userId: user.id,
-                OR: [
-                    { name: { contains: searchTerm, } },
-                    { email: { contains: searchTerm, } },
-                ]
-            },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
-                address: true,
-            },
-            take: 10, // Limit to 10 suggestions
-        });
+//         // Search for clients matching the search term
+//         const clients = await prisma.client.findMany({
+//             where: {
+//                 userId: user.id,
+//                 OR: [
+//                     { name: { contains: searchTerm, } },
+//                     { email: { contains: searchTerm, } },
+//                 ]
+//             },
+//             select: {
+//                 id: true,
+//                 name: true,
+//                 email: true,
+//                 phone: true,
+//                 address: true,
+//             },
+//             take: 10, // Limit to 10 suggestions
+//         });
 
-        return {
-            success: true,
-            data: clients
-        };
-    } catch (error) {
-        console.error("Error getting client suggestions:", error);
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : "An unexpected error occurred"
-        };
-    }
-}
+//         return {
+//             success: true,
+//             data: clients
+//         };
+//     } catch (error) {
+//         console.error("Error getting client suggestions:", error);
+//         return {
+//             success: false,
+//             error: error instanceof Error ? error.message : "An unexpected error occurred"
+//         };
+//     }
+// }
 
 /**
  * Generate a new invoice number
@@ -563,7 +576,11 @@ export async function createInvoiceAction(formData: FormData) {
             clientName: rawData.clientName as string,
             clientEmail: rawData.clientEmail as string,
             clientPhone: rawData.clientPhone as string,
-            clientAddress: rawData.clientAddress as string,
+            clientStreetName: rawData.clientStreetName as string,
+            clientCity: rawData.clientCity as string,
+            clientState: rawData.clientState as string,
+            clientZip: rawData.clientZip as string,
+            clientCountry: rawData.clientCountry as string,
             invoiceNumber: rawData.invoiceNumber as string,
             dueDate: new Date(rawData.dueDate as string),
             status: rawData.status as InvoiceStatus,

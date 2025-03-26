@@ -19,20 +19,16 @@ export function InvoiceSummary({
 }: {
   form: UseFormReturn<InvoiceFormValues>; // Properly type the form
 }) {
-  // We don't need the tax recalculation here since InvoiceContentsList is handling it
-  // But we'll add a subscription to watch for taxRate changes just to be safe
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
-      if (name === "taxRate") {
-        // Only handle tax rate changes here
-        const subtotal = form.getValues("subtotal") || 0;
-        const taxRate = form.getValues("taxRate") || 0;
-
+      if (name === "taxRate" || name === "subtotal") {
+        // Only handle tax rate or subtotal changes here
+        const subtotal = Number(form.getValues("subtotal") || 0);
+        const taxRate = Number(form.getValues("taxRate") || 0);
         const taxAmount = subtotal * (taxRate / 100);
-        form.setValue("taxAmount", taxAmount, { shouldValidate: true });
-
+        form.setValue("taxAmount", taxAmount);
         const total = subtotal + taxAmount;
-        form.setValue("invoiceTotal", total, { shouldValidate: true });
+        form.setValue("invoiceTotal", total);
       }
     });
 
@@ -41,7 +37,7 @@ export function InvoiceSummary({
 
   return (
     <Card className="mt-6">
-      <CardContent className="pt-6">
+      <CardContent className="">
         <h3 className="text-lg font-medium mb-4">Invoice Summary</h3>
 
         <div className="grid gap-4">
@@ -57,7 +53,7 @@ export function InvoiceSummary({
                       {...field}
                       readOnly
                       className="bg-muted"
-                      value={field.value?.toFixed(2) || "0.00"}
+                      value={(Number(field.value) || 0).toFixed(2)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -101,7 +97,7 @@ export function InvoiceSummary({
                       {...field}
                       readOnly
                       className="bg-muted"
-                      value={field.value?.toFixed(2) || "0.00"}
+                      value={(Number(field.value) || 0).toFixed(2)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -120,7 +116,7 @@ export function InvoiceSummary({
                       {...field}
                       readOnly
                       className="bg-muted font-medium text-lg"
-                      value={field.value?.toFixed(2) || "0.00"}
+                      value={(Number(field.value) || 0).toFixed(2)}
                     />
                   </FormControl>
                   <FormMessage />

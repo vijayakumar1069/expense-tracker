@@ -168,7 +168,7 @@ const InvoiceTable = () => {
                       className="max-w-xs truncate"
                       // title={invoice.clientAddress}
                     >
-                      {invoice.clientAddress}
+                      {invoice.clientCountry}
                     </TableCell>
                     {/* <TableCell className="text-right space-x-2">
                       <Button

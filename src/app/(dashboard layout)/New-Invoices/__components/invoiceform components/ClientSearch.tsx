@@ -30,9 +30,14 @@ interface Client {
   name: string;
   email: string;
   phone: string;
-  address: string;
+  streetName: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ClientSearch({ form }: { form: any }) {
   const [open, setOpen] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
@@ -74,13 +79,19 @@ export function ClientSearch({ form }: { form: any }) {
 
   const handleSelect = (clientId: string) => {
     const selectedClient = clients.find((client) => client.id === clientId);
+
     if (selectedClient) {
       // Update form fields with selected client data
       form.setValue("clientId", selectedClient.id);
       form.setValue("clientName", selectedClient.name);
       form.setValue("clientEmail", selectedClient.email);
       form.setValue("clientPhone", selectedClient.phone);
-      form.setValue("clientAddress", selectedClient.address);
+      form.setValue("clientStreetName", selectedClient.streetName);
+      form.setValue("clientCity", selectedClient.city);
+      form.setValue("clientZip", selectedClient.zip);
+      form.setValue("clientState", selectedClient.state);
+
+      form.setValue("clientCountry", selectedClient.country);
     }
     setOpen(false);
   };

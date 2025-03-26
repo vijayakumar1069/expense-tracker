@@ -29,31 +29,32 @@ export function InvoiceContentsList({
     name: "taxRate",
   });
 
-  // Add empty line item if none exist
   useEffect(() => {
     if (fields.length === 0) {
-      append({ description: "", quantity: 0, price: 0, total: 0 });
+      append({
+        description: "",
+        total: 0,
+      });
     }
   }, [fields.length, append]);
 
-  // Calculate totals when invoice contents or tax rate changes
   useEffect(() => {
-    // Calculate subtotal
+    // Calculate subtotal, ensuring each item's total is a number
     const subtotal = invoiceContents.reduce(
-      (sum, item) => sum + (item?.quantity || 0) * (item?.price || 0),
+      (sum, item) => sum + Number(item?.total || 0),
       0
     );
 
     // Update subtotal in form WITHOUT triggering validation (to avoid loops)
-    form.setValue("subtotal", subtotal, { shouldValidate: false });
+    form.setValue("subtotal", subtotal);
 
-    // Calculate tax
-    const taxAmount = subtotal * ((taxRate || 0) / 100);
-    form.setValue("taxAmount", taxAmount, { shouldValidate: false });
+    // Calculate tax, ensuring subtotal is a number
+    const taxAmount = subtotal * ((Number(taxRate) || 0) / 100);
+    form.setValue("taxAmount", taxAmount);
 
-    // Calculate total
+    // Calculate total, ensuring taxAmount is a number
     const total = subtotal + taxAmount;
-    form.setValue("invoiceTotal", total, { shouldValidate: false });
+    form.setValue("invoiceTotal", total);
   }, [form, invoiceContents, taxRate]);
 
   return (
@@ -78,7 +79,10 @@ export function InvoiceContentsList({
           size="sm"
           className="mt-4"
           onClick={() =>
-            append({ description: "", quantity: 0, price: 0, total: 0 })
+            append({
+              description: "",
+              total: 0,
+            })
           }
         >
           <PlusCircle className="mr-2 h-4 w-4" />

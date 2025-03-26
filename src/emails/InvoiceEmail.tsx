@@ -1,9 +1,6 @@
-// emails/InvoiceEmail.tsx
 import React from "react";
 import {
   Body,
-  Button,
-  Column,
   Container,
   Font,
   Head,
@@ -11,17 +8,13 @@ import {
   Hr,
   Html,
   Img,
-  Link,
   Preview,
-  Row,
   Section,
   Tailwind,
   Text,
 } from "@react-email/components";
 import { Invoice, InvoiceContents } from "@prisma/client";
-// import { Invoice, InvoiceContents } from "@prisma/client";
 
-// Define the props for our email
 type InvoiceEmailProps = {
   invoice: Invoice & {
     invoiceContents: InvoiceContents[];
@@ -47,53 +40,14 @@ const formatDate = (date: Date) => {
   }).format(new Date(date));
 };
 
-// Get status badge styling
-const getStatusStyles = (status: string) => {
-  switch (status) {
-    case "PAID":
-      return {
-        backgroundColor: "#D1FAE5",
-        color: "#065F46",
-      };
-    case "OVERDUE":
-      return {
-        backgroundColor: "#FEE2E2",
-        color: "#B91C1C",
-      };
-    case "SENT":
-      return {
-        backgroundColor: "#DBEAFE",
-        color: "#1E40AF",
-      };
-    case "DRAFT":
-      return {
-        backgroundColor: "#F3F4F6",
-        color: "#374151",
-      };
-    case "CANCELLED":
-      return {
-        backgroundColor: "#FEF3C7",
-        color: "#92400E",
-      };
-    default:
-      return {
-        backgroundColor: "#F3F4F6",
-        color: "#374151",
-      };
-  }
-};
-
 export const InvoiceEmail = ({
   invoice,
   previewUrl = "https://your-app.com/invoice/preview",
 }: InvoiceEmailProps) => {
   const {
+    id,
     invoiceNumber,
-    status,
     clientName,
-    clientEmail,
-    clientPhone,
-    clientAddress,
     dueDate,
     subtotal,
     taxRate,
@@ -103,17 +57,24 @@ export const InvoiceEmail = ({
     createdAt,
   } = invoice;
 
-  const statusStyle = getStatusStyles(status);
+  // Fixed email-safe colors
+  const primaryColor = "#4f46e5"; // Indigo that displays well in email clients
+  const secondaryColor = "#f8fafc"; // Very light gray/blue
+  const accentColor = "#f97316"; // Orange for highlights
+  const darkTextColor = "#334155"; // Slate-700
+  const lightTextColor = "#94a3b8"; // Slate-400
 
   return (
     <Html>
       <Head>
-        <title>{`Invoice ${invoice.invoiceNumber}`}</title>
+        <title>{`Your Invoice ${invoiceNumber} | ${formatCurrency(
+          invoiceTotal
+        )}`}</title>
         <Font
-          fontFamily="Inter"
-          fallbackFontFamily="Arial"
+          fontFamily="Arial"
+          fallbackFontFamily="Helvetica"
           webFont={{
-            url: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+            url: "https://fonts.googleapis.com/css2?family=Arial:wght@400;500;600;700&display=swap",
             format: "woff2",
           }}
           fontWeight={400}
@@ -121,353 +82,467 @@ export const InvoiceEmail = ({
         />
       </Head>
       <Preview>
-        Your invoice #{invoiceNumber} for ${invoiceTotal.toFixed(2)} is ready
+        Your invoice #{invoiceNumber} for {formatCurrency(invoiceTotal)} is
+        ready to view and download ✨
       </Preview>
       <Tailwind>
-        <Body className="bg-white my-auto mx-auto font-sans">
-          <Container className="border border-solid border-[#eaeaea] rounded-lg p-8 my-10 mx-auto max-w-[600px]">
-            {/* Header with Logo */}
-            <Section className="mt-4">
-              <Row>
-                <Column>
-                  <Img
-                    src="https://your-company.com/logo.png"
-                    width="120"
-                    height="50"
-                    alt="Your Company"
-                    className="object-contain"
-                  />
-                </Column>
-                <Column align="right">
-                  <div
-                    style={{
-                      padding: "4px 12px",
-                      borderRadius: "16px",
-                      display: "inline-block",
-                      backgroundColor: statusStyle.backgroundColor,
-                      color: statusStyle.color,
-                      fontSize: "14px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {status}
-                  </div>
-                </Column>
-              </Row>
-            </Section>
-
-            {/* Invoice Heading */}
-            <Section className="mt-1">
-              <Heading className="text-2xl font-bold text-gray-800 mb-0">
-                Invoice #{invoiceNumber}
+        <Body style={{ backgroundColor: "#f1f5f9", margin: "0", padding: "0" }}>
+          <Container
+            style={{
+              backgroundColor: "#ffffff",
+              margin: "40px auto",
+              maxWidth: "600px",
+              borderRadius: "12px",
+              overflow: "hidden",
+              border: "1px solid #e2e8f0",
+            }}
+          >
+            {/* Header Banner */}
+            <Section
+              style={{
+                backgroundColor: primaryColor,
+                padding: "32px 40px",
+                textAlign: "center",
+              }}
+            >
+              <Img
+                src="https://your-company.com/logo-white.png"
+                width="130"
+                height="55"
+                alt="Your Company"
+                style={{ margin: "0 auto" }}
+              />
+              <Heading
+                style={{
+                  color: "#ffffff",
+                  fontSize: "28px",
+                  fontWeight: "bold",
+                  marginTop: "24px",
+                  marginBottom: "8px",
+                  textAlign: "center",
+                }}
+              >
+                Invoice Ready
               </Heading>
-              <Text className="text-gray-500 mt-1">
-                Issued on {formatDate(createdAt)} • Due {formatDate(dueDate)}
+              <Text
+                style={{
+                  color: "#ffffff",
+                  opacity: "0.9",
+                  fontWeight: "300",
+                  textAlign: "center",
+                  margin: "0",
+                }}
+              >
+                We&apos;ve prepared your invoice {invoiceNumber}
               </Text>
             </Section>
 
-            {/* Client & Company Info */}
-            <Section className="">
-              <Row>
-                <Column className="pr-1">
-                  <Text className="text-xs font-medium text-gray-500 uppercase">
-                    Bill To
-                  </Text>
-                  <Text className="text-base font-medium text-gray-800 mt-2">
-                    {clientName}
-                  </Text>
-                  <Text className="text-sm text-gray-600 mt-1">
-                    {clientEmail}
-                  </Text>
-                  <Text className="text-sm text-gray-600 mt-1">
-                    {clientPhone}
-                  </Text>
-                  <Text className="text-sm text-gray-600 mt-1 whitespace-pre-line ">
-                    {clientAddress}
-                  </Text>
-                </Column>
-                <Column>
-                  <Text className="text-xs font-medium text-gray-500 uppercase">
-                    From
-                  </Text>
-                  <Text className="text-base font-medium text-gray-800 mt-2">
-                    Your Company, Inc.
-                  </Text>
-                  <Text className="text-sm text-gray-600 mt-1">
-                    contact@yourcompany.com
-                  </Text>
-                  <Text className="text-sm text-gray-600 mt-1">
-                    +1 (555) 123-4567
-                  </Text>
-                  <Text className="text-sm text-gray-600 mt-1">
-                    123 Business Street
-                    <br />
-                    City, State ZIP
-                  </Text>
-                </Column>
-              </Row>
-            </Section>
-
-            {/* Invoice Summary Card */}
-            <Section className="mt-2">
-              <div
+            {/* Main Content */}
+            <Section style={{ padding: "40px" }}>
+              <Text
                 style={{
-                  backgroundColor: "#F9FAFB",
-                  borderRadius: "8px",
-                  padding: "24px",
-                  marginTop: "24px",
+                  color: darkTextColor,
+                  fontSize: "16px",
+                  lineHeight: "24px",
                 }}
               >
+                Hello {clientName},
+              </Text>
+              <Text
+                style={{
+                  color: darkTextColor,
+                  fontSize: "16px",
+                  lineHeight: "24px",
+                  marginTop: "16px",
+                }}
+              >
+                Thank you for your business! Please find your invoice details
+                below. We&apos;ve attached a PDF copy of this invoice to this
+                email for your records.
+              </Text>
+
+              {/* Invoice Details Card */}
+              <Section style={{ marginTop: "32px", marginBottom: "32px" }}>
+                <div
+                  style={{
+                    border: "1px solid #e2e8f0",
+                    borderLeft: `4px solid ${primaryColor}`,
+                    borderRadius: "8px",
+                    padding: "24px",
+                    backgroundColor: secondaryColor,
+                  }}
+                >
+                  <Heading
+                    as="h2"
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: "600",
+                      marginBottom: "16px",
+                      color: primaryColor,
+                    }}
+                  >
+                    Invoice #{invoiceNumber}
+                  </Heading>
+
+                  <table
+                    width="100%"
+                    cellPadding="0"
+                    cellSpacing="0"
+                    style={{ marginBottom: "16px" }}
+                  >
+                    <tr>
+                      <td width="33%">
+                        <Text
+                          style={{
+                            color: lightTextColor,
+                            fontSize: "12px",
+                            marginBottom: "4px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          ISSUED ON
+                        </Text>
+                        <Text
+                          style={{
+                            color: darkTextColor,
+                            fontSize: "14px",
+                            fontWeight: "500",
+                          }}
+                        >
+                          {formatDate(createdAt)}
+                        </Text>
+                      </td>
+                      <td width="33%">
+                        <Text
+                          style={{
+                            color: lightTextColor,
+                            fontSize: "12px",
+                            marginBottom: "4px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          DUE DATE
+                        </Text>
+                        <Text
+                          style={{
+                            color: darkTextColor,
+                            fontSize: "14px",
+                            fontWeight: "500",
+                          }}
+                        >
+                          {formatDate(dueDate)}
+                        </Text>
+                      </td>
+                      <td width="33%">
+                        <Text
+                          style={{
+                            color: lightTextColor,
+                            fontSize: "12px",
+                            marginBottom: "4px",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          INVOICE NUMBER
+                        </Text>
+                        <Text
+                          style={{
+                            color: accentColor,
+                            fontSize: "14px",
+                            fontWeight: "500",
+                          }}
+                        >
+                          #{invoiceNumber}
+                        </Text>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <Hr
+                    style={{
+                      borderColor: "#e2e8f0",
+                      borderWidth: "1px",
+                      margin: "20px 0",
+                    }}
+                  />
+
+                  {/* Amount Summary */}
+                  <table width="100%" cellPadding="0" cellSpacing="0">
+                    <tr>
+                      <td width="60%">
+                        <Text
+                          style={{ color: darkTextColor, fontSize: "14px" }}
+                        >
+                          Subtotal
+                        </Text>
+                      </td>
+                      <td width="40%" align="right">
+                        <Text
+                          style={{ color: darkTextColor, fontSize: "14px" }}
+                        >
+                          {formatCurrency(subtotal)}
+                        </Text>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td width="60%">
+                        <Text
+                          style={{ color: darkTextColor, fontSize: "14px" }}
+                        >
+                          Tax ({taxRate}%)
+                        </Text>
+                      </td>
+                      <td width="40%" align="right">
+                        <Text
+                          style={{ color: darkTextColor, fontSize: "14px" }}
+                        >
+                          {formatCurrency(taxAmount)}
+                        </Text>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td width="60%">
+                        <Text
+                          style={{
+                            color: primaryColor,
+                            fontSize: "18px",
+                            fontWeight: "600",
+                            marginTop: "16px",
+                          }}
+                        >
+                          Total Due
+                        </Text>
+                      </td>
+                      <td width="40%" align="right">
+                        <Text
+                          style={{
+                            color: primaryColor,
+                            fontSize: "18px",
+                            fontWeight: "600",
+                            marginTop: "16px",
+                          }}
+                        >
+                          {formatCurrency(invoiceTotal)}
+                        </Text>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </Section>
+
+              {/* Services Summary */}
+              <Heading
+                as="h3"
+                style={{
+                  fontSize: "18px",
+                  fontWeight: "500",
+                  color: darkTextColor,
+                  marginBottom: "12px",
+                }}
+              >
+                Services Provided
+              </Heading>
+
+              {invoiceContents.map((item, i) => (
+                <div
+                  key={i}
+                  style={{
+                    padding: "12px",
+                    marginBottom: "8px",
+                    backgroundColor: i % 2 === 0 ? "#f8fafc" : "#ffffff",
+                    borderRadius: "6px",
+                    border: "1px solid #e2e8f0",
+                  }}
+                >
+                  <table width="100%" cellPadding="0" cellSpacing="0">
+                    <tr>
+                      <td width="70%">
+                        <Text
+                          style={{
+                            color: darkTextColor,
+                            fontSize: "14px",
+                            fontWeight: "500",
+                          }}
+                        >
+                          {item.description}
+                        </Text>
+                      </td>
+                      <td width="30%" align="right">
+                        <Text
+                          style={{
+                            color: darkTextColor,
+                            fontSize: "14px",
+                            fontWeight: "500",
+                          }}
+                        >
+                          {formatCurrency(item.total)}
+                        </Text>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              ))}
+
+              {/* Call to Action Button */}
+              <Section style={{ textAlign: "center", marginTop: "32px" }}>
+                <div>
+                  <a
+                    href={`${previewUrl}/${id}`}
+                    style={{
+                      backgroundColor: primaryColor,
+                      color: "#ffffff",
+                      padding: "12px 24px",
+                      borderRadius: "6px",
+                      fontWeight: "500",
+                      fontSize: "16px",
+                      textDecoration: "none",
+                      display: "inline-block",
+                    }}
+                  >
+                    View Full Invoice
+                  </a>
+                </div>
+              </Section>
+
+              {/* Payment Options */}
+              <Section style={{ marginTop: "32px" }}>
                 <Heading
                   as="h3"
-                  className="text-lg font-semibold text-gray-800 mb-4"
+                  style={{
+                    fontSize: "18px",
+                    fontWeight: "500",
+                    color: darkTextColor,
+                    marginBottom: "12px",
+                  }}
                 >
-                  Invoice Summary
+                  Payment Options
                 </Heading>
-
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr>
-                      <th
-                        style={{
-                          textAlign: "left",
-                          padding: "12px 16px",
-                          borderBottom: "1px solid #E5E7EB",
-                          fontSize: "14px",
-                          fontWeight: 500,
-                          color: "#6B7280",
-                        }}
-                      >
-                        Description
-                      </th>
-                      <th
-                        style={{
-                          textAlign: "right",
-                          padding: "12px 16px",
-                          borderBottom: "1px solid #E5E7EB",
-                          fontSize: "14px",
-                          fontWeight: 500,
-                          color: "#6B7280",
-                          width: "100px",
-                        }}
-                      >
-                        Qty
-                      </th>
-                      <th
-                        style={{
-                          textAlign: "right",
-                          padding: "12px 16px",
-                          borderBottom: "1px solid #E5E7EB",
-                          fontSize: "14px",
-                          fontWeight: 500,
-                          color: "#6B7280",
-                          width: "120px",
-                        }}
-                      >
-                        Price
-                      </th>
-                      <th
-                        style={{
-                          textAlign: "right",
-                          padding: "12px 16px",
-                          borderBottom: "1px solid #E5E7EB",
-                          fontSize: "14px",
-                          fontWeight: 500,
-                          color: "#6B7280",
-                          width: "120px",
-                        }}
-                      >
-                        Amount
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {invoiceContents.map(
-                      (
-                        item: {
-                          description: string;
-                          quantity: number;
-                          price: number;
-                          total: number;
-                        },
-                        index: number
-                      ) => (
-                        <tr key={index}>
-                          <td
-                            style={{
-                              padding: "16px",
-                              borderBottom:
-                                index === invoiceContents.length - 1
-                                  ? "none"
-                                  : "1px solid #E5E7EB",
-                              fontSize: "14px",
-                              color: "#374151",
-                            }}
-                          >
-                            {item.description}
-                          </td>
-                          <td
-                            style={{
-                              textAlign: "right",
-                              padding: "16px",
-                              borderBottom:
-                                index === invoiceContents.length - 1
-                                  ? "none"
-                                  : "1px solid #E5E7EB",
-                              fontSize: "14px",
-                              color: "#374151",
-                            }}
-                          >
-                            {item.quantity}
-                          </td>
-                          <td
-                            style={{
-                              textAlign: "right",
-                              padding: "16px",
-                              borderBottom:
-                                index === invoiceContents.length - 1
-                                  ? "none"
-                                  : "1px solid #E5E7EB",
-                              fontSize: "14px",
-                              color: "#374151",
-                            }}
-                          >
-                            {formatCurrency(item.price)}
-                          </td>
-                          <td
-                            style={{
-                              textAlign: "right",
-                              padding: "16px",
-                              borderBottom:
-                                index === invoiceContents.length - 1
-                                  ? "none"
-                                  : "1px solid #E5E7EB",
-                              fontSize: "14px",
-                              color: "#374151",
-                            }}
-                          >
-                            {formatCurrency(item.total)}
-                          </td>
-                        </tr>
-                      )
-                    )}{" "}
-                  </tbody>{" "}
-                </table>
-
-                {/* Totals */}
-                <div style={{ marginTop: "24px" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "8px 0",
-                    }}
-                  >
-                    <Text className="text-sm text-gray-600">Subtotal</Text>
-                    <Text className="text-sm text-gray-800">
-                      {formatCurrency(subtotal)}
-                    </Text>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "8px 0",
-                    }}
-                  >
-                    <Text className="text-sm text-gray-600">
-                      Tax ({taxRate}%)
-                    </Text>
-                    <Text className="text-sm text-gray-800">
-                      {formatCurrency(taxAmount)}
-                    </Text>
-                  </div>
-                  <Hr style={{ margin: "16px 0", borderColor: "#E5E7EB" }} />
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "8px 0",
-                    }}
-                  >
-                    <Text className="text-base font-semibold text-gray-800">
-                      Total Due
-                    </Text>
-                    <Text className="text-base font-semibold text-purple-600">
-                      {formatCurrency(invoiceTotal)}
-                    </Text>
-                  </div>
-                </div>
-              </div>
-            </Section>
-
-            {/* Call to Action Buttons */}
-            <Section className="mt-8 text-center">
-              <Button
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-md"
-                href={`${previewUrl}/${invoice.id}`}
-              >
-                View Invoice
-              </Button>
-              <div className="mt-4">
-                <Link
-                  href="#"
-                  className="text-sm text-gray-500 underline hover:text-gray-700"
+                <div
+                  style={{
+                    backgroundColor: secondaryColor,
+                    borderRadius: "8px",
+                    padding: "20px",
+                    border: "1px solid #e2e8f0",
+                  }}
                 >
-                  Download PDF
-                </Link>
-              </div>
-            </Section>
+                  <Text
+                    style={{
+                      color: darkTextColor,
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    <strong>Bank Transfer:</strong> Make a direct transfer to
+                    our account
+                  </Text>
+                  <Text
+                    style={{
+                      color: darkTextColor,
+                      fontSize: "14px",
+                      margin: "4px 0",
+                    }}
+                  >
+                    Bank: Bank of America
+                  </Text>
+                  <Text
+                    style={{
+                      color: darkTextColor,
+                      fontSize: "14px",
+                      margin: "4px 0",
+                    }}
+                  >
+                    Account: Your Company, Inc.
+                  </Text>
+                  <Text
+                    style={{
+                      color: darkTextColor,
+                      fontSize: "14px",
+                      margin: "4px 0",
+                    }}
+                  >
+                    Account #: XXXX-XXXX-XXXX-XXXX
+                  </Text>
+                  <Text
+                    style={{
+                      color: darkTextColor,
+                      fontSize: "14px",
+                      margin: "4px 0",
+                    }}
+                  >
+                    Reference: INV-{invoiceNumber}
+                  </Text>
 
-            {/* Payment Instructions */}
-            <Section className="mt-8 mb-8">
-              <div
-                style={{
-                  padding: "16px",
-                  borderLeft: "4px solid #8B5CF6",
-                  backgroundColor: "#F5F3FF",
-                  borderRadius: "0 4px 4px 0",
-                }}
-              >
-                <Text className="text-sm font-medium text-gray-900 mb-2">
-                  Payment Instructions
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  Please make payment via bank transfer using the following
-                  details:
-                </Text>
-                <div className="mt-2 text-sm text-gray-700">
-                  <div>Bank: Bank of America</div>
-                  <div>Account Name: Your Company, Inc.</div>
-                  <div>Account Number: XXXX-XXXX-XXXX-XXXX</div>
-                  <div>Routing Number: XXXXXXXX</div>
-                  <div className="mt-2">
-                    Reference: Invoice #{invoiceNumber}
+                  <Hr style={{ borderColor: "#e2e8f0", margin: "16px 0" }} />
+
+                  <Text
+                    style={{
+                      color: darkTextColor,
+                      fontSize: "14px",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    <strong>Credit Card:</strong> Pay securely online
+                  </Text>
+                  <div>
+                    <a
+                      href={`${previewUrl}/${id}/pay`}
+                      style={{
+                        backgroundColor: "#ffffff",
+                        color: primaryColor,
+                        border: `1px solid ${primaryColor}`,
+                        padding: "8px 16px",
+                        borderRadius: "6px",
+                        fontWeight: "500",
+                        textDecoration: "none",
+                        display: "inline-block",
+                      }}
+                    >
+                      Pay Online Now
+                    </a>
                   </div>
                 </div>
-              </div>
+              </Section>
             </Section>
-
-            <Hr style={{ margin: "32px 0", borderColor: "#E5E7EB" }} />
 
             {/* Footer */}
-            <Section>
-              <Text className="text-center text-xs text-gray-500">
-                If you have any questions about this invoice, please contact
-              </Text>
-              <Text className="text-center text-xs text-gray-500">
-                <Link
+            <Section
+              style={{
+                backgroundColor: secondaryColor,
+                padding: "24px 40px",
+                textAlign: "center",
+                borderTop: "1px solid #e2e8f0",
+              }}
+            >
+              <Text
+                style={{
+                  color: darkTextColor,
+                  fontSize: "14px",
+                  marginBottom: "8px",
+                }}
+              >
+                Need help with this invoice? Contact us at{" "}
+                <a
                   href="mailto:billing@yourcompany.com"
-                  className="text-purple-600 hover:text-purple-500"
+                  style={{ color: primaryColor, textDecoration: "underline" }}
                 >
                   billing@yourcompany.com
-                </Link>{" "}
-                or call us at +1 (555) 123-4567
+                </a>
               </Text>
-              <Text className="text-center text-xs text-gray-500 mt-4">
+              <Text
+                style={{
+                  color: lightTextColor,
+                  fontSize: "12px",
+                  margin: "4px 0",
+                }}
+              >
                 © 2025 Your Company, Inc. All rights reserved.
               </Text>
-              <Text className="text-center text-xs text-gray-500 mt-2">
+              <Text
+                style={{
+                  color: lightTextColor,
+                  fontSize: "12px",
+                  margin: "4px 0",
+                }}
+              >
                 123 Business Street, City, State ZIP
               </Text>
             </Section>
