@@ -7,7 +7,6 @@ import {
   Heading,
   Hr,
   Html,
-  Img,
   Preview,
   Section,
   Tailwind,
@@ -40,12 +39,8 @@ const formatDate = (date: Date) => {
   }).format(new Date(date));
 };
 
-export const InvoiceEmail = ({
-  invoice,
-  previewUrl = "https://your-app.com/invoice/preview",
-}: InvoiceEmailProps) => {
+export const InvoiceEmail = ({ invoice }: InvoiceEmailProps) => {
   const {
-    id,
     invoiceNumber,
     clientName,
     dueDate,
@@ -57,12 +52,13 @@ export const InvoiceEmail = ({
     createdAt,
   } = invoice;
 
-  // Fixed email-safe colors
-  const primaryColor = "#4f46e5"; // Indigo that displays well in email clients
-  const secondaryColor = "#f8fafc"; // Very light gray/blue
-  const accentColor = "#f97316"; // Orange for highlights
-  const darkTextColor = "#334155"; // Slate-700
-  const lightTextColor = "#94a3b8"; // Slate-400
+  // Custom colors based on the provided RGB values
+  const primaryColor = "#2CAC68"; // Professional green from rgb(0.17, 0.67, 0.41)
+  const secondaryColor = "#333333"; // Dark gray from rgb(0.2, 0.2, 0.2)
+  const accentColor = "#F2F2F2"; // Light gray from rgb(0.95, 0.95, 0.95)
+  const textColor = "#333333"; // Text color from rgb(0.2, 0.2, 0.2)
+  const successColor = "#2DB42D"; // Success green from rgb(0.176, 0.706, 0.176)
+  const lightTextColor = "#666666"; // Lighter text for less emphasis
 
   return (
     <Html>
@@ -86,15 +82,16 @@ export const InvoiceEmail = ({
         ready to view and download ✨
       </Preview>
       <Tailwind>
-        <Body style={{ backgroundColor: "#f1f5f9", margin: "0", padding: "0" }}>
+        <Body style={{ backgroundColor: "#f8f9fa", margin: "0", padding: "0" }}>
           <Container
             style={{
               backgroundColor: "#ffffff",
               margin: "40px auto",
               maxWidth: "600px",
-              borderRadius: "12px",
+              borderRadius: "8px",
               overflow: "hidden",
               border: "1px solid #e2e8f0",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)",
             }}
           >
             {/* Header Banner */}
@@ -105,13 +102,6 @@ export const InvoiceEmail = ({
                 textAlign: "center",
               }}
             >
-              <Img
-                src="https://your-company.com/logo-white.png"
-                width="130"
-                height="55"
-                alt="Your Company"
-                style={{ margin: "0 auto" }}
-              />
               <Heading
                 style={{
                   color: "#ffffff",
@@ -141,7 +131,7 @@ export const InvoiceEmail = ({
             <Section style={{ padding: "40px" }}>
               <Text
                 style={{
-                  color: darkTextColor,
+                  color: textColor,
                   fontSize: "16px",
                   lineHeight: "24px",
                 }}
@@ -150,7 +140,7 @@ export const InvoiceEmail = ({
               </Text>
               <Text
                 style={{
-                  color: darkTextColor,
+                  color: textColor,
                   fontSize: "16px",
                   lineHeight: "24px",
                   marginTop: "16px",
@@ -169,7 +159,7 @@ export const InvoiceEmail = ({
                     borderLeft: `4px solid ${primaryColor}`,
                     borderRadius: "8px",
                     padding: "24px",
-                    backgroundColor: secondaryColor,
+                    backgroundColor: accentColor,
                   }}
                 >
                   <Heading
@@ -204,7 +194,7 @@ export const InvoiceEmail = ({
                         </Text>
                         <Text
                           style={{
-                            color: darkTextColor,
+                            color: secondaryColor,
                             fontSize: "14px",
                             fontWeight: "500",
                           }}
@@ -225,7 +215,7 @@ export const InvoiceEmail = ({
                         </Text>
                         <Text
                           style={{
-                            color: darkTextColor,
+                            color: secondaryColor,
                             fontSize: "14px",
                             fontWeight: "500",
                           }}
@@ -246,7 +236,7 @@ export const InvoiceEmail = ({
                         </Text>
                         <Text
                           style={{
-                            color: accentColor,
+                            color: primaryColor,
                             fontSize: "14px",
                             fontWeight: "500",
                           }}
@@ -270,14 +260,14 @@ export const InvoiceEmail = ({
                     <tr>
                       <td width="60%">
                         <Text
-                          style={{ color: darkTextColor, fontSize: "14px" }}
+                          style={{ color: secondaryColor, fontSize: "14px" }}
                         >
                           Subtotal
                         </Text>
                       </td>
                       <td width="40%" align="right">
                         <Text
-                          style={{ color: darkTextColor, fontSize: "14px" }}
+                          style={{ color: secondaryColor, fontSize: "14px" }}
                         >
                           {formatCurrency(subtotal)}
                         </Text>
@@ -286,14 +276,14 @@ export const InvoiceEmail = ({
                     <tr>
                       <td width="60%">
                         <Text
-                          style={{ color: darkTextColor, fontSize: "14px" }}
+                          style={{ color: secondaryColor, fontSize: "14px" }}
                         >
                           Tax ({taxRate}%)
                         </Text>
                       </td>
                       <td width="40%" align="right">
                         <Text
-                          style={{ color: darkTextColor, fontSize: "14px" }}
+                          style={{ color: secondaryColor, fontSize: "14px" }}
                         >
                           {formatCurrency(taxAmount)}
                         </Text>
@@ -303,7 +293,7 @@ export const InvoiceEmail = ({
                       <td width="60%">
                         <Text
                           style={{
-                            color: primaryColor,
+                            color: successColor,
                             fontSize: "18px",
                             fontWeight: "600",
                             marginTop: "16px",
@@ -315,7 +305,7 @@ export const InvoiceEmail = ({
                       <td width="40%" align="right">
                         <Text
                           style={{
-                            color: primaryColor,
+                            color: successColor,
                             fontSize: "18px",
                             fontWeight: "600",
                             marginTop: "16px",
@@ -335,7 +325,7 @@ export const InvoiceEmail = ({
                 style={{
                   fontSize: "18px",
                   fontWeight: "500",
-                  color: darkTextColor,
+                  color: primaryColor,
                   marginBottom: "12px",
                 }}
               >
@@ -348,7 +338,7 @@ export const InvoiceEmail = ({
                   style={{
                     padding: "12px",
                     marginBottom: "8px",
-                    backgroundColor: i % 2 === 0 ? "#f8fafc" : "#ffffff",
+                    backgroundColor: i % 2 === 0 ? accentColor : "#ffffff",
                     borderRadius: "6px",
                     border: "1px solid #e2e8f0",
                   }}
@@ -358,7 +348,7 @@ export const InvoiceEmail = ({
                       <td width="70%">
                         <Text
                           style={{
-                            color: darkTextColor,
+                            color: secondaryColor,
                             fontSize: "14px",
                             fontWeight: "500",
                           }}
@@ -369,7 +359,7 @@ export const InvoiceEmail = ({
                       <td width="30%" align="right">
                         <Text
                           style={{
-                            color: darkTextColor,
+                            color: secondaryColor,
                             fontSize: "14px",
                             fontWeight: "500",
                           }}
@@ -382,27 +372,6 @@ export const InvoiceEmail = ({
                 </div>
               ))}
 
-              {/* Call to Action Button */}
-              <Section style={{ textAlign: "center", marginTop: "32px" }}>
-                <div>
-                  <a
-                    href={`${previewUrl}/${id}`}
-                    style={{
-                      backgroundColor: primaryColor,
-                      color: "#ffffff",
-                      padding: "12px 24px",
-                      borderRadius: "6px",
-                      fontWeight: "500",
-                      fontSize: "16px",
-                      textDecoration: "none",
-                      display: "inline-block",
-                    }}
-                  >
-                    View Full Invoice
-                  </a>
-                </div>
-              </Section>
-
               {/* Payment Options */}
               <Section style={{ marginTop: "32px" }}>
                 <Heading
@@ -410,7 +379,7 @@ export const InvoiceEmail = ({
                   style={{
                     fontSize: "18px",
                     fontWeight: "500",
-                    color: darkTextColor,
+                    color: primaryColor,
                     marginBottom: "12px",
                   }}
                 >
@@ -418,7 +387,7 @@ export const InvoiceEmail = ({
                 </Heading>
                 <div
                   style={{
-                    backgroundColor: secondaryColor,
+                    backgroundColor: accentColor,
                     borderRadius: "8px",
                     padding: "20px",
                     border: "1px solid #e2e8f0",
@@ -426,7 +395,7 @@ export const InvoiceEmail = ({
                 >
                   <Text
                     style={{
-                      color: darkTextColor,
+                      color: secondaryColor,
                       fontSize: "14px",
                       marginBottom: "8px",
                     }}
@@ -436,7 +405,7 @@ export const InvoiceEmail = ({
                   </Text>
                   <Text
                     style={{
-                      color: darkTextColor,
+                      color: secondaryColor,
                       fontSize: "14px",
                       margin: "4px 0",
                     }}
@@ -445,7 +414,7 @@ export const InvoiceEmail = ({
                   </Text>
                   <Text
                     style={{
-                      color: darkTextColor,
+                      color: secondaryColor,
                       fontSize: "14px",
                       margin: "4px 0",
                     }}
@@ -454,7 +423,7 @@ export const InvoiceEmail = ({
                   </Text>
                   <Text
                     style={{
-                      color: darkTextColor,
+                      color: secondaryColor,
                       fontSize: "14px",
                       margin: "4px 0",
                     }}
@@ -463,7 +432,7 @@ export const InvoiceEmail = ({
                   </Text>
                   <Text
                     style={{
-                      color: darkTextColor,
+                      color: secondaryColor,
                       fontSize: "14px",
                       margin: "4px 0",
                     }}
@@ -472,33 +441,6 @@ export const InvoiceEmail = ({
                   </Text>
 
                   <Hr style={{ borderColor: "#e2e8f0", margin: "16px 0" }} />
-
-                  <Text
-                    style={{
-                      color: darkTextColor,
-                      fontSize: "14px",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    <strong>Credit Card:</strong> Pay securely online
-                  </Text>
-                  <div>
-                    <a
-                      href={`${previewUrl}/${id}/pay`}
-                      style={{
-                        backgroundColor: "#ffffff",
-                        color: primaryColor,
-                        border: `1px solid ${primaryColor}`,
-                        padding: "8px 16px",
-                        borderRadius: "6px",
-                        fontWeight: "500",
-                        textDecoration: "none",
-                        display: "inline-block",
-                      }}
-                    >
-                      Pay Online Now
-                    </a>
-                  </div>
                 </div>
               </Section>
             </Section>
@@ -506,7 +448,7 @@ export const InvoiceEmail = ({
             {/* Footer */}
             <Section
               style={{
-                backgroundColor: secondaryColor,
+                backgroundColor: primaryColor,
                 padding: "24px 40px",
                 textAlign: "center",
                 borderTop: "1px solid #e2e8f0",
@@ -514,36 +456,39 @@ export const InvoiceEmail = ({
             >
               <Text
                 style={{
-                  color: darkTextColor,
+                  color: "#ffffff",
                   fontSize: "14px",
                   marginBottom: "8px",
                 }}
               >
                 Need help with this invoice? Contact us at{" "}
                 <a
-                  href="mailto:billing@yourcompany.com"
-                  style={{ color: primaryColor, textDecoration: "underline" }}
+                  href="mailto:info@gliggo.com"
+                  style={{ color: "#ffffff", textDecoration: "underline" }}
                 >
-                  billing@yourcompany.com
+                  info@gliggo.com
                 </a>
               </Text>
               <Text
                 style={{
-                  color: lightTextColor,
+                  color: "#ffffff",
+                  opacity: "0.8",
                   fontSize: "12px",
                   margin: "4px 0",
                 }}
               >
-                © 2025 Your Company, Inc. All rights reserved.
+                © 2025 Gliggo Inc, Inc. All rights reserved.
               </Text>
               <Text
                 style={{
-                  color: lightTextColor,
+                  color: "#ffffff",
+                  opacity: "0.8",
                   fontSize: "12px",
                   margin: "4px 0",
                 }}
               >
-                123 Business Street, City, State ZIP
+                57/1-A VOC Nagar 2nd Cross Street, Anna Nagar East, Chennai- 600
+                102, Tamil Nadu, India
               </Text>
             </Section>
           </Container>
