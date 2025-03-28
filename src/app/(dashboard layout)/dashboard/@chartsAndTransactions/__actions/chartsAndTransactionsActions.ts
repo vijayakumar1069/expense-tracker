@@ -2,7 +2,8 @@
 "use server"
 
 import { prisma } from "@/utils/prisma"
-import { TransactionType } from "@prisma/client"
+import { PaymentMethodType } from "@/utils/types"
+import { Role, TransactionType } from "@prisma/client"
 import { subDays, startOfDay, endOfDay } from "date-fns"
 
 interface CategoryData {
@@ -52,29 +53,80 @@ export async function getCategoryDistribution(
     return []
   }
 }
-
-export async function recentTransactionsData()
-{
+interface TransactionWithRelations {
+  id:string;
+  
+    type: TransactionType;
+    name: string;
+    description?: string;
+    amount: number;
+    tax?: string;
+    total: number;
+    date: Date;
+    category: string;
+    userId: string;
+    createdAt: Date;
+    updatedAt: Date;
+  
+    paymentMethod?: {
+      type: PaymentMethodType;
+      receivedBy?: string;
+      bankName?: string;
+      chequeNo?: string;
+      chequeDate?: Date;
+      invoiceNo?: string;
+    };
+    attachments?: Array<{
+      id: string;
+      url: string;
+    }>;
+  }
+  
+  type ApiResponse<T> = 
+    | { success: true; data: T }
+    | { success: false; error: string };
+  
+  export async function recentTransactionsData(): Promise<ApiResponse<TransactionWithRelations[]>> {
     try {
-        const transactions = await prisma.transaction.findMany({
-          take: 10,
-          orderBy: {
-            date: 'desc'
-          },
-          include: {
-           
-            paymentMethod: true
-          }
-        })
-    
-       return transactions
-    
-      } catch (error) {
-        console.error("Error fetching recent transactions:", error)
-        return {
-            success:false,
-            error:error.message
+      const transactions = await prisma.transaction.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          paymentMethod: true
         }
-       
-      }
-}
+      });
+  
+      const mappedTransactions = transactions.map(t => ({
+        id: t.id,
+        type: t.type as TransactionType,
+        name: t.name,
+        description: t.description ?? undefined,
+        amount: t.amount,
+        tax: t.tax ?? undefined,
+        total: t.total,
+        date: t.date,
+        category: t.category,
+        userId: t.userId,
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+        paymentMethod: t.paymentMethod ? {
+          type: t.paymentMethod.type as PaymentMethodType,
+          receivedBy: t.paymentMethod.receivedBy ?? undefined,
+          bankName: t.paymentMethod.bankName ?? undefined,
+          chequeNo: t.paymentMethod.chequeNo ?? undefined,
+          chequeDate: t.paymentMethod.chequeDate ?? undefined,
+          invoiceNo: t.paymentMethod.invoiceNo ?? undefined
+        } : undefined,
+        attachments: []
+      }));
+
+      return { success: true, data: mappedTransactions };
+  
+    } catch (error) {
+      console.error("Error fetching recent transactions:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error occurred"
+      };
+    }
+  }

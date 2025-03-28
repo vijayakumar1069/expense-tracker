@@ -12,39 +12,55 @@ import {
 } from "@/components/ui/card"
 import { TransactionType } from "@prisma/client"
 import { format } from "date-fns"
+import { recentTransactionsData } from "../__actions/chartsAndTransactionsActions"
+import { PaymentMethodType } from "@/utils/types"
+import Link from "next/link"
 
-interface Transaction {
-  id: string
-  type: TransactionType
-  name: string
-  amount: number
-  date: Date
-  category: string
-  user: {
-    name: string
-    email: string
+interface TransactionWithRelations {
+  id:string;
+  
+    type: TransactionType;
+    name: string;
+    description?: string;
+    amount: number;
+    tax?: string;
+    total: number;
+    date: Date;
+    category: string;
+    userId: string;
+    createdAt: Date;
+    updatedAt: Date;
+  
+    paymentMethod?: {
+      type: PaymentMethodType;
+      receivedBy?: string;
+      bankName?: string;
+      chequeNo?: string;
+      chequeDate?: Date;
+      invoiceNo?: string;
+    };
+    attachments?: Array<{
+      id: string;
+      url: string;
+    }>;
   }
-  paymentMethod?: {
-    type: string
-    bankName?: string
-    chequeNo?: string
-  }
-}
 
 export function RecentTransactions() {
-  const [transactions, setTransactions] = React.useState<Transaction[]>([])
+  const [transactions, setTransactions] = React.useState<TransactionWithRelations[]>([])
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/transactions/recent')
-        const data = await response.json()
-        setTransactions(data)
+        const response = await recentTransactionsData()
+        console.log(response)
+        if ('success' in response && response.success) {
+          setTransactions(response.data)
+        }
       } catch (error) {
         console.error("Error fetching transactions:", error)
       }
-    }
-    fetchData()
+    }   
+     fetchData()
   }, [])
 
   return (
@@ -55,9 +71,12 @@ export function RecentTransactions() {
             <CardTitle>Recent Transactions</CardTitle>
             <CardDescription>Last 10 activities</CardDescription>
           </div>
+          <Link href={"/New-Transactions"}>
+          
           <Badge variant="outline" className="bg-white/50 backdrop-blur-sm">
-            Real-time Updates
+          View All Transactions
           </Badge>
+          </Link>
         </div>
       </CardHeader>
       <CardContent className="p-0">
@@ -77,9 +96,9 @@ export function RecentTransactions() {
                 </div>
                 <div className="space-y-1">
                   <div className="font-medium">{transaction.name}</div>
-                  <div className="text-sm text-gray-500">
+                  {/* <div className="text-sm text-gray-500">
                     {transaction.user.name} • {transaction.category}
-                  </div>
+                  </div> */}
                   {transaction.paymentMethod && (
                     <div className="text-xs text-gray-400">
                       {transaction.paymentMethod.type === 'BANK' && `Bank: ${transaction.paymentMethod.bankName}`}
