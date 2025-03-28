@@ -68,7 +68,7 @@ interface FilterState {
 
 const ExpenseTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 2;
+  const limit =10;
   const [filters, setFilters] = useState<FilterState>({
     sortBy: "createdAt",
     sortDirection: "desc",

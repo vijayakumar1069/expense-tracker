@@ -2,19 +2,29 @@ import React, { ReactNode } from "react";
 import "../../../app/globals.css"
 export default function LayoutForDashboard({
     children,
-    cards
+    cards,
+    incomeExpenseCharts,
+    chartsAndTransactions
 }:{
     children: ReactNode;
     cards: ReactNode;
+    incomeExpenseCharts: ReactNode;
+    chartsAndTransactions: ReactNode;
 
 }) {
     return (
-        <div>
+        <div className="p-3 mx-auto">
+            {
+                children
+            }
             {
                 cards
             }
             {
-                children
+                incomeExpenseCharts
+            }
+            {
+                chartsAndTransactions
             }
         </div>
     );
