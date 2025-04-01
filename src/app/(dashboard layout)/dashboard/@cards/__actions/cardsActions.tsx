@@ -387,12 +387,8 @@ export async function fetchInvoiceData(): Promise<InvoiceData> {
 
     // Get recent invoices
     const recentInvoices = await prisma.invoice.findMany({
-      select: {
-        id: true,
+      include: {
         client: true,
-        invoiceTotal: true,
-        status: true,
-        dueDate: true,
       },
       orderBy: {
         createdAt: "desc",
@@ -416,7 +412,7 @@ export async function fetchInvoiceData(): Promise<InvoiceData> {
       },
       recentInvoices: recentInvoices.map((invoice) => ({
         id: invoice.id,
-        client: invoice.client.name,
+        client: invoice.client.name || "",
         amount: invoice.invoiceTotal,
         status: invoice.status as InvoiceStatus,
         dueDate: invoice.dueDate,
@@ -478,7 +474,6 @@ export async function fetchInvoiceData(): Promise<InvoiceData> {
     };
   }
 }
-
 // Get all transactions
 export async function fetchAllTransactions() {
   try {

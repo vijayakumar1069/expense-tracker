@@ -24,13 +24,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 // import ClientFilters from "./ClientFilters";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Invoice } from "@prisma/client";
+import { Invoice, InvoiceContents } from "@prisma/client";
 // import { deleteClient } from "../__actions/clientsActions";
 // import { toast } from "sonner";
 import { InvoiceResponse } from "@/utils/types";
 import InvoiceDialog from "./InvoiceDialog";
 import InvoiceFilter from "./InvoiceFilter";
-
+type InvoiceWithContents = Invoice & {
+  invoiceContents: InvoiceContents[];
+};
 // Define proper types for client data and API responses
 
 const InvoiceTable = () => {
@@ -40,24 +42,19 @@ const InvoiceTable = () => {
   }>({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const limit =10;
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | undefined>(
-    undefined
-  );
+  const limit = 10;
+  const [selectedInvoice, setSelectedInvoice] = useState<
+    InvoiceWithContents | undefined
+  >(undefined);
 
-  // const queryClient = useQueryClient();
-
-  // Query for fetching clients with TanStack Query
   const { data, isLoading, isError } = useQuery<InvoiceResponse>({
     queryKey: ["invoices", filters, currentPage, limit],
     queryFn: async () => {
-      // Build query parameters
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: limit.toString(),
       });
 
-      // Add filter parameters if they exist
       if (filters.clientName) params.append("clientName", filters.clientName);
       if (filters.invoiceNumber)
         params.append("invoiceNumber", filters.invoiceNumber);
@@ -80,7 +77,6 @@ const InvoiceTable = () => {
     setDialogOpen(true);
   };
 
-  // Page change handlers
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(1, prev - 1));
   };
@@ -91,7 +87,7 @@ const InvoiceTable = () => {
     }
   };
 
-  const handleViewInvoice = (invoice: Invoice) => {
+  const handleViewInvoice = (invoice: InvoiceWithContents) => {
     setSelectedInvoice(invoice);
     setDialogOpen(true);
   };
@@ -137,12 +133,10 @@ const InvoiceTable = () => {
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Address</TableHead>
-                {/* <TableHead className="text-right">Actions</TableHead> */}
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                // Loading skeletons
                 Array.from({ length: 5 }).map((_, index) => (
                   <TableRow key={`skeleton-${index}`}>
                     {Array.from({ length: 5 }).map((_, cellIndex) => (
@@ -156,7 +150,9 @@ const InvoiceTable = () => {
                 invoices.map((invoice) => (
                   <TableRow
                     key={invoice.id}
-                    onClick={() => handleViewInvoice(invoice)}
+                    onClick={() =>
+                      handleViewInvoice(invoice as InvoiceWithContents)
+                    }
                     className="cursor-pointer hover:bg-gray-100"
                   >
                     <TableCell className="font-medium">
@@ -164,29 +160,9 @@ const InvoiceTable = () => {
                     </TableCell>
                     <TableCell>{invoice.clientEmail}</TableCell>
                     <TableCell>{invoice.clientPhone}</TableCell>
-                    <TableCell
-                      className="max-w-xs truncate"
-                      // title={invoice.clientAddress}
-                    >
+                    <TableCell className="max-w-xs truncate">
                       {invoice.clientCountry}
                     </TableCell>
-                    {/* <TableCell className="text-right space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleEdit(client)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 dark:border-red-800 dark:hover:bg-red-950"
-                        onClick={() => handleDelete(client.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell> */}
                   </TableRow>
                 ))
               ) : (
@@ -206,8 +182,6 @@ const InvoiceTable = () => {
           </Table>
         </CardContent>
       </Card>
-
-      {/* Pagination */}
       <div className="flex items-center justify-between px-2 mt-6">
         <div className="text-sm font-medium bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-md text-gray-700 dark:text-gray-300 flex items-center gap-1">
           <FileDigit className="h-3.5 w-3.5 text-indigo-500" />
@@ -245,5 +219,4 @@ const InvoiceTable = () => {
     </div>
   );
 };
-
 export default InvoiceTable;

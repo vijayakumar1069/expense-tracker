@@ -130,8 +130,22 @@ export const clientSchema = z.object({
     state: z.string().min(3, "State must be at least 3 characters"),
     zip: z.string().min(5, "Zip code must be at least 5 characters"),
     country: z.string().min(3, "Country must be at least 3 characters"),
-
-
+}).refine(data => {
+    // Ensure either name or companyName (or both) are present
+    return Boolean(data.name) || Boolean(data.companyName);
+}, {
+    message: "Either name or company name must be provided",
+    path: ["name"] // This will highlight the name field for the error
 });
 
 export type ClientFormValues = z.infer<typeof clientSchema>;
+
+
+// types/form.ts
+export interface UserFormValues {
+    email: string;
+    name?: string;
+    password: string;
+    rememberMe?: boolean;
+    // Add other fields as needed
+}

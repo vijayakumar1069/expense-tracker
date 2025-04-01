@@ -116,8 +116,8 @@ model Session {
 
 model Client{
   id String @id @default(cuid())
-  name String
-  companyName String
+  name String?          // Make optional with ?
+  companyName String?   // Make optional with ?
   email String @unique
   phone String
   streetName String

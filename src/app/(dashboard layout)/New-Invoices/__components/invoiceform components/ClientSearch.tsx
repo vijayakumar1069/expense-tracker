@@ -31,6 +31,7 @@ interface Client {
   email: string;
   phone: string;
   streetName: string;
+  clientCompanyName: string;
   city: string;
   state: string;
   zip: string;
@@ -90,6 +91,7 @@ export function ClientSearch({ form }: { form: any }) {
       form.setValue("clientCity", selectedClient.city);
       form.setValue("clientZip", selectedClient.zip);
       form.setValue("clientState", selectedClient.state);
+      form.setValue("clientCompanyName", selectedClient.clientCompanyName);
 
       form.setValue("clientCountry", selectedClient.country);
     }

@@ -9,9 +9,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { UserFormValues } from "@/utils/types";
 
+// Define a type for the form values that includes email
 interface EmailFieldProps {
-  control: Control<any>;
+  control: Control<UserFormValues>;
 }
 
 export const EmailField = ({ control }: EmailFieldProps) => {

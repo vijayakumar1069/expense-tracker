@@ -26,11 +26,14 @@ const InvoiceFilter = ({
 }: {
   onFilterChange: (filters: {
     clientName?: string;
+    clientCompanyName?: string;
     invoiceNumber?: string;
   }) => void;
 }) => {
   const [clientNameFilter, setClientNameFilter] = useState<string>("");
   const [invoiceNumberFilter, setInvoiceNumberFilter] = useState<string>("");
+  const [clientCompanyNameFilter, setClientCompanyNameFilter] =
+    useState<string>("");
   const [expanded, setExpanded] = useState<boolean>(false);
 
   const handleFilterSubmit = (e: React.FormEvent) => {
@@ -38,16 +41,19 @@ const InvoiceFilter = ({
     onFilterChange({
       clientName: clientNameFilter || undefined,
       invoiceNumber: invoiceNumberFilter || undefined,
+      clientCompanyName: clientCompanyNameFilter || undefined,
     });
   };
 
   const handleClearFilters = () => {
-    setClientNameFilter("");
     setInvoiceNumberFilter("");
+    setClientCompanyNameFilter("");
+    setClientNameFilter("");
     onFilterChange({});
   };
 
-  const filtersActive = clientNameFilter || invoiceNumberFilter;
+  const filtersActive =
+    clientNameFilter || invoiceNumberFilter || clientCompanyNameFilter;
 
   return (
     <Card className="mb-6 border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-950 overflow-hidden">
@@ -129,6 +135,24 @@ const InvoiceFilter = ({
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                 </div>
               </div>
+              <div className="space-y-2.5">
+                <Label
+                  htmlFor="clientCompanyNameFilter"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5"
+                >
+                  Client Company Name
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="clientCompanyNameFilter"
+                    placeholder="Filter by client name"
+                    value={clientCompanyNameFilter}
+                    onChange={(e) => setClientCompanyNameFilter(e.target.value)}
+                    className="pl-9 h-10 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                </div>
+              </div>
 
               <div className="space-y-2.5">
                 <Label
@@ -180,6 +204,13 @@ const InvoiceFilter = ({
               <div className="text-xs flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm">
                 <span className="font-medium mr-1.5">Invoice #:</span>{" "}
                 {invoiceNumberFilter}
+              </div>
+            )}
+
+            {clientCompanyNameFilter && (
+              <div className="text-xs flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm">
+                <span className="font-medium mr-1.5">Client Company:</span>{" "}
+                {clientCompanyNameFilter}
               </div>
             )}
           </div>

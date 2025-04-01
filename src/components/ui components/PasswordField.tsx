@@ -6,12 +6,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { UserFormValues } from "@/utils/types";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { useState } from "react";
 import { Control } from "react-hook-form";
 
 interface PasswordFieldProps {
-  control: Control<any>;
+  control: Control<UserFormValues>;
 }
 
 export const PasswordField = ({ control }: PasswordFieldProps) => {

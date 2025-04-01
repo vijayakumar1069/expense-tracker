@@ -30,6 +30,7 @@ const invoiceSchema = z.object({
     id: z.string().optional(), // Optional for creating new invoices
     clientId: z.string().min(1, "Client is required"),
     clientName: z.string().min(1, "Client name is required"),
+    clientCompanyName: z.string().optional(),
     clientEmail: z.string().email("Invalid email address"),
     clientPhone: z.string().min(1, "Phone is required"),
     clientStreetName: z.string().min(1, "Address is required"),
@@ -101,6 +102,7 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                     clientId: validatedData.clientId,
                     clientName: validatedData.clientName,
                     clientEmail: validatedData.clientEmail,
+                    clientCompanyName: validatedData.clientCompanyName ?? "",
                     clientPhone: validatedData.clientPhone,
                     clientStreetName: validatedData.clientStreetName,
                     clientCity: validatedData.clientCity,
@@ -131,7 +133,6 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
 
             return invoice;
         });
-
         // Generate email HTML from React Email template
         const invoiceEmailHtml = await render(
             InvoiceEmail({

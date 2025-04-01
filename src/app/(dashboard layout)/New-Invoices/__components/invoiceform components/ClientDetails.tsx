@@ -27,6 +27,19 @@ export function ClientDetails({ form }: { form: any }) {
           </FormItem>
         )}
       />
+      <FormField
+        control={form.control}
+        name="clientCompanyName"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Client Company Name</FormLabel>
+            <FormControl>
+              <Input {...field} readOnly className="bg-muted" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       {/* Client Phone */}
       <FormField

@@ -1,17 +1,11 @@
 import { requireAuth } from "@/lib/auth";
 import React from "react";
-
+export const dynamic = "force-dynamic";
 export default async function Admin_Dashboard() {
-  // Simulated user data (in production, fetch this from your authProvider)
-  const user = {
-    email: "user@example.com",
-    role: "admin", // Could be 'admin', 'user', 'editor', etc.
-    name: "Jane Smith",
-    lastLogin: new Date().toLocaleString(),
-  };
   const currentUser = await requireAuth();
   const name = currentUser.email.split("@");
-  console.log(currentUser);
+  const role = "ADMIN";
+
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
       {/* User Profile Summary */}
@@ -26,12 +20,12 @@ export default async function Admin_Dashboard() {
             <span>•</span>
             <span
               className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                user.role === "admin"
+                role === "ADMIN"
                   ? "bg-purple-100 text-purple-800"
                   : "bg-blue-100 text-blue-800"
               }`}
             >
-              {user.role.toUpperCase()}
+              {role.toUpperCase()}
             </span>
           </div>
         </div>

@@ -1,7 +1,7 @@
 // components/auth/LoginForm.tsx
 "use client";
 
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -29,7 +29,7 @@ export const LoginForm = () => {
 
   const router = useRouter();
 
-  const form = useForm<LoginFormValues>({
+  const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: "",

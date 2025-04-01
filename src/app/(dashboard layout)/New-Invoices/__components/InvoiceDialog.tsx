@@ -34,6 +34,7 @@ type InvoiceFormValues = Omit<
   InvoiceWithContents,
   "id" | "createdAt" | "updatedAt" | "userId"
 > & {
+  clientCompanyName?: string;
   // Override the invoiceContents to match what the form uses
   invoiceContents: {
     id?: string;
@@ -297,11 +298,10 @@ const InvoiceDialog = ({
     },
   });
 
-  const handleSubmit = (data: InvoiceFormValues) => {
+  const handleSubmit = (data: any) => {
     if (invoice?.id) {
       updateMutation.mutate({ ...data, id: invoice.id } as any);
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       addMutation.mutate(data as any);
     }
   };
