@@ -117,6 +117,7 @@ model Session {
 model Client{
   id String @id @default(cuid())
   name String
+  companyName String
   email String @unique
   phone String
   streetName String
@@ -138,6 +139,7 @@ model Client{
 model Invoice{
   id String @id @default(cuid())
   clientName String
+  clientCompanyName String
   clientEmail String
   clientPhone String
   clientStreetName String

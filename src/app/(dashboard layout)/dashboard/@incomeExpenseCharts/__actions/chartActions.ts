@@ -1,5 +1,6 @@
 "use server";
 
+import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/utils/prisma";
 import { subDays, startOfDay, endOfDay, formatISO } from "date-fns";
 
@@ -18,6 +19,10 @@ export async function getTransactionChartData(
   timeRange: "7d" | "30d" | "90d"
 ): Promise<returnType[]> {
   try {
+    const user = await requireAuth();
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
     // Validate input
     if (!["7d", "30d", "90d"].includes(timeRange)) {
       throw new Error("Invalid time range specified");
@@ -33,6 +38,7 @@ export async function getTransactionChartData(
     // Fetch transactions
     const transactions = await prisma.transaction.findMany({
       where: {
+        userId: user.id,
         date: { gte: startDate, lte: endDate },
       },
       select: { date: true, type: true, amount: true },
@@ -41,7 +47,7 @@ export async function getTransactionChartData(
     // Initialize daily totals
     const dailyTotals = new Map<string, DailyTotal>();
     let currentDate = startDate;
-    
+
     while (currentDate <= endDate) {
       const dateKey = formatISO(currentDate, { representation: "date" });
       dailyTotals.set(dateKey, { income: 0, expense: 0 });
@@ -52,14 +58,15 @@ export async function getTransactionChartData(
     transactions.forEach(({ date, type, amount }) => {
       const dateKey = formatISO(date, { representation: "date" });
       const totals = dailyTotals.get(dateKey) || { income: 0, expense: 0 };
-      
-      type === "INCOME" 
-        ? totals.income += amount 
-        : totals.expense += Math.abs(amount);
-      
+
+      if (type === "INCOME") {
+        totals.income += amount;
+      } else {
+        totals.expense += Math.abs(amount);
+      }
+
       dailyTotals.set(dateKey, totals);
     });
-
     // Convert to sorted array
     return Array.from(dailyTotals)
       .map(([date, totals]) => ({

@@ -1,92 +1,139 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import * as React from "react"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
-import { getTransactionChartData } from "../__actions/chartActions"
-
-// ... other imports remain the same
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import * as React from "react";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { getTransactionChartData } from "../__actions/chartActions";
 
 const chartConfig = {
   income: {
     label: "Income",
-    color: "hsl(145, 63%, 49%)", // Vibrant green
+    color: "hsl(142, 76%, 36%)", // Rich green
   },
   expense: {
     label: "Expense",
-    color: "hsl(356, 75%, 57%)", // Bold red
+    color: "hsl(354, 70%, 54%)", // Vibrant red
   },
-} satisfies ChartConfig
-interface chartDataType{
+} satisfies ChartConfig;
+
+interface chartDataType {
   date: string;
   income: number;
   expense: number;
 }
 
 export function IncomeExpenseChartComponent() {
-  const [timeRange, setTimeRange] = React.useState<"7d" | "30d" | "90d">("7d")
-  const [chartData, setChartData] = React.useState<chartDataType[]>([])
+  const [timeRange, setTimeRange] = React.useState<"7d" | "30d" | "90d">("7d");
+  const [chartData, setChartData] = React.useState<chartDataType[]>([]);
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const data = await getTransactionChartData(timeRange)
-      setChartData(data)
-    }
-    fetchData()
-  }, [timeRange])
+      const data = await getTransactionChartData(timeRange);
+      setChartData(data);
+    };
+    fetchData();
+  }, [timeRange]);
 
   return (
-    <Card className="bg-gradient-to-br from-[#0f172a] to-[#1e293b] border-none shadow-xl">
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b border-white/10 py-5 sm:flex-row">
+    <Card className="bg-gradient-to-br from-white to-gray-50 border border-gray-100 shadow-lg">
+      <CardHeader className="flex items-center gap-2 space-y-0 border-b border-gray-100 py-5 sm:flex-row">
         <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle className="text-white">Income vs Expense</CardTitle>
-          <CardDescription className="text-white/70">
+          <CardTitle className="text-gray-800 font-bold">
+            Income vs Expense
+          </CardTitle>
+          <CardDescription className="text-gray-500">
             Financial overview for the selected period
           </CardDescription>
         </div>
-        <Select value={timeRange} onValueChange={(v) => setTimeRange(v as typeof timeRange)}>
-          <SelectTrigger className="w-[160px] rounded-lg bg-white/5 border-white/10 text-white">
+        <Select
+          value={timeRange}
+          onValueChange={(v) => setTimeRange(v as typeof timeRange)}
+        >
+          <SelectTrigger className="w-[160px] rounded-lg bg-white border-gray-200 text-gray-700 shadow-sm hover:bg-gray-50 transition-colors">
             <SelectValue placeholder="Select range" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl bg-[#1e293b] border-white/10">
-            <SelectItem value="90d" className="hover:bg-white/5 text-white">
+          <SelectContent className="rounded-xl bg-white border-gray-200">
+            <SelectItem value="90d" className="hover:bg-gray-50 text-gray-700">
               Last 3 months
             </SelectItem>
-            <SelectItem value="30d" className="hover:bg-white/5 text-white">
+            <SelectItem value="30d" className="hover:bg-gray-50 text-gray-700">
               Last 30 days
             </SelectItem>
-            <SelectItem value="7d" className="hover:bg-white/5 text-white">
+            <SelectItem value="7d" className="hover:bg-gray-50 text-gray-700">
               Last 7 days
             </SelectItem>
           </SelectContent>
         </Select>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer 
-          config={chartConfig} 
-          className="aspect-auto h-[250px] w-full"
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[280px] w-full"
         >
-          <BarChart 
+          <BarChart
             data={chartData}
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           >
             <defs>
               <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="hsl(145, 63%, 49%)" />
-                <stop offset="100%" stopColor="hsl(145, 63%, 30%)" />
+                <stop
+                  offset="0%"
+                  stopColor="hsl(142, 76%, 36%)"
+                  stopOpacity={0.9}
+                />
+                <stop
+                  offset="100%"
+                  stopColor="hsl(142, 76%, 30%)"
+                  stopOpacity={0.7}
+                />
               </linearGradient>
               <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="hsl(356, 75%, 57%)" />
-                <stop offset="100%" stopColor="hsl(356, 75%, 40%)" />
+                <stop
+                  offset="0%"
+                  stopColor="hsl(354, 70%, 54%)"
+                  stopOpacity={0.9}
+                />
+                <stop
+                  offset="100%"
+                  stopColor="hsl(354, 70%, 45%)"
+                  stopOpacity={0.7}
+                />
               </linearGradient>
+              <filter id="shadow" height="130%">
+                <feDropShadow
+                  dx="0"
+                  dy="3"
+                  stdDeviation="3"
+                  floodOpacity="0.1"
+                />
+              </filter>
             </defs>
 
-            <CartesianGrid 
-              vertical={false} 
-              stroke="rgba(255,255,255,0.1)" 
-              strokeDasharray="3 3"
+            <CartesianGrid
+              vertical={false}
+              stroke="rgba(0,0,0,0.06)"
+              strokeDasharray="5 5"
             />
 
             <XAxis
@@ -95,79 +142,99 @@ export function IncomeExpenseChartComponent() {
               axisLine={false}
               tickMargin={8}
               minTickGap={32}
-              tickFormatter={(value) => new Date(value).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-              })}
-              tick={{ 
-                fill: "rgba(255,255,255,0.7)", 
+              tickFormatter={(value) =>
+                new Date(value).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })
+              }
+              tick={{
+                fill: "rgba(75,85,99,0.8)",
                 fontSize: 12,
-                fontFamily: "var(--font-sans)"
+                fontFamily: "var(--font-sans)",
               }}
             />
 
             <ChartTooltip
-              cursor={{ 
-                fill: 'rgba(255,255,255,0.05)', 
-                stroke: "hsl(145, 63%, 49%)",
-                strokeWidth: 2
+              cursor={{
+                fill: "rgba(243,244,246,0.8)",
+                radius: 4,
               }}
-              content={(
-                <ChartTooltipContent 
-                  className="bg-[#0f172a] border border-white/10 rounded-lg shadow-xl"
+              content={
+                <ChartTooltipContent
+                  className="bg-white border border-gray-100 rounded-lg shadow-xl"
+                  labelClassName="text-gray-600 border-b border-gray-100 pb-2 mb-1"
                   labelFormatter={(value) => (
-                    <span className="text-sm font-medium text-white/80">
+                    <span className="text-sm font-medium">
                       {new Date(value).toLocaleDateString("en-US", {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric'
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
                       })}
                     </span>
                   )}
                   formatter={(value, name) => [
-                    <span 
-                      key={name} 
+                    <span
+                      key={name}
                       className="font-semibold"
-                      style={{ color: name === 'income' ? 'hsl(145, 63%, 49%)' : 'hsl(356, 75%, 57%)' }}
+                      style={{
+                        color:
+                          name === "income"
+                            ? "hsl(142, 76%, 36%)"
+                            : "hsl(354, 70%, 54%)",
+                      }}
                     >
                       ${Number(value).toFixed(2)}
                     </span>,
-                    name === 'income' ? 'Income' : 'Expense'
+                    <span key={`${name}-label`} className="text-gray-600">
+                      {name === "income" ? "Income" : "Expense"}
+                    </span>,
                   ]}
-                  itemStyle={{ 
-                    color: '#fff',
-                    padding: '4px 0',
-                    borderBottom: '1px solid rgba(255,255,255,0.05)'
+                  itemStyle={{
+                    color: "#4b5563",
+                    padding: "4px 0",
                   }}
                 />
-              )}
+              }
             />
 
             <Bar
               dataKey="income"
-              fill="#056517"
+              fill={chartConfig.income.color}
               radius={[6, 6, 0, 0]}
-              barSize={24}
-              opacity={0.9}
+              barSize={28}
+              opacity={1}
+              filter="url(#shadow)"
+              animationDuration={1000}
             />
 
             <Bar
               dataKey="expense"
-              fill="url(#expenseGradient)"
+              fill={chartConfig.expense.color}
               radius={[6, 6, 0, 0]}
-              barSize={24}
-              opacity={0.9}
+              barSize={28}
+              opacity={1}
+              filter="url(#shadow)"
+              animationDuration={1000}
             />
 
-            <ChartLegend 
-              content={<ChartLegendContent 
-                className="font-medium text-white/80"
-                // itemStyle={{ padding: '0 16px' }}
-              />} 
+            <ChartLegend
+              verticalAlign="top"
+              align="right"
+              iconSize={12}
+              iconType="circle"
+              content={
+                <ChartLegendContent
+                  className="font-medium text-gray-700 flex items-center justify-end gap-6 mb-2"
+                  // wrapperClassName="flex items-center gap-2"
+                  // iconSize={8}
+                  // iconClassName="rounded-full"
+                />
+              }
             />
           </BarChart>
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }

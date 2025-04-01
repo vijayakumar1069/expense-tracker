@@ -1,9 +1,9 @@
 import { IncomeExpenseChartComponent } from "./__components/IncomeExpenseChartComponent";
 
-export default function IcomeExpenseChart() {
-    return (
-        <div>
-            <IncomeExpenseChartComponent />
-        </div>
-    );
+export default function IncomeExpenseChart() {
+  return (
+    <div>
+      <IncomeExpenseChartComponent />
+    </div>
+  );
 }
