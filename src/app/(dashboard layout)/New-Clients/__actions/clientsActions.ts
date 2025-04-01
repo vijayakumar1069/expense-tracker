@@ -24,6 +24,7 @@ export async function addClient(
 
         // Validate client data
         const validatedData = clientSchema.parse(client);
+        console.log(validatedData);
 
         // Create client in database
         const newClient = await prisma.client.create({
@@ -109,6 +110,7 @@ export async function updateClient(
                 name: validatedData.name,
                 email: validatedData.email,
                 phone: validatedData.phone,
+                companyName: validatedData.companyName,
                 streetName: validatedData.streetName,
                 city: validatedData.city,
                 state: validatedData.state,

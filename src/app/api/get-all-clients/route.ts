@@ -10,6 +10,7 @@ const querySchema = z.object({
     email: z.string().optional(),
     limit: z.string().transform(val => parseInt(val)).optional(),
     page: z.string().transform(val => parseInt(val)).optional(),
+    companyName: z.string().optional(),
 });
 
 // type QueryParams = z.infer<typeof querySchema>;
@@ -33,6 +34,7 @@ export async function GET(request: NextRequest) {
             limit: searchParams.get("limit") || "10",
             name: searchParams.get("name") || undefined,
             email: searchParams.get("email") || undefined,
+            companyName: searchParams.get("companyName") || undefined,
         });
 
         const {
@@ -40,6 +42,7 @@ export async function GET(request: NextRequest) {
             limit = 10,
             name,
             email,
+            companyName,
         } = validatedParams;
 
         // Build where clause for filtering
@@ -58,6 +61,11 @@ export async function GET(request: NextRequest) {
         if (email) {
             where.email = {
                 contains: email,
+            };
+        }
+        if (companyName) {
+            where.companyName = {
+                contains: companyName,
             };
         }
 

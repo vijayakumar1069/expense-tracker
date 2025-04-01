@@ -27,11 +27,13 @@ const ClientForm = ({
   isSubmitting = false,
   isEditMode = false,
 }: ClientFormProps) => {
+  console.log(defaultValues);
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
     defaultValues: defaultValues || {
       name: "",
       email: "",
+      companyName: "",
       phone: "",
       streetName: "",
       city: "",
@@ -78,6 +80,25 @@ const ClientForm = ({
                   className="rounded-md border border-accent focus:border-secondary focus:ring-secondary"
                   placeholder="Enter email address"
                   type="email"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Company Name Field */}
+        <FormField
+          control={form.control}
+          name="companyName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-primary">Company Name</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Enter company name"
+                  className="rounded-md border border-accent focus:border-secondary focus:ring-secondary"
                   {...field}
                 />
               </FormControl>
@@ -220,17 +241,20 @@ const ClientForm = ({
         /> */}
 
         {/* Submit Button */}
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-primary text-white hover:bg-primary/90 focus:ring-primary"
-        >
-          {isSubmitting
-            ? "Submitting..."
-            : isEditMode
-              ? "Update Client"
-              : "Add Client"}
-        </Button>
+        <div className="w-full flex justify-end mt-5">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            // onClick={form.handleSubmit(onSubmit)}
+            className="w-fit flex justify-center items-end bg-primary text-white hover:bg-primary/90 focus:ring-primary"
+          >
+            {isSubmitting
+              ? "Submitting..."
+              : isEditMode
+                ? "Update Client"
+                : "Add Client"}
+          </Button>
+        </div>
       </form>
     </Form>
   );

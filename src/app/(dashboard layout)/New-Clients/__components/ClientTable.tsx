@@ -31,7 +31,11 @@ import { Client, ClientResponse } from "@/utils/types";
 // Define proper types for client data and API responses
 
 const ClientTable = () => {
-  const [filters, setFilters] = useState<{ name?: string; email?: string }>({});
+  const [filters, setFilters] = useState<{
+    name?: string;
+    email?: string;
+    companyName?: string;
+  }>({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 2;
@@ -50,10 +54,13 @@ const ClientTable = () => {
         page: currentPage.toString(),
         limit: limit.toString(),
       });
+      console.log(filters);
 
       // Add filter parameters if they exist
       if (filters.name) params.append("name", filters.name);
       if (filters.email) params.append("email", filters.email);
+      if (filters.companyName)
+        params.append("companyName", filters.companyName);
 
       const response = await fetch(`/api/get-all-clients?${params.toString()}`);
 
@@ -83,6 +90,7 @@ const ClientTable = () => {
   };
 
   const handleViewClient = (client: Client) => {
+    console.log("Viewing client:", client);
     setSelectedClient(client);
     setDialogOpen(true);
   };
@@ -127,6 +135,7 @@ const ClientTable = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
+                <TableHead>Company</TableHead>
                 <TableHead>Address</TableHead>
                 {/* <TableHead className="text-right">Actions</TableHead> */}
               </TableRow>
@@ -153,6 +162,7 @@ const ClientTable = () => {
                     <TableCell className="font-medium">{client.name}</TableCell>
                     <TableCell>{client.email}</TableCell>
                     <TableCell>{client.phone}</TableCell>
+                    <TableCell>{client.companyName}</TableCell>
                     <TableCell
                       className="max-w-xs truncate"
                       title={client.city}

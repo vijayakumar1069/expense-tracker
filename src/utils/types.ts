@@ -54,6 +54,7 @@ export interface Client {
     state: string;
     zip: string;
     country: string;
+    companyName: string;
 
     userId: string;
     createdAt: string;
@@ -120,7 +121,8 @@ export type UpdateTransactionResult = {
 
 export const clientSchema = z.object({
     clientId: z.string().optional(),
-    name: z.string().min(2, "Name must be at least 2 characters"),
+    name: z.string().optional(),
+    companyName: z.string().optional(),
     email: z.string().email("Please enter a valid email address"),
     phone: z.string().min(10, "Phone must be at least 10 characters"),
     streetName: z.string().min(5, "Address must be at least 5 characters"),

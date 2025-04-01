@@ -43,6 +43,7 @@ const ClientDialog = ({
         name: client.name,
         email: client.email,
         phone: client.phone,
+        companyName: client.companyName || "",
         streetName: client.streetName || "",
         city: client.city || "",
         state: client.state || "",
@@ -92,6 +93,7 @@ const ClientDialog = ({
         name: newClientData.name,
         email: newClientData.email,
         phone: newClientData.phone,
+        companyName: newClientData.companyName,
         streetName: newClientData.streetName,
         city: newClientData.city,
         zipCode: newClientData.zip,
@@ -182,6 +184,7 @@ const ClientDialog = ({
       });
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       setIsEditMode(false);
+      handleOpenChange(false);
     },
     onError: (error, _, context) => {
       if (context?.previousDataMap) {
@@ -306,9 +309,13 @@ const ClientDialog = ({
 
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-muted-foreground">
-            StreetName
+            CompanyName
           </h3>
-          <p className="text-base whitespace-pre-wrap">{client.streetName}</p>
+          <p className="text-base whitespace-pre-wrap">{client.companyName}</p>
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">City</h3>
+          <p className="text-base whitespace-pre-wrap">{client.city}</p>
         </div>
       </div>
     );

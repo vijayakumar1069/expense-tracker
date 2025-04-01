@@ -17,10 +17,15 @@ import { useState } from "react";
 const ClientFilters = ({
   onFilterChange,
 }: {
-  onFilterChange: (filters: { name?: string; email?: string }) => void;
+  onFilterChange: (filters: {
+    name?: string;
+    email?: string;
+    companyName?: string;
+  }) => void;
 }) => {
   const [nameFilter, setNameFilter] = useState<string>("");
   const [emailFilter, setEmailFilter] = useState<string>("");
+  const [companyNameFilter, setCompanyNameFilter] = useState<string>("");
   const [expanded, setExpanded] = useState<boolean>(false);
 
   const handleFilterSubmit = (e: React.FormEvent) => {
@@ -28,16 +33,18 @@ const ClientFilters = ({
     onFilterChange({
       name: nameFilter || undefined,
       email: emailFilter || undefined,
+      companyName: companyNameFilter || undefined,
     });
   };
 
   const handleClearFilters = () => {
     setNameFilter("");
     setEmailFilter("");
+    setCompanyNameFilter("");
     onFilterChange({});
   };
 
-  const filtersActive = nameFilter || emailFilter;
+  const filtersActive = nameFilter || emailFilter || companyNameFilter;
 
   return (
     <Card className="mb-6 border border-gray-200 dark:border-gray-800 shadow-sm">
@@ -132,6 +139,24 @@ const ClientFilters = ({
                     placeholder="Search by email"
                     value={emailFilter}
                     onChange={(e) => setEmailFilter(e.target.value)}
+                    className="pl-9 h-10 bg-white dark:bg-gray-950"
+                  />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="companyNameFilter"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Company Name
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="companyNameFilter"
+                    placeholder="Search by company name"
+                    value={companyNameFilter}
+                    onChange={(e) => setCompanyNameFilter(e.target.value)}
                     className="pl-9 h-10 bg-white dark:bg-gray-950"
                   />
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
