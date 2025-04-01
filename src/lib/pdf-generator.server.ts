@@ -302,7 +302,8 @@ export async function generateInvoicePDF(invoice: any) {
         const totals = [
             { label: "Subtotal", value: invoice.subtotal },
             { label: `Tax (${invoice.taxRate}%)`, value: invoice.taxAmount },
-            { label: "Total", value: invoice.invoiceTotal }
+            { label: "Total", value: Math.round(invoice?.invoiceTotal ?? 0) }
+
         ];
 
         // Right margin for text (padding from edge)

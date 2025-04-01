@@ -551,7 +551,7 @@ export async function generateInvoiceNumber(): Promise<ActionResponse> {
         }
 
         // Format the new invoice number with leading zeros
-        const invoiceNumber = `INV-${newNumber.toString().padStart(3, '0')}`;
+        const invoiceNumber = `GT-INV-${newNumber.toString().padStart(3, '0')}`;
 
         return {
             success: true,
