@@ -101,11 +101,11 @@ export async function generateInvoicePDF(invoice: any) {
 
         // Invoice title moved below company details
         const invoiceTitle = "INVOICE";
-        const titleWidth = boldFont.widthOfTextAtSize(invoiceTitle, fontSize.large);
+        const titleWidth = boldFont.widthOfTextAtSize(invoiceTitle, fontSize.medium);
         page.drawText(invoiceTitle, {
             x: (width - titleWidth) / 2,
             y: yPosition,
-            size: fontSize.large,
+            size: fontSize.medium,
             font: boldFont,
             color: colors.primary
         });
@@ -113,7 +113,7 @@ export async function generateInvoicePDF(invoice: any) {
         // Add underline to the INVOICE title
         const underlineExtension = 8; // Slight extension beyond text on each side
         const underlineThickness = 1.5; // Slightly thicker than default but not too much
-        const underlineGap = 4; // Space between text and underline
+        const underlineGap = 5; // Space between text and underline
 
         page.drawLine({
             start: {
@@ -128,7 +128,7 @@ export async function generateInvoicePDF(invoice: any) {
             color: colors.primary
         });
 
-        yPosition -= 20; // Continue to adjust vertical position after the title and underline
+        yPosition -= 23; // Continue to adjust vertical position after the title and underline
         // position for next element
 
         // Client & Company Address Section
@@ -588,7 +588,7 @@ export async function generateInvoicePDF(invoice: any) {
                                     color: colors.text
                                 });
 
-                                currentY -= 16; // Move to next line
+                                currentY -= 13; // Move to next line
                                 currentLine = [];
                                 isFirstLine = false;
                             }
@@ -609,7 +609,7 @@ export async function generateInvoicePDF(invoice: any) {
                             color: colors.text
                         });
 
-                        currentY -= 20; // Extra space between notes
+                        currentY -= 16; // Extra space between notes
                     }
                 } else {
                     // Regular non-numbered text - use original logic
@@ -634,7 +634,7 @@ export async function generateInvoicePDF(invoice: any) {
                                 color: colors.text
                             });
 
-                            currentY -= 16; // Move to next line
+                            currentY -= 13; // Move to next line
                             currentLine = [word];
                         }
                     }
@@ -649,7 +649,7 @@ export async function generateInvoicePDF(invoice: any) {
                             color: colors.text
                         });
 
-                        currentY -= 20; // Extra space between notes
+                        currentY -= 16; // Extra space between notes
                     }
                 }
             });
