@@ -22,6 +22,7 @@ import { Invoice, InvoiceContents } from "@prisma/client";
 import { InvoiceResponse } from "@/utils/types";
 import InvoiceDialog from "./InvoiceDialog";
 import InvoiceFilter from "./InvoiceFilter";
+import { generateInvoicePDF } from "@/lib/pdf-generator.server";
 type InvoiceWithContents = Invoice & {
   invoiceContents: InvoiceContents[];
 };
@@ -43,6 +44,7 @@ const InvoiceTable = () => {
   const [selectedInvoice, setSelectedInvoice] = useState<
     InvoiceWithContents | undefined
   >(undefined);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const { data, isLoading, isError } = useQuery<InvoiceResponse>({
     queryKey: ["invoices", filters, currentPage, limit],
@@ -88,6 +90,38 @@ const InvoiceTable = () => {
     setSelectedInvoice(invoice);
     setDialogOpen(true);
   };
+  async function handleDownloadInvoice(invoiceData: InvoiceWithContents) {
+    try {
+      setIsDownloading(true);
+      // Generate the PDF buffer
+      const pdfBuffer = await generateInvoicePDF(invoiceData);
+
+      // Create a Blob from the PDF buffer
+      const blob = new Blob([pdfBuffer], { type: "application/pdf" });
+
+      // Create a temporary URL
+      const url = window.URL.createObjectURL(blob);
+
+      // Create a hidden anchor element
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = `invoice_${invoiceData.invoiceNumber}.pdf`; // Custom filename
+
+      // Append to body and trigger download
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      setIsDownloading(false);
+    } catch (error) {
+      setIsDownloading(false);
+      console.error("Error generating/downloading PDF:", error);
+      // Add your error handling here
+    }
+  }
 
   if (isError) {
     return (
@@ -127,9 +161,10 @@ const InvoiceTable = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Invoice #</TableHead>
-                <TableHead>Client Email</TableHead>
+                <TableHead>Client Name</TableHead>
                 <TableHead>Client Phone</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -163,6 +198,20 @@ const InvoiceTable = () => {
                       >
                         {invoice.status}
                       </span>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation(); // This stops the event from bubbling up to the row
+                          handleDownloadInvoice(invoice as InvoiceWithContents);
+                        }}
+                        disabled={isDownloading}
+                        className="text-white hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-all"
+                      >
+                        {isDownloading ? "Generating..." : "Download"}
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))

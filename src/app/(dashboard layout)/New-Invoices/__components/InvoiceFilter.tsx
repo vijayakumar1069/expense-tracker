@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import {
   Filter,
   Search,
-  X,
   Receipt,
   CalendarRange,
   SlidersHorizontal,
@@ -81,8 +80,7 @@ const InvoiceFilter = ({
                 onClick={handleClearFilters}
                 className="text-xs h-8 px-3 border-gray-200 dark:border-gray-700 text-white hover:bg-red-600 dark:text-gray-100 dark:hover:bg-red-700"
               >
-                <X className="h-3.5 w-3.5 mr-1" />
-                Clear
+                Clear Filters
               </Button>
             )}
 
@@ -90,16 +88,9 @@ const InvoiceFilter = ({
               variant="ghost"
               size="sm"
               onClick={() => setExpanded(!expanded)}
-              className="h-9 w-9 p-0 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+              className="h-9 px-4 rounded-lg text-white bg-accent-foreground hover:bg-accent-foreground/50 dark:bg-gray-800 dark:hover:bg-gray-700"
             >
-              {expanded ? (
-                <X size={16} className="text-gray-600 dark:text-gray-400" />
-              ) : (
-                <Filter
-                  size={16}
-                  className="text-gray-600 dark:text-gray-400"
-                />
-              )}
+              {expanded ? "Close Search" : "Search Invoice"}
             </Button>
           </div>
         </div>

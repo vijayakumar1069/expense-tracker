@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Filter, Search, X, SlidersHorizontal } from "lucide-react";
+import { Filter, Search, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 
 // ClientFilters component for filtering/searching clients
@@ -63,17 +63,15 @@ const ClientFilters = ({
               </CardDescription>
             </div>
           </div>
-
           <div className="flex items-center gap-2">
             {filtersActive && (
               <Button
                 variant="destructive"
                 size="sm"
                 onClick={handleClearFilters}
-                className="text-xs h-8 px-3 border-gray-200 dark:border-gray-700 text-white hover:bg-destructive dark:text-gray-100  dark:hover:bg-gray-800"
+                className="text-xs h-8 px-3 border-gray-200 dark:border-gray-700 text-white hover:bg-red-600 dark:text-gray-100 dark:hover:bg-red-700"
               >
-                <X className="h-3.5 w-3.5 mr-1" />
-                Clear
+                Clear Filters
               </Button>
             )}
 
@@ -81,16 +79,9 @@ const ClientFilters = ({
               variant="ghost"
               size="sm"
               onClick={() => setExpanded(!expanded)}
-              className="h-8 w-8 p-0 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+              className="h-9 px-4 rounded-lg text-white bg-accent-foreground hover:bg-accent-foreground/50 dark:bg-gray-800 dark:hover:bg-gray-700"
             >
-              {expanded ? (
-                <X size={14} className="text-gray-600 dark:text-gray-400" />
-              ) : (
-                <Filter
-                  size={14}
-                  className="text-gray-600 dark:text-gray-400"
-                />
-              )}
+              {expanded ? "Close Search" : "Search Clients"}
             </Button>
           </div>
         </div>

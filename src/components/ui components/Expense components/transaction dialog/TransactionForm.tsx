@@ -36,7 +36,7 @@ export const TransactionForm: React.FC<{
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-5 overflow-y-auto"
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-5 overflow-y-auto">
+        <div className="flex flex-col space-y-5">
           <BasicInfoSection form={form} isPending={isPending} />
           <AmountSection form={form} isPending={isPending} />
           <PaymentSection form={form} isPending={isPending} />
@@ -45,8 +45,6 @@ export const TransactionForm: React.FC<{
         <div className="flex justify-end items-end w-full">
           <TransactionFormSubmitButton isPending={isPending} mode={mode} />
         </div>
-
-        {/* <DialogFooter isPending={isPending} mode={mode} setOpen={setOpen} /> */}
       </form>
     </Form>
   );
