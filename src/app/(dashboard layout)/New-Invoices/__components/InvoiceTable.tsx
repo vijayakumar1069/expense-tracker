@@ -23,6 +23,7 @@ import { InvoiceResponse } from "@/utils/types";
 import InvoiceDialog from "./InvoiceDialog";
 import InvoiceFilter from "./InvoiceFilter";
 import { generateInvoicePDF } from "@/lib/pdf-generator.server";
+import { format } from "date-fns";
 type InvoiceWithContents = Invoice & {
   invoiceContents: InvoiceContents[];
 };
@@ -162,7 +163,7 @@ const InvoiceTable = () => {
               <TableRow>
                 <TableHead>Invoice #</TableHead>
                 <TableHead>Client Name</TableHead>
-                <TableHead>Client Phone</TableHead>
+                <TableHead>Issue Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -191,7 +192,12 @@ const InvoiceTable = () => {
                       {invoice.invoiceNumber}
                     </TableCell>
                     <TableCell>{invoice.clientName}</TableCell>
-                    <TableCell>{invoice.clientPhone}</TableCell>
+                    <TableCell>
+                      {invoice.createdAt
+                        ? format(new Date(invoice.createdAt), "dd/MM/yyyy")
+                        : "N/A"}
+                    </TableCell>
+
                     <TableCell>
                       <span
                         className={`px-2 py-1 text-sm font-semibold rounded-md border ${statusColors[invoice.status]}`}
