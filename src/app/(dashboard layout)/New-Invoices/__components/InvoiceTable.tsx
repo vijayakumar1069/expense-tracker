@@ -190,7 +190,7 @@ const InvoiceTable = () => {
                     <TableCell className="font-medium">
                       {invoice.invoiceNumber}
                     </TableCell>
-                    <TableCell>{invoice.clientEmail}</TableCell>
+                    <TableCell>{invoice.clientName}</TableCell>
                     <TableCell>{invoice.clientPhone}</TableCell>
                     <TableCell>
                       <span
@@ -208,7 +208,7 @@ const InvoiceTable = () => {
                           handleDownloadInvoice(invoice as InvoiceWithContents);
                         }}
                         disabled={isDownloading}
-                        className="text-white hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-all"
+                        className="text-white hover:text-black bg-shopping hover:bg-shopping/50 dark:hover:bg-indigo-950/30 transition-all"
                       >
                         {isDownloading ? "Generating..." : "Download"}
                       </Button>
