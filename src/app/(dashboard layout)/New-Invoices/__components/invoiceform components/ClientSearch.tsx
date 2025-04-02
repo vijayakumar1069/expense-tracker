@@ -80,7 +80,6 @@ export function ClientSearch({ form }: { form: any }) {
 
   const handleSelect = (clientId: string) => {
     const selectedClient = clients.find((client) => client.id === clientId);
-    console.log("Selected Client:", selectedClient);
 
     if (selectedClient) {
       // Update form fields with selected client data

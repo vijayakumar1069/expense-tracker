@@ -175,6 +175,7 @@ const InvoiceDialog = ({
           invoiceId: data.id,
         })),
       };
+      console.log(formattedData);
       return updateInvoice(formattedData);
     },
     onMutate: async (updatedInvoiceData) => {

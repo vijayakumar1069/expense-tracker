@@ -8,7 +8,6 @@ export async function GET(req: NextRequest) {
     // Get search query from URL
     const searchParams = req.nextUrl.searchParams;
     const query = searchParams.get('query')?.toLowerCase() || '';
-    console.log(query);
 
     // Authenticate user
     const user = await requireAuth();
@@ -27,7 +26,7 @@ export async function GET(req: NextRequest) {
             ],
         },
     });
-    console.log(clients);
+
 
     // Return matching clients as JSON
     return new Response(JSON.stringify(clients), {

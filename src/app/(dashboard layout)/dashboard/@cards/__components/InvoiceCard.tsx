@@ -6,7 +6,6 @@ import Link from "next/link";
 
 export default async function InvoiceCard() {
   const { pendingInvoices, invoicesByStatus } = await fetchInvoiceData();
-  console.log(pendingInvoices, invoicesByStatus);
 
   return (
     <Card className="overflow-hidden border-none shadow-lg bg-gradient-to-br from-[#fef9c3] to-white">

@@ -5,7 +5,6 @@ import { fetchIncomeData } from "../__actions/cardsActions";
 
 export default async function IncomeCard() {
   const { totalIncome, incomeChange } = await fetchIncomeData();
-  console.log(totalIncome, incomeChange);
 
   return (
     <Card className="overflow-hidden border-none shadow-lg bg-gradient-to-br from-[#eef2ff] to-white">

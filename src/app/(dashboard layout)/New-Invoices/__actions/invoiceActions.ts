@@ -75,7 +75,7 @@ const getCurrentUser = async () => {
  */
 export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Promise<ActionResponse> {
     try {
-        console.log(formData)
+
         // Validate input data
         const validatedData = invoiceSchema.parse(formData);
 
@@ -238,11 +238,10 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
 
 
 
-/**
- * Update an existing invoice
- */
+
 export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Promise<ActionResponse> {
     try {
+        console.log("Received form data:", formData);
 
         // Validate input data
         const validatedData = invoiceSchema.parse(formData);
@@ -277,7 +276,8 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
             };
         }
 
-
+        // Check if status is changing from DRAFT to SENT
+        const isStatusChangingToSent = existingInvoice.status === "DRAFT" && validatedData.status === "SENT";
 
         // Update the invoice in a transaction
         const updatedInvoice = await prisma.$transaction(async (prisma) => {
@@ -297,9 +297,9 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                     clientId: validatedData.clientId,
                     clientName: validatedData.clientName,
                     clientEmail: validatedData.clientEmail,
+                    clientCompanyName: validatedData.clientCompanyName ?? "",
                     clientPhone: validatedData.clientPhone,
                     clientStreetName: validatedData.clientStreetName,
-
                     clientCity: validatedData.clientCity,
                     clientState: validatedData.clientState,
                     clientZip: validatedData.clientZip,
@@ -315,7 +315,6 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                     invoiceContents: {
                         create: validatedData.invoiceContents.map(item => ({
                             description: item.description,
-
                             total: item.total,
                         }))
                     }
@@ -329,6 +328,94 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
         });
 
 
+        // Send email only if status is changing from DRAFT to SENT
+        if (isStatusChangingToSent) {
+            try {
+                // Generate email HTML from React Email template
+                const invoiceEmailHtml = await render(
+                    InvoiceEmail({
+                        invoice: updatedInvoice,
+                        previewUrl: `${process.env.NEXT_PUBLIC_APP_URL}/invoices/preview`,
+                    })
+                );
+
+                // Validate environment variables
+                if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.TENANT_ID) {
+                    throw new Error("Missing required environment variables");
+                }
+
+                // Get Microsoft Graph API access token
+                const tokenResponse = await gettingAccessToken({
+                    ClientId: process.env.CLIENT_ID,
+                    ClientSecret: process.env.CLIENT_SECRET,
+                    TenantID: process.env.TENANT_ID,
+                });
+
+                // Check token acquisition
+                if (!tokenResponse?.message?.access_token) {
+                    throw new Error("Error getting access token");
+                }
+
+                const accessToken = tokenResponse.message.access_token;
+
+                // Generate PDF buffer with server-compatible method
+                let pdfBuffer: Buffer;
+                try {
+                    // Use our server-compatible PDF generator
+                    const pdfData = await generateInvoicePDF(updatedInvoice);
+                    pdfBuffer = Buffer.from(pdfData);
+                } catch (error) {
+                    console.error("PDF generation failed:", error);
+                    throw new Error("Failed to generate invoice PDF");
+                }
+
+                // Create a proper filename for the attachment
+                const pdfFilename = `Invoice-${updatedInvoice.invoiceNumber}.pdf`;
+
+                // Convert buffer to base64 efficiently
+                const base64PDF = pdfBuffer.toString("base64");
+
+                // Prepare email payload for Microsoft Graph API
+                const emailPayload = {
+                    message: {
+                        subject: `Invoice #${updatedInvoice.invoiceNumber} from Gliggo`,
+                        body: {
+                            contentType: "HTML",
+                            content: invoiceEmailHtml,
+                        },
+                        toRecipients: [
+                            {
+                                emailAddress: {
+                                    address: validatedData.clientEmail,
+                                },
+                            },
+                        ],
+                        attachments: [
+                            {
+                                "@odata.type": "#microsoft.graph.fileAttachment",
+                                name: pdfFilename,
+                                contentType: "application/pdf",
+                                contentBytes: base64PDF,
+                                isInline: false,
+                            },
+                        ],
+                    },
+                    saveToSentItems: true,
+                };
+
+                // Send email via Microsoft Graph API
+                const graphResponse = await mailSendFunction(emailPayload, accessToken);
+
+                if (graphResponse.status !== 200) {
+                    console.error("Email sending failed:", graphResponse.message);
+                    // We don't return error here because the invoice update was successful
+                    // Just log the error and continue
+                }
+            } catch (error) {
+                console.error("Error sending invoice email:", error);
+                // Similarly, we don't return error here as the invoice update was successful
+            }
+        }
 
         return {
             success: true,
@@ -342,9 +429,7 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
         };
     }
 }
-/**
- * Delete an invoice
- */
+
 export async function deleteInvoice(id: string): Promise<ActionResponse> {
     try {
 

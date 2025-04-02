@@ -75,7 +75,7 @@ export default function InvoiceForm({
       clientCountry: "",
       invoiceNumber: "",
       dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default to 30 days from now
-      status: "DRAFT",
+      status: defaultValues?.status || "DRAFT",
       invoiceContents: [{ description: "", total: 0 }],
       subtotal: 0,
       taxRate: 0,
@@ -108,7 +108,7 @@ export default function InvoiceForm({
   const handleSubmit = (data: InvoiceFormValues) => {
     onSubmit(data);
   };
-  console.log(defaultValues);
+
   return (
     // This outer div constrains the height to the viewport
     <div className="h-[calc(80vh-2rem)] max-h-[900px] flex flex-col">

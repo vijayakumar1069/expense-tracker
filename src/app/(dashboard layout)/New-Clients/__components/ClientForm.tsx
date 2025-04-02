@@ -27,7 +27,6 @@ const ClientForm = ({
   isSubmitting = false,
   isEditMode = false,
 }: ClientFormProps) => {
-  console.log(defaultValues);
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientSchema),
     defaultValues: defaultValues || {

@@ -54,7 +54,6 @@ const ClientTable = () => {
         page: currentPage.toString(),
         limit: limit.toString(),
       });
-      console.log(filters);
 
       // Add filter parameters if they exist
       if (filters.name) params.append("name", filters.name);
@@ -90,7 +89,6 @@ const ClientTable = () => {
   };
 
   const handleViewClient = (client: Client) => {
-    console.log("Viewing client:", client);
     setSelectedClient(client);
     setDialogOpen(true);
   };

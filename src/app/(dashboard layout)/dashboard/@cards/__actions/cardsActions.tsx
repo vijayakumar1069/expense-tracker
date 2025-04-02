@@ -97,7 +97,6 @@ export async function fetchIncomeData(): Promise<IncomeData> {
         amount: true,
       },
     });
-    console.log(currentMonthIncome);
 
     // Get total income for last month
     const lastMonthIncome = await prisma.transaction.aggregate({
@@ -112,7 +111,6 @@ export async function fetchIncomeData(): Promise<IncomeData> {
         amount: true,
       },
     });
-    console.log(lastMonthIncome);
 
     const totalIncome = currentMonthIncome._sum.amount || 0;
     const previousIncome = lastMonthIncome._sum.amount || 0;

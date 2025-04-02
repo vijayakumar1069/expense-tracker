@@ -54,7 +54,7 @@ export function RecentTransactions() {
     const fetchData = async () => {
       try {
         const response = await recentTransactionsData();
-        console.log(response);
+
         if ("success" in response && response.success) {
           setTransactions(response.data);
         }

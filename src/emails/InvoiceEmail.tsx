@@ -457,7 +457,7 @@ export const InvoiceEmail = ({ invoice }: InvoiceEmailProps) => {
                       margin: "4px 0",
                     }}
                   >
-                    Reference: INV-{invoiceNumber}
+                    Reference: {invoiceNumber}
                   </Text>
 
                   <Hr style={{ borderColor: "#e2e8f0", margin: "16px 0" }} />

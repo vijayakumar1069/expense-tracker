@@ -41,19 +41,23 @@ export function InvoiceDetails({
     if (!defaultValues) {
       const getInvoice = async () => {
         const res = await generateInvoiceNumber();
-
         if (res.success && typeof res.data === "string") {
           form.setValue("invoiceNumber", res.data);
         }
       };
       getInvoice();
+      // Set initial status
+      form.setValue("status", "DRAFT");
       return;
     }
+
+    // For existing invoices, set all fields including status
     form.reset({
       ...defaultValues,
-      invoiceNumber: defaultValues.invoiceNumber,
+      status: defaultValues.status || "DRAFT",
     });
   }, [form, defaultValues]);
+
   // Convert any string dates to Date objects when the form initializes
   useEffect(() => {
     const dueDateValue = form.getValues("dueDate");
@@ -86,7 +90,15 @@ export function InvoiceDetails({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Status</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select
+              onValueChange={(
+                value: "DRAFT" | "SENT" | "PAID" | "OVERDUE" | "CANCELLED"
+              ) => {
+                field.onChange(value);
+                form.setValue("status", value, { shouldValidate: true });
+              }}
+              value={field.value || "DRAFT"}
+            >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
