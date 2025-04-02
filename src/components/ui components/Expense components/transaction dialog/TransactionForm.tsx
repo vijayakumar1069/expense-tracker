@@ -5,11 +5,10 @@ import { BasicInfoSection } from "./BasicInfoSection";
 import { AmountSection } from "./AmountSection";
 import { PaymentSection } from "./PaymentSection";
 import { DateImageSection } from "./DateImageSection";
-// import { DialogFooter } from "@/components/ui/dialog";
+
 import { TransactionFormSubmitButton } from "./TransActionFormSubmitButton";
 import { useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
-// import { UseFormReturn } from "react-hook-form";
 
 export const TransactionForm: React.FC<{
   form: UseFormReturn<TransactionFormValues>;
@@ -22,15 +21,6 @@ export const TransactionForm: React.FC<{
 }> = ({ form, onSubmit, isPending, mode, initialValues }) => {
   useEffect(() => {
     if (initialValues) {
-      // Only set values that are empty or different
-      // Object.entries(initialValues).forEach(([key, value]) => {
-      //   if (
-      //     value &&
-      //     form.getValues(key as keyof TransactionFormValues) !== value
-      //   ) {
-      //     form.setValue(key as keyof TransactionFormValues, value);
-      //   }
-      // });
       form.reset(initialValues);
     }
   }, [form, initialValues]);
@@ -42,8 +32,11 @@ export const TransactionForm: React.FC<{
   }, [form]);
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-5">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-5 overflow-y-auto"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 lg:gap-5 overflow-y-auto">
           <BasicInfoSection form={form} isPending={isPending} />
           <AmountSection form={form} isPending={isPending} />
           <PaymentSection form={form} isPending={isPending} />

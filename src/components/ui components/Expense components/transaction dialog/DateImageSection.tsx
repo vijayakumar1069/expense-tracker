@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -137,19 +136,6 @@ export const DateImageSection: React.FC<FormSectionProps> = ({
   return (
     <div className="lg:col-span-2">
       {/* Date Input */}
-      <FormField
-        control={form.control}
-        name="date"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Date</FormLabel>
-            <FormControl>
-              <Input type="date" {...field} value={field.value ?? ""} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
 
       {/* Simplified Image Upload */}
       <FormField

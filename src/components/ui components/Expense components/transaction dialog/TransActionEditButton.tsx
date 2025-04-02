@@ -247,7 +247,7 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
         </Button>
       </DialogTrigger>
       <DialogContent
-        className="w-full sm:max-w-[700px] bg-primary-foreground p-5"
+        className="w-full sm:max-w-[700px] bg-primary-foreground p-5 max-h-[90vh] overflow-y-auto"
         onInteractOutside={(e) => {
           e.preventDefault();
         }}

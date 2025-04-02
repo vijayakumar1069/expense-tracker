@@ -50,7 +50,7 @@ export const LoginForm = () => {
         // Show loading toast
         toast.loading("Authenticating...", {
           id: "login",
-          duration: Infinity, // Will be dismissed on success/error
+          duration: 3000, // Will be dismissed on success/error
         });
 
         // Wrap the server action in startTransition
@@ -77,6 +77,7 @@ export const LoginForm = () => {
 
             toast.error(response.message || "Authentication failed", {
               id: "login",
+              duration: 3000,
             });
 
             return;
@@ -103,9 +104,8 @@ export const LoginForm = () => {
 
         toast.error(errorMessage, {
           id: "login",
+          duration: 3000,
         });
-
-        console.error("Login error:", error);
       }
     },
     [router, form]

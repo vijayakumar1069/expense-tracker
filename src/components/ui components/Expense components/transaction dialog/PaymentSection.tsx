@@ -29,7 +29,7 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
             <FormLabel>Payment Method</FormLabel>
             <Select onValueChange={field.onChange} value={field.value || ""}>
               <FormControl className="w-full">
-                <SelectTrigger>
+                <SelectTrigger className="border-primary/20 w-full focus:border-primary/30">
                   <SelectValue placeholder="Select payment method" />
                 </SelectTrigger>
               </FormControl>
@@ -54,7 +54,10 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>Received By</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  className="border-primary/20 w-full focus:border-primary/30"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -69,7 +72,10 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>Bank Name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  className="border-primary/20 w-full focus:border-primary/30"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -85,7 +91,10 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
               <FormItem>
                 <FormLabel>Cheque Number</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input
+                    {...field}
+                    className="border-primary/20 w-full focus:border-primary/30"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -98,7 +107,11 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
               <FormItem>
                 <FormLabel>Cheque Date</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input
+                    type="date"
+                    {...field}
+                    className="border-primary/20 w-full focus:border-primary/30"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -114,13 +127,29 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
             <FormItem>
               <FormLabel>Invoice Number</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  className="border-primary/20 w-full focus:border-primary/30"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
       )}
+      <FormField
+        control={form.control}
+        name="date"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Date</FormLabel>
+            <FormControl>
+              <Input type="date" {...field} value={field.value ?? ""} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </>
   );
 };

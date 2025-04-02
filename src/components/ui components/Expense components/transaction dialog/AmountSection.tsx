@@ -43,6 +43,7 @@ export const AmountSection: React.FC<FormSectionProps> = ({ form }) => {
                 onChange={(e) =>
                   handleAmountOrTaxChange("amount", e.target.value)
                 }
+                className="border-primary/20 w-full focus:border-primary/30"
               />
             </FormControl>
             <FormMessage />
@@ -64,7 +65,7 @@ export const AmountSection: React.FC<FormSectionProps> = ({ form }) => {
               value={field.value || ""}
             >
               <FormControl className="w-full">
-                <SelectTrigger>
+                <SelectTrigger className="border-primary/20 w-full focus:border-primary/30">
                   <SelectValue placeholder="Select tax type" />
                 </SelectTrigger>
               </FormControl>

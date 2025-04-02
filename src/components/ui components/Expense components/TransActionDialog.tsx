@@ -175,37 +175,37 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
   };
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button
-            variant="default"
-            className="bg-gradient-to-r from-primary to-[#8b5cf6]"
-          >
-            {mode === "add" ? "Add Transaction" : "Edit Transaction"}
-          </Button>
-        </DialogTrigger>
-        <DialogContent
-          className="w-full sm:max-w-[700px] bg-primary-foreground p-5"
-          onInteractOutside={(e) => {
-            e.preventDefault();
-          }}
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button
+          variant="default"
+          className="bg-gradient-to-r from-primary to-[#8b5cf6]"
         >
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-[#8b5cf6] bg-clip-text text-transparent">
-              {mode === "add" ? "Add Transaction" : "Edit Transaction"}
-            </DialogTitle>
-          </DialogHeader>
+          {mode === "add" ? "Add Transaction" : "Edit Transaction"}
+        </Button>
+      </DialogTrigger>
+      <DialogContent
+        className="w-full sm:max-w-[700px] bg-primary-foreground p-5 max-h-[90vh] overflow-y-auto"
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+      >
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-[#8b5cf6] bg-clip-text text-transparent">
+            {mode === "add" ? "Add Transaction" : "Edit Transaction"}
+          </DialogTitle>
+        </DialogHeader>
 
+        <div className="mt-4">
           <TransactionForm
             form={form}
             onSubmit={onFormSubmit}
             isPending={isPending}
             mode={mode}
           />
-        </DialogContent>
-      </Dialog>
-    </>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 export default TransActionDialog;
