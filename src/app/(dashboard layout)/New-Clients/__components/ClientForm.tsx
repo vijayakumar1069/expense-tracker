@@ -46,7 +46,7 @@ const ClientForm = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6 p-4 grid grid-cols-2 gap-3"
+        className="space-y-6 p-2 lg:p-4 grid grid-cols-1 lg:grid-cols-2 gap-3"
       >
         {/* Name Field */}
         <FormField

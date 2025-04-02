@@ -399,7 +399,7 @@ const InvoiceDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-6xl bg-primary-foreground ">
+      <DialogContent className="sm:max-w-6xl bg-primary-foreground max-h-[90vh] overflow-y-auto ">
         <DialogHeader>
           <DialogTitle>
             {isNewInvoice

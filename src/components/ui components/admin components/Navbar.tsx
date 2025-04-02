@@ -87,19 +87,21 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           {/* Logo Section */}
-          <motion.div
-            className="flex items-center gap-3"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="p-2 rounded-xl bg-gradient-to-br from-primary via-[#8b5cf6] to-[#0ea5e9]">
-              <Wallet className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary via-[#8b5cf6] to-[#0ea5e9] bg-clip-text text-transparent">
-              Expense Tracker
-            </h1>
-          </motion.div>
+          <Link href={"/dashboard"}>
+            <motion.div
+              className="flex items-center gap-3"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="p-2 rounded-xl bg-gradient-to-br from-primary via-[#8b5cf6] to-[#0ea5e9]">
+                <Wallet className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary via-[#8b5cf6] to-[#0ea5e9] bg-clip-text text-transparent">
+                Expense Tracker
+              </h1>
+            </motion.div>
+          </Link>
 
           {/* Desktop Navigation */}
           <motion.ul

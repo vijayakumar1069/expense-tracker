@@ -323,7 +323,7 @@ const ClientDialog = ({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="sm:max-w-4xl bg-primary-foreground"
+        className="sm:max-w-4xl bg-primary-foreground max-h-[90vh] overflow-y-auto p-2 "
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
