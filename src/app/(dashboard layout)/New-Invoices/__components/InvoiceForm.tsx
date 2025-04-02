@@ -35,6 +35,7 @@ const invoiceSchema = z.object({
   dueDate: z.date({
     required_error: "Due date is required",
   }),
+  clientCompanyName: z.string().optional(),
   status: z
     .enum(["DRAFT", "SENT", "PAID", "OVERDUE", "CANCELLED"])
     .default("DRAFT"),
@@ -66,6 +67,7 @@ export default function InvoiceForm({
       clientName: "",
       clientEmail: "",
       clientPhone: "",
+      clientCompanyName: "",
       clientStreetName: "",
       clientCity: "",
       clientState: "",

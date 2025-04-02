@@ -97,7 +97,7 @@ export async function generateInvoicePDF(invoice: any) {
             });
         });
 
-        yPosition -= 83; // Adjusted position after company info
+        yPosition -= 75; // Adjusted position after company info
 
         // Invoice title moved below company details
         const invoiceTitle = "INVOICE";
@@ -128,7 +128,7 @@ export async function generateInvoicePDF(invoice: any) {
             color: colors.primary
         });
 
-        yPosition -= 23; // Continue to adjust vertical position after the title and underline
+        yPosition -= 18; // Continue to adjust vertical position after the title and underline
         // position for next element
 
         // Client & Company Address Section
@@ -211,7 +211,7 @@ export async function generateInvoicePDF(invoice: any) {
             });
         });
 
-        yPosition -= 102;
+        yPosition -= 123; // Adjusted position after client & company address
 
         // Items Table with 2 columns
         const tableHeaderY = yPosition;

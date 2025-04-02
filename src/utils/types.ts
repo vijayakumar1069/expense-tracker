@@ -149,3 +149,11 @@ export interface UserFormValues {
     rememberMe?: boolean;
     // Add other fields as needed
 }
+
+
+export interface ErrorResponse {
+    success: false;
+    message: string;
+    errors?: Record<string, string[]>;
+    code?: string;
+}

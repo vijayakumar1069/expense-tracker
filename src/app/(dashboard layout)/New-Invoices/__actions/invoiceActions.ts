@@ -75,9 +75,10 @@ const getCurrentUser = async () => {
  */
 export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Promise<ActionResponse> {
     try {
+        console.log(formData)
         // Validate input data
         const validatedData = invoiceSchema.parse(formData);
-        console.log("Validated Data:", validatedData);
+
 
         // Get current user
         const user = await getCurrentUser();
@@ -242,7 +243,7 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
  */
 export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Promise<ActionResponse> {
     try {
-        console.log("Updating invoice...");
+
         // Validate input data
         const validatedData = invoiceSchema.parse(formData);
 
@@ -275,8 +276,7 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                 error: "Invoice not found or you don't have permission to update it"
             };
         }
-        console.log("Existing invoice found:", existingInvoice.invoiceNumber);
-        console.log("Validated data:", validatedData);
+
 
 
         // Update the invoice in a transaction
@@ -328,7 +328,7 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
             return invoice;
         });
 
-        console.log("Invoice updated successfully:", updatedInvoice);
+
 
         return {
             success: true,
@@ -347,8 +347,7 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
  */
 export async function deleteInvoice(id: string): Promise<ActionResponse> {
     try {
-        console.log("Deleting invoice...");
-        console.log("Deleting invoice with ID:", id);
+
         // Get current user
         const user = await getCurrentUser();
 
@@ -537,7 +536,7 @@ export async function generateInvoiceNumber(): Promise<ActionResponse> {
             orderBy: { createdAt: 'desc' },
             select: { invoiceNumber: true },
         });
-        console.log(latestInvoice);
+
         // Generate a new invoice number
         let newNumber = 1;
 

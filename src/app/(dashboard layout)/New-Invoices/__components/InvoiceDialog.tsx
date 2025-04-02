@@ -14,7 +14,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Pencil, Printer, Trash2, X } from "lucide-react";
+import { Pencil, Trash2, X } from "lucide-react";
 import InvoiceForm from "./InvoiceForm";
 import {
   createInvoice,
@@ -39,8 +39,7 @@ type InvoiceFormValues = Omit<
   invoiceContents: {
     id?: string;
     description: string;
-    quantity: number;
-    price: number;
+
     total: number;
     createdAt?: Date;
     updatedAt?: Date;
@@ -440,15 +439,13 @@ const InvoiceDialog = ({
               </Button>
             </div>
             <div className="flex items-center gap-3">
-              <Button
-                onClick={() => {
-                  /* Add print function */
-                }}
+              {/* <Button
+             
                 variant="outline"
               >
                 <Printer className="h-4 w-4 mr-2" />
                 Print
-              </Button>
+              </Button> */}
               <Button
                 onClick={() => setIsEditMode(true)}
                 className="hover:bg-purple-400"

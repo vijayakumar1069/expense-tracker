@@ -46,7 +46,7 @@ export function InvoiceContentsItem({
           name={`invoiceContents.${index}.total`}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Total</FormLabel>
+              <FormLabel>Amount</FormLabel>
               <FormControl>
                 <Input
                   type="number"

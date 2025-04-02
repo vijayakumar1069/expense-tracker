@@ -31,7 +31,7 @@ interface Client {
   email: string;
   phone: string;
   streetName: string;
-  clientCompanyName: string;
+  companyName: string;
   city: string;
   state: string;
   zip: string;
@@ -80,6 +80,7 @@ export function ClientSearch({ form }: { form: any }) {
 
   const handleSelect = (clientId: string) => {
     const selectedClient = clients.find((client) => client.id === clientId);
+    console.log("Selected Client:", selectedClient);
 
     if (selectedClient) {
       // Update form fields with selected client data
@@ -91,7 +92,7 @@ export function ClientSearch({ form }: { form: any }) {
       form.setValue("clientCity", selectedClient.city);
       form.setValue("clientZip", selectedClient.zip);
       form.setValue("clientState", selectedClient.state);
-      form.setValue("clientCompanyName", selectedClient.clientCompanyName);
+      form.setValue("clientCompanyName", selectedClient?.companyName);
 
       form.setValue("clientCountry", selectedClient.country);
     }

@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/utils/prisma"
 import { LoginSchema } from "@/utils/schema/LoginSchema"
 import { getCookie } from "@/lib/sessiongetter"
+import { z } from "zod"
 
 export type LoginFormValues = {
     email: string;
@@ -18,47 +19,48 @@ type ReturnResponse = {
     message: string
     errors?: Record<string, string[]>
 }
-export async function loginFunction(data: LoginFormValues): Promise<ReturnResponse> {
+export async function loginFunction(data: z.infer<typeof LoginSchema>) {
     try {
-        // Extract and validate form data
+        // Validate input
         const validatedFields = LoginSchema.safeParse(data);
 
-        // Return validation errors if any
         if (!validatedFields.success) {
+
             return {
                 success: false,
                 message: "Validation failed",
                 errors: validatedFields.error.flatten().fieldErrors
-            }
+            };
         }
 
-        const { email, password, rememberMe } = validatedFields.data
+        const { email, password, rememberMe } = validatedFields.data;
 
-        // Check if user exists
+        // Find user
         const user = await prisma.user.findUnique({
             where: { email: email.toLowerCase() }
-        })
-
+        });
 
         if (!user) {
             return {
                 success: false,
-                message: "Invalid credentials"
-            }
+                message: "Invalid credentials",
+                code: "AUTH_INVALID_CREDENTIALS"
+            };
         }
 
         // Verify password
-        const passwordMatch = await bcrypt.compare(password, user.password)
+        const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordMatch) {
             return {
                 success: false,
-                message: "Invalid credentials"
-            }
+                message: "Invalid credentials",
+                code: "AUTH_INVALID_CREDENTIALS"
+            };
         }
 
         // Generate session token
-        const sessionToken = nanoid(32)
+        const sessionToken = nanoid(32);
 
         // Create session in database
         await prisma.session.create({
@@ -66,13 +68,13 @@ export async function loginFunction(data: LoginFormValues): Promise<ReturnRespon
                 id: sessionToken,
                 userId: user.id,
                 expiresAt: rememberMe
-                    ? new Date(Date.now() + 12 * 24 * 60 * 60 * 1000) // 30 days
-                    : new Date(Date.now() + 12 * 60 * 60 * 1000) // 24 hours
+                    ? new Date(Date.now() + 12 * 24 * 60 * 60 * 1000) // 12 days
+                    : new Date(Date.now() + 12 * 60 * 60 * 1000) // 12 hours
             }
-        })
+        });
 
         // Generate JWT
-        const secret = new TextEncoder().encode(process.env.JWT_SECRET)
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
         const token = await new SignJWT({
             userId: user.id,
@@ -82,10 +84,10 @@ export async function loginFunction(data: LoginFormValues): Promise<ReturnRespon
             .setProtectedHeader({ alg: "HS256" })
             .setIssuedAt()
             .setExpirationTime(rememberMe ? "12d" : "12h")
-            .sign(secret)
+            .sign(secret);
 
         // Set cookies
-        const cookieStore = await cookies()
+        const cookieStore = await cookies();
         cookieStore.set("Expense-tracker-session", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
@@ -93,32 +95,22 @@ export async function loginFunction(data: LoginFormValues): Promise<ReturnRespon
             expires: rememberMe
                 ? new Date(Date.now() + 12 * 24 * 60 * 60 * 1000)
                 : new Date(Date.now() + 12 * 60 * 60 * 1000)
-        })
+        });
 
         return {
             success: true,
             message: "Login successful"
-        }
-
+        };
     } catch (error) {
-        console.error("Login error:", error)
-
-        // if (error instanceof AuthError) {
-        //     return {
-        //         success: false,
-        //         message: error.message
-        //     }
-        // }
+        console.error("Login error:", error);
 
         return {
             success: false,
-            message: "An unexpected error occurred",
-            errors: {
-                general: [process.env.NODE_ENV === "development"
-                    ? (error as Error).message
-                    : "Internal server error"]
-            }
-        }
+            message: process.env.NODE_ENV === "development"
+                ? (error instanceof Error ? error.message : "Unknown error")
+                : "An unexpected error occurred",
+            code: "AUTH_SERVER_ERROR"
+        };
     }
 }
 

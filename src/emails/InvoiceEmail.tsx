@@ -43,7 +43,7 @@ export const InvoiceEmail = ({ invoice }: InvoiceEmailProps) => {
   const {
     invoiceNumber,
     clientName,
-    dueDate,
+
     subtotal,
     taxRate,
     taxAmount,
@@ -82,7 +82,9 @@ export const InvoiceEmail = ({ invoice }: InvoiceEmailProps) => {
         ready to view and download ✨
       </Preview>
       <Tailwind>
-        <Body style={{ backgroundColor: "#f8f9fa", margin: "0", padding: "0" }}>
+        <Body
+          style={{ backgroundColor: "#f8f9fa", margin: "0", padding: "2px" }}
+        >
           <Container
             style={{
               backgroundColor: "#ffffff",
@@ -181,7 +183,7 @@ export const InvoiceEmail = ({ invoice }: InvoiceEmailProps) => {
                     style={{ marginBottom: "16px" }}
                   >
                     <tr>
-                      <td width="33%">
+                      <td width="50%">
                         <Text
                           style={{
                             color: lightTextColor,
@@ -202,7 +204,7 @@ export const InvoiceEmail = ({ invoice }: InvoiceEmailProps) => {
                           {formatDate(createdAt)}
                         </Text>
                       </td>
-                      <td width="33%">
+                      {/* <td width="33%">
                         <Text
                           style={{
                             color: lightTextColor,
@@ -222,8 +224,8 @@ export const InvoiceEmail = ({ invoice }: InvoiceEmailProps) => {
                         >
                           {formatDate(dueDate)}
                         </Text>
-                      </td>
-                      <td width="33%">
+                      </td> */}
+                      <td width="50%" className="text-right">
                         <Text
                           style={{
                             color: lightTextColor,
@@ -410,7 +412,7 @@ export const InvoiceEmail = ({ invoice }: InvoiceEmailProps) => {
                       margin: "4px 0",
                     }}
                   >
-                    Bank: Bank of America
+                    Account Name: {process.env.ACCOUNT_NAME}
                   </Text>
                   <Text
                     style={{
@@ -419,7 +421,7 @@ export const InvoiceEmail = ({ invoice }: InvoiceEmailProps) => {
                       margin: "4px 0",
                     }}
                   >
-                    Account: Your Company, Inc.
+                    Bank: {process.env.BANK_NAME}
                   </Text>
                   <Text
                     style={{
@@ -428,7 +430,25 @@ export const InvoiceEmail = ({ invoice }: InvoiceEmailProps) => {
                       margin: "4px 0",
                     }}
                   >
-                    Account #: XXXX-XXXX-XXXX-XXXX
+                    Account No: {process.env.ACCOUNT_NUMBER}
+                  </Text>
+                  <Text
+                    style={{
+                      color: secondaryColor,
+                      fontSize: "14px",
+                      margin: "4px 0",
+                    }}
+                  >
+                    Branch Name:{process.env.BRANCH_NAME}
+                  </Text>
+                  <Text
+                    style={{
+                      color: secondaryColor,
+                      fontSize: "14px",
+                      margin: "4px 0",
+                    }}
+                  >
+                    IFSC Code:{process.env.IFSC_CODE}
                   </Text>
                   <Text
                     style={{
