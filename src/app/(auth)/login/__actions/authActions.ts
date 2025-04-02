@@ -69,7 +69,7 @@ export async function loginFunction(data: z.infer<typeof LoginSchema>) {
                 userId: user.id,
                 expiresAt: rememberMe
                     ? new Date(Date.now() + 12 * 24 * 60 * 60 * 1000) // 12 days
-                    : new Date(Date.now() + 1 * 60 * 1000) // 1min
+                    : new Date(Date.now() + 12 * 60 * 60 * 1000) // 12 hours
             }
         });
 

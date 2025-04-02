@@ -39,7 +39,7 @@ export async function addClient(
             data: newClient,
         };
     } catch (error) {
-        console.error("Error adding client:", error);
+
 
         // Handle Zod validation errors
         if (error instanceof z.ZodError) {
