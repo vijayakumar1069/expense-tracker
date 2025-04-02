@@ -340,59 +340,43 @@ export async function fetchInvoiceData(): Promise<InvoiceData> {
     if (!user) {
       throw new Error("Not authenticated");
     }
-    // Fetch pending invoices
+
+    // Fetch count of invoices for the authenticated user
     const pendingInvoicesCount = await prisma.invoice.count({
       where: {
         userId: user.id,
-        status: {
-          in: ["DRAFT", "SENT", "OVERDUE"],
-        },
+        status: { in: ["SENT", "PAID", "OVERDUE"] },
       },
     });
 
-    // Count invoices by status
-    const statusCounts = await Promise.all([
-      prisma.invoice.count({ where: { status: "DRAFT" } }),
+    // Fetch count of each status (SENT, PAID, OVERDUE)
+    const [sentCount, paidCount, overdueCount] = await Promise.all([
       prisma.invoice.count({ where: { status: "SENT" } }),
+      prisma.invoice.count({ where: { status: "PAID" } }),
       prisma.invoice.count({ where: { status: "OVERDUE" } }),
     ]);
 
-    // Total invoices
+    // Total invoice count
     const totalInvoices = await prisma.invoice.count();
-
-    // Calculate percentage
     const pendingPercentage =
       (pendingInvoicesCount / (totalInvoices || 1)) * 100;
 
-    // Get pending and overdue amounts
-    const pendingAmount = await prisma.invoice.aggregate({
-      where: {
-        status: {
-          in: ["DRAFT", "SENT"],
-        },
-      },
-      _sum: {
-        invoiceTotal: true,
-      },
-    });
+    // Aggregate amounts for SENT and OVERDUE
+    const [pendingAmount, overdueAmount] = await Promise.all([
+      prisma.invoice.aggregate({
+        where: { status: "SENT" },
+        _sum: { invoiceTotal: true },
+      }),
+      prisma.invoice.aggregate({
+        where: { status: "OVERDUE" },
+        _sum: { invoiceTotal: true },
+      }),
+    ]);
 
-    const overdueAmount = await prisma.invoice.aggregate({
-      where: {
-        status: "OVERDUE",
-      },
-      _sum: {
-        invoiceTotal: true,
-      },
-    });
-
-    // Get recent invoices
+    // Get the 5 most recent invoices
     const recentInvoices = await prisma.invoice.findMany({
-      include: {
-        client: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+      include: { client: true },
+      orderBy: { createdAt: "desc" },
       take: 5,
     });
 
@@ -402,9 +386,9 @@ export async function fetchInvoiceData(): Promise<InvoiceData> {
         percentage: pendingPercentage,
       },
       invoicesByStatus: [
-        { name: "Draft", count: statusCounts[0], color: "#94a3b8" },
-        { name: "Sent", count: statusCounts[1], color: "#eab308" },
-        { name: "Overdue", count: statusCounts[2], color: "#f43f5e" },
+        { name: "Sent", count: sentCount, color: "#eab308" }, // Yellow
+        { name: "Paid", count: paidCount, color: "#22c55e" }, // Green
+        { name: "Overdue", count: overdueCount, color: "#f43f5e" }, // Red
       ],
       totalAmount: {
         pending: pendingAmount._sum.invoiceTotal || 0,
@@ -420,14 +404,16 @@ export async function fetchInvoiceData(): Promise<InvoiceData> {
     };
   } catch (error) {
     console.error("Error fetching invoice data:", error);
+
+    // Fallback data
     return {
       pendingInvoices: {
         count: 12,
         percentage: 40,
       },
       invoicesByStatus: [
-        { name: "Draft", count: 5, color: "#94a3b8" },
         { name: "Sent", count: 4, color: "#eab308" },
+        { name: "Paid", count: 5, color: "#22c55e" },
         { name: "Overdue", count: 3, color: "#f43f5e" },
       ],
       totalAmount: {
@@ -453,14 +439,14 @@ export async function fetchInvoiceData(): Promise<InvoiceData> {
           id: "inv-003",
           client: "Stark Industries",
           amount: 5200,
-          status: "DRAFT",
+          status: "SENT",
           dueDate: addDays(new Date(), 14),
         },
         {
           id: "inv-004",
           client: "Wayne Enterprises",
           amount: 1850,
-          status: "SENT",
+          status: "PAID",
           dueDate: addDays(new Date(), 5),
         },
         {
@@ -474,6 +460,7 @@ export async function fetchInvoiceData(): Promise<InvoiceData> {
     };
   }
 }
+
 // Get all transactions
 export async function fetchAllTransactions() {
   try {

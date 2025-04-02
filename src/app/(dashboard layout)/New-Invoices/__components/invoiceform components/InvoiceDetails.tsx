@@ -32,20 +32,28 @@ import { InvoiceFormValues } from "../InvoiceForm";
 
 export function InvoiceDetails({
   form,
+  defaultValues,
 }: {
   form: UseFormReturn<InvoiceFormValues>;
+  defaultValues?: Partial<InvoiceFormValues>;
 }) {
   useEffect(() => {
-    const getInvoice = async () => {
-      const res = await generateInvoiceNumber();
+    if (!defaultValues) {
+      const getInvoice = async () => {
+        const res = await generateInvoiceNumber();
 
-      if (res.success && typeof res.data === "string") {
-        form.setValue("invoiceNumber", res.data);
-      }
-    };
-    getInvoice();
-  }, [form]);
-
+        if (res.success && typeof res.data === "string") {
+          form.setValue("invoiceNumber", res.data);
+        }
+      };
+      getInvoice();
+      return;
+    }
+    form.reset({
+      ...defaultValues,
+      invoiceNumber: defaultValues.invoiceNumber,
+    });
+  }, [form, defaultValues]);
   // Convert any string dates to Date objects when the form initializes
   useEffect(() => {
     const dueDateValue = form.getValues("dueDate");

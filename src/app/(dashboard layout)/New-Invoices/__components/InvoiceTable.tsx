@@ -2,15 +2,8 @@
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  ChevronLeft,
-  ChevronRight,
-  FileDigit,
-  // Pencil,
-  Plus,
-  // Trash2,
-} from "lucide-react";
-// import ClientDialog from "./ClientDialog";
+import { ChevronLeft, ChevronRight, FileDigit, Plus } from "lucide-react";
+
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -21,19 +14,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-// import ClientFilters from "./ClientFilters";
+
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Invoice, InvoiceContents } from "@prisma/client";
-// import { deleteClient } from "../__actions/clientsActions";
-// import { toast } from "sonner";
+
 import { InvoiceResponse } from "@/utils/types";
 import InvoiceDialog from "./InvoiceDialog";
 import InvoiceFilter from "./InvoiceFilter";
 type InvoiceWithContents = Invoice & {
   invoiceContents: InvoiceContents[];
 };
-// Define proper types for client data and API responses
+const statusColors: Record<string, string> = {
+  SENT: "bg-yellow-100 text-yellow-700 border-yellow-500",
+  PAID: "bg-green-100 text-green-700 border-green-500",
+  OVERDUE: "bg-red-100 text-red-700 border-red-500",
+  CANCELLED: "bg-gray-100 text-gray-700 border-gray-500",
+};
 
 const InvoiceTable = () => {
   const [filters, setFilters] = useState<{
@@ -129,10 +126,10 @@ const InvoiceTable = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Address</TableHead>
+                <TableHead>Invoice #</TableHead>
+                <TableHead>Client Email</TableHead>
+                <TableHead>Client Phone</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -160,8 +157,12 @@ const InvoiceTable = () => {
                     </TableCell>
                     <TableCell>{invoice.clientEmail}</TableCell>
                     <TableCell>{invoice.clientPhone}</TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {invoice.clientCountry}
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 text-sm font-semibold rounded-md border ${statusColors[invoice.status]}`}
+                      >
+                        {invoice.status}
+                      </span>
                     </TableCell>
                   </TableRow>
                 ))

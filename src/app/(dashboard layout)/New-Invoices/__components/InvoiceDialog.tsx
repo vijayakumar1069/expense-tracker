@@ -300,8 +300,11 @@ const InvoiceDialog = ({
   const handleSubmit = (data: any) => {
     if (invoice?.id) {
       updateMutation.mutate({ ...data, id: invoice.id } as any);
+      setIsEditMode(false);
+      onOpenChange(false);
     } else {
       addMutation.mutate(data as any);
+      onOpenChange(false);
     }
   };
 

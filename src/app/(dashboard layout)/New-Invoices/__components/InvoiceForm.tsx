@@ -108,7 +108,7 @@ export default function InvoiceForm({
   const handleSubmit = (data: InvoiceFormValues) => {
     onSubmit(data);
   };
-
+  console.log(defaultValues);
   return (
     // This outer div constrains the height to the viewport
     <div className="h-[calc(80vh-2rem)] max-h-[900px] flex flex-col">
@@ -129,7 +129,7 @@ export default function InvoiceForm({
                     <ClientDetails form={form} />
                   </div>
                   <div className="space-y-4">
-                    <InvoiceDetails form={form} />
+                    <InvoiceDetails form={form} defaultValues={defaultValues} />
                   </div>
                 </div>
 
