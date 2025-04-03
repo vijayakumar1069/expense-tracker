@@ -43,7 +43,7 @@ const ClientDialog = ({
         name: client.name,
         email: client.email,
         phone1: client.phone1,
-        phone2: client.phone2,
+        phone2: client.phone2 || "",
         companyName: client.companyName || "",
         streetName: client.streetName || "",
         city: client.city || "",

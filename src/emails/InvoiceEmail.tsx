@@ -204,27 +204,7 @@ export const InvoiceEmail = ({ invoice }: InvoiceEmailProps) => {
                           {formatDate(createdAt)}
                         </Text>
                       </td>
-                      {/* <td width="33%">
-                        <Text
-                          style={{
-                            color: lightTextColor,
-                            fontSize: "12px",
-                            marginBottom: "4px",
-                            textTransform: "uppercase",
-                          }}
-                        >
-                          DUE DATE
-                        </Text>
-                        <Text
-                          style={{
-                            color: secondaryColor,
-                            fontSize: "14px",
-                            fontWeight: "500",
-                          }}
-                        >
-                          {formatDate(dueDate)}
-                        </Text>
-                      </td> */}
+
                       <td width="50%" className="text-right">
                         <Text
                           style={{

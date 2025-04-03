@@ -24,7 +24,7 @@ import InvoiceDialog from "./InvoiceDialog";
 import InvoiceFilter from "./InvoiceFilter";
 import { generateInvoicePDF } from "@/lib/pdf-generator.server";
 import { format } from "date-fns";
-type InvoiceWithContents = Invoice & {
+export type InvoiceWithContents = Invoice & {
   invoiceContents: InvoiceContents[];
 };
 const statusColors: Record<string, string> = {

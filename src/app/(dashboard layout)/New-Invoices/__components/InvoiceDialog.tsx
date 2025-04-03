@@ -35,6 +35,8 @@ type InvoiceFormValues = Omit<
   "id" | "createdAt" | "updatedAt" | "userId"
 > & {
   clientCompanyName?: string;
+  clientPhone1: string;
+  clientPhone2?: string;
   // Override the invoiceContents to match what the form uses
   invoiceContents: {
     id?: string;
@@ -168,7 +170,7 @@ const InvoiceDialog = ({
     mutationFn: (data: InvoiceFormValues & { id: string }) => {
       const formattedData = {
         ...data,
-        clientPhone2: data.clientPhone2 || undefined,
+        clientPhone2: data.clientPhone2 || "",
         invoiceContents: data.invoiceContents.map((item) => ({
           ...item,
           id: item.id || crypto.randomUUID(),
@@ -373,9 +375,11 @@ const InvoiceDialog = ({
               <div key={index} className="p-3 flex justify-between">
                 <div>
                   <p className="font-medium">{item.description}</p>
-                  <p className="text-sm text-muted-foreground">{item.total}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {item.total.toFixed(2)}
+                  </p>
                 </div>
-                <p className="font-medium">{item.total}</p>
+                <p className="font-medium">{item.total.toFixed(2)}</p>
               </div>
             ))}
           </div>
@@ -384,15 +388,17 @@ const InvoiceDialog = ({
         <div className="space-y-2 pt-3 border-t">
           <div className="flex justify-between">
             <p className="text-muted-foreground">Subtotal</p>
-            <p>{invoice.subtotal}</p>
+            <p>{invoice.subtotal.toFixed(2)}</p>
           </div>
           <div className="flex justify-between">
-            <p className="text-muted-foreground">Tax ({invoice.taxRate}%)</p>
-            <p>{invoice.taxAmount}</p>
+            <p className="text-muted-foreground">
+              Tax ({invoice.taxRate.toFixed(2)}%)
+            </p>
+            <p>{invoice.taxAmount.toFixed(2)}</p>
           </div>
           <div className="flex justify-between font-medium text-lg">
             <p>Total</p>
-            <p>{invoice.invoiceTotal}</p>
+            <p>{invoice.invoiceTotal.toFixed(2)}</p>
           </div>
         </div>
       </div>

@@ -38,7 +38,7 @@ const ClientTable = () => {
   }>({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 2;
+  const limit = 10;
   const [selectedClient, setSelectedClient] = useState<Client | undefined>(
     undefined
   );

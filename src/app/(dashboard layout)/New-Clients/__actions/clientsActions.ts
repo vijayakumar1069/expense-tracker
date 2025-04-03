@@ -110,7 +110,7 @@ export async function updateClient(
                 name: validatedData.name,
                 email: validatedData.email,
                 phone1: validatedData.phone1,
-                phone2: validatedData.phone2,
+                phone2: validatedData.phone2 || "",
                 companyName: validatedData.companyName,
                 streetName: validatedData.streetName,
                 city: validatedData.city,

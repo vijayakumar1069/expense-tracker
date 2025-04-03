@@ -5,7 +5,7 @@ import { requireAuth } from "@/lib/auth";
 import { CATEGORIES } from "@/utils/constants/consts";
 import { prisma } from "@/utils/prisma";
 import { PaymentMethodType } from "@prisma/client";
-import { addDays, format, subDays, subMonths } from "date-fns";
+import { format, subMonths } from "date-fns";
 
 // Types definitions
 // type TransactionType = 'INCOME' | 'EXPENSE';
@@ -60,7 +60,6 @@ type InvoiceData = {
     client: string;
     amount: number;
     status: InvoiceStatus;
-    dueDate: Date;
   }[];
 };
 
@@ -544,7 +543,6 @@ export async function fetchInvoiceData(): Promise<InvoiceData> {
         client: invoice.client.name || "",
         amount: invoice.invoiceTotal,
         status: invoice.status as InvoiceStatus,
-        dueDate: invoice.dueDate,
       })),
     };
   } catch (error) {
@@ -571,35 +569,30 @@ export async function fetchInvoiceData(): Promise<InvoiceData> {
           client: "Acme Corp",
           amount: 3500,
           status: "SENT",
-          dueDate: addDays(new Date(), 7),
         },
         {
           id: "inv-002",
           client: "Globex Inc",
           amount: 2800,
           status: "OVERDUE",
-          dueDate: subDays(new Date(), 3),
         },
         {
           id: "inv-003",
           client: "Stark Industries",
           amount: 5200,
           status: "SENT",
-          dueDate: addDays(new Date(), 14),
         },
         {
           id: "inv-004",
           client: "Wayne Enterprises",
           amount: 1850,
           status: "PAID",
-          dueDate: addDays(new Date(), 5),
         },
         {
           id: "inv-005",
           client: "Umbrella Corp",
           amount: 3250,
           status: "PAID",
-          dueDate: subDays(new Date(), 10),
         },
       ],
     };

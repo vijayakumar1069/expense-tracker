@@ -8,9 +8,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { InvoiceFormValues } from "../InvoiceForm";
+import { UseFormReturn } from "react-hook-form";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function ClientDetails({ form }: { form: any }) {
+export function ClientDetails({
+  form,
+}: {
+  form: UseFormReturn<InvoiceFormValues>;
+}) {
   console.log(form.getValues());
   return (
     <div className="grid grid-cols-2 gap-4 mt-4">
@@ -35,7 +40,12 @@ export function ClientDetails({ form }: { form: any }) {
           <FormItem>
             <FormLabel>Client Company Name</FormLabel>
             <FormControl>
-              <Input {...field} readOnly className="bg-muted" />
+              <Input
+                {...field}
+                readOnly
+                className="bg-muted"
+                value={field.value || ""}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -62,7 +72,12 @@ export function ClientDetails({ form }: { form: any }) {
           <FormItem>
             <FormLabel>Secondary Phone (Optional)</FormLabel>
             <FormControl>
-              <Input {...field} readOnly placeholder="Secondary Phone Number" />
+              <Input
+                {...field}
+                readOnly
+                placeholder="Secondary Phone Number"
+                value={field.value || ""}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

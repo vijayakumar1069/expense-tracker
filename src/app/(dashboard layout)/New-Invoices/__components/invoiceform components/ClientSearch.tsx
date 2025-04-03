@@ -65,6 +65,7 @@ export function ClientSearch({ form }: { form: any }) {
           }
 
           const data = await response.json();
+          console.log("Fetched clients:", data); // Log the fetched clients
           setClients(data);
           setLoading(false);
         }, 300); // 300ms debounce
@@ -88,7 +89,7 @@ export function ClientSearch({ form }: { form: any }) {
       form.setValue("clientName", selectedClient.name);
       form.setValue("clientEmail", selectedClient.email);
       form.setValue("clientPhone1", selectedClient.phone1);
-      form.setValue("clientPhone2", selectedClient.phone2);
+      form.setValue("clientPhone2", selectedClient.phone2 || "");
       form.setValue("clientStreetName", selectedClient.streetName);
       form.setValue("clientCity", selectedClient.city);
       form.setValue("clientZip", selectedClient.zip);
@@ -118,7 +119,7 @@ export function ClientSearch({ form }: { form: any }) {
           </FormControl>
         </PopoverTrigger>
         <PopoverContent className="w-[400px] p-0">
-          <Command>
+          <Command shouldFilter={false}>
             <CommandInput
               placeholder="Search clients..."
               value={searchQuery}

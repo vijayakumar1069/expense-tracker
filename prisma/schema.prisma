@@ -151,7 +151,7 @@ model Invoice{
   clientCountry String
 
   invoiceNumber String  
-  dueDate DateTime
+
   client Client @relation(fields: [clientId], references: [id])
   clientId String
   user User @relation(fields: [userId], references: [id])

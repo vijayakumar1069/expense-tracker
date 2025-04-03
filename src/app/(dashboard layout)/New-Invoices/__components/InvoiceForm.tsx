@@ -26,16 +26,14 @@ const invoiceSchema = z.object({
   clientName: z.string().min(1, "Client name is required"),
   clientEmail: z.string().email("Invalid email address"),
   clientPhone1: z.string().min(1, "Phone is required"),
-  clientPhone2: z.string().optional(),
+  clientPhone2: z.string().optional().nullable(),
   clientStreetName: z.string().min(1, "Address is required"),
   clientCity: z.string().min(1, "City is required"),
   clientState: z.string().min(1, "State is required"),
   clientZip: z.string().min(1, "Zip code is required"),
   clientCountry: z.string().min(1, "Country is required"),
   invoiceNumber: z.string().min(1, "Invoice number is required"),
-  dueDate: z.date({
-    required_error: "Due date is required",
-  }),
+
   clientCompanyName: z.string().optional(),
   status: z
     .enum(["DRAFT", "SENT", "PAID", "OVERDUE", "CANCELLED"])
@@ -63,12 +61,13 @@ export default function InvoiceForm({
   // Initialize form with default values
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
+    mode: "onBlur",
     defaultValues: {
       clientId: "",
       clientName: "",
       clientEmail: "",
-      clientPhone1: "",
-      clientPhone2: defaultValues?.clientPhone2 || "",
+      clientPhone1: defaultValues?.clientPhone1 ?? "",
+      clientPhone2: defaultValues?.clientPhone2 ?? undefined,
       clientCompanyName: "",
       clientStreetName: "",
       clientCity: "",
@@ -76,7 +75,7 @@ export default function InvoiceForm({
       clientZip: "",
       clientCountry: "",
       invoiceNumber: "",
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default to 30 days from now
+
       status: defaultValues?.status || "DRAFT",
       invoiceContents: [{ description: "", total: 0 }],
       subtotal: 0,
