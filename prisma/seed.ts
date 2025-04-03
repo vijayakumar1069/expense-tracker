@@ -1,6 +1,7 @@
 // seed.ts
 import { PrismaClient, TransactionType, PaymentMethodType, InvoiceStatus } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import { formatDate } from 'date-fns';
 
 const prisma = new PrismaClient();
 
@@ -114,7 +115,7 @@ const TAX_TYPES = [
 ];
 
 const FY_START = new Date('2025-04-01');
-const FY_END = new Date('2026-03-31');
+// const FY_END = new Date('2026-03-31');
 
 async function seed() {
     try {
@@ -156,40 +157,119 @@ async function seed() {
             clients.push(client);
         }
 
-        // Create 30 transactions within financial year
+        // Create transactions - 100 per month with all payment methods and types
         const transactions = [];
-        for (let i = 0; i < 60; i++) {
-            const type = i % 2 === 0 ? TransactionType.INCOME : TransactionType.EXPENSE;
-            const amount = faker.number.float({ min: 1000, max: 50000, fractionDigits: 2 });
+        const paymentMethods = ['CASH', 'BANK', 'CHEQUE', 'INVOICE'] as const;
+
+        // Generate array of months in the financial year
+        const months = Array.from({ length: 12 }, (_, index) => {
+            const start = new Date(FY_START);
+            start.setMonth(FY_START.getMonth() + index);
+            const end = new Date(start);
+            end.setMonth(end.getMonth() + 1);
+            end.setDate(0); // Last day of the month
+            return { start, end };
+        });
+
+        // Create transactions for each month
+        for (const { start: monthStart, end: monthEnd } of months) {
+            // Create 25 transactions per payment method (12 income + 13 expense)
+            for (const method of paymentMethods) {
+                // Income transactions
+                for (let i = 0; i < 12; i++) {
+                    const transaction = await createTransaction(
+                        TransactionType.INCOME,
+                        method,
+                        monthStart,
+                        monthEnd
+                    );
+                    transactions.push(transaction);
+                }
+
+                // Expense transactions
+                for (let i = 0; i < 13; i++) {
+                    const transaction = await createTransaction(
+                        TransactionType.EXPENSE,
+                        method,
+                        monthStart,
+                        monthEnd
+                    );
+                    transactions.push(transaction);
+                }
+            }
+        }
+
+        // Helper function to create transactions
+        async function createTransaction(
+            type: TransactionType,
+            method: typeof paymentMethods[number],
+            monthStart: Date,
+            monthEnd: Date
+        ) {
+            const amount = faker.number.float({
+                min: 1000,
+                max: 50000,
+                fractionDigits: 2
+            });
             const taxType = faker.helpers.arrayElement(TAX_TYPES);
             const category = faker.helpers.arrayElement(CATEGORIES);
 
-            const transaction = await prisma.transaction.create({
+            const paymentDetails = {
+                type: PaymentMethodType[method],
+                ...(method === 'CASH' && {
+                    receivedBy: faker.person.fullName(),
+                    bankName: null,
+                    chequeNo: null,
+                    chequeDate: null,
+                    invoiceNo: null
+                }),
+                ...(method === 'BANK' && {
+                    bankName: faker.company.name(),
+                    receivedBy: null,
+                    chequeNo: null,
+                    chequeDate: null,
+                    invoiceNo: null
+                }),
+                ...(method === 'CHEQUE' && {
+                    chequeNo: `CHQ${faker.string.numeric(8)}`,
+                    chequeDate: faker.date.future({ years: 1 }),
+                    receivedBy: null,
+                    bankName: null,
+                    invoiceNo: null
+                }),
+                ...(method === 'INVOICE' && {
+                    invoiceNo: `INV-${faker.string.alphanumeric(6).toUpperCase()}`,
+                    receivedBy: null,
+                    bankName: null,
+                    chequeNo: null,
+                    chequeDate: null
+                })
+            };
+
+            return prisma.transaction.create({
                 data: {
                     type,
-                    name: `${type} Transaction FY25-26-${i + 1}`,
+                    name: `${type} Transaction ${method} ${formatDate(monthStart, 'MMM yyyy')}`,
                     description: faker.finance.transactionDescription(),
                     amount,
                     tax: taxType.id,
                     total: amount + (amount * taxType.rate),
-                    date: faker.date.between({ from: FY_START, to: FY_END }),
+                    date: faker.date.between({
+                        from: monthStart,
+                        to: monthEnd
+                    }),
                     category: category.name,
                     user: { connect: { id: user.id } },
                     attachments: {
-                        create: i % 4 === 0 ? [{
+                        create: Math.random() < 0.25 ? [{
                             url: faker.internet.url()
                         }] : undefined
                     },
                     paymentMethod: {
-                        create: {
-                            type: PaymentMethodType[i % 4 === 0 ? 'CASH' : 'BANK'],
-                            ...(i % 4 === 0 && { receivedBy: faker.person.fullName() }),
-                            ...(i % 4 === 1 && { bankName: faker.company.name() })
-                        }
+                        create: paymentDetails
                     }
                 }
             });
-            transactions.push(transaction);
         }
 
         // Create 20 invoices with proper tax types

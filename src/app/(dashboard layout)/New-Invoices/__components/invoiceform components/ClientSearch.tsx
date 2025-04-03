@@ -65,7 +65,7 @@ export function ClientSearch({ form }: { form: any }) {
           }
 
           const data = await response.json();
-          console.log("Fetched clients:", data); // Log the fetched clients
+
           setClients(data);
           setLoading(false);
         }, 300); // 300ms debounce

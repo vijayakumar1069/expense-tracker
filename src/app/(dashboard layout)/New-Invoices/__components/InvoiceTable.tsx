@@ -2,7 +2,13 @@
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, FileDigit, Plus } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileDigit,
+  Loader2,
+  Plus,
+} from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -17,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Invoice, InvoiceContents } from "@prisma/client";
+import { Invoice, InvoiceContents, InvoiceStatus } from "@prisma/client";
 
 import { InvoiceResponse } from "@/utils/types";
 import InvoiceDialog from "./InvoiceDialog";
@@ -38,14 +44,17 @@ const InvoiceTable = () => {
   const [filters, setFilters] = useState<{
     clientName?: string;
     invoiceNumber?: string;
+    clientCompanyName?: string;
+    status?: InvoiceStatus;
   }>({});
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 10;
   const [selectedInvoice, setSelectedInvoice] = useState<
     InvoiceWithContents | undefined
   >(undefined);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [, setIsDownloading] = useState(false);
 
   const { data, isLoading, isError } = useQuery<InvoiceResponse>({
     queryKey: ["invoices", filters, currentPage, limit],
@@ -58,6 +67,9 @@ const InvoiceTable = () => {
       if (filters.clientName) params.append("clientName", filters.clientName);
       if (filters.invoiceNumber)
         params.append("invoiceNumber", filters.invoiceNumber);
+      if (filters.clientCompanyName)
+        params.append("clientCompanyName", filters.clientCompanyName);
+      if (filters.status) params.append("status", filters.status);
 
       const response = await fetch(
         `/api/get-all-invoices?${params.toString()}`
@@ -93,6 +105,7 @@ const InvoiceTable = () => {
   };
   async function handleDownloadInvoice(invoiceData: InvoiceWithContents) {
     try {
+      setDownloadingId(invoiceData.id); // Set the specific invoice ID
       setIsDownloading(true);
       // Generate the PDF buffer
       const pdfBuffer = await generateInvoicePDF(invoiceData);
@@ -117,8 +130,10 @@ const InvoiceTable = () => {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
       setIsDownloading(false);
+      setDownloadingId(null); // Reset when done
     } catch (error) {
       setIsDownloading(false);
+      setDownloadingId(null); // Reset when done
       console.error("Error generating/downloading PDF:", error);
       // Add your error handling here
     }
@@ -210,13 +225,20 @@ const InvoiceTable = () => {
                         variant="outline"
                         size="sm"
                         onClick={(e) => {
-                          e.stopPropagation(); // This stops the event from bubbling up to the row
+                          e.stopPropagation();
                           handleDownloadInvoice(invoice as InvoiceWithContents);
                         }}
-                        disabled={isDownloading}
+                        disabled={downloadingId === invoice.id}
                         className="text-white hover:text-black bg-shopping hover:bg-shopping/50 dark:hover:bg-indigo-950/30 transition-all"
                       >
-                        {isDownloading ? "Generating..." : "Download"}
+                        {downloadingId === invoice.id ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          "Download"
+                        )}
                       </Button>
                     </TableCell>
                   </TableRow>

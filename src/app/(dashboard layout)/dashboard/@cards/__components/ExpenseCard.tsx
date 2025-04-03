@@ -5,12 +5,6 @@ import { BarChart2, TrendingDown, Calendar } from "lucide-react";
 export default async function ExpenseCard() {
   const { totalExpense, topExpenseCategories, financialYear, monthlyExpenses } =
     await fetchExpenseData();
-  console.log(
-    totalExpense,
-    topExpenseCategories,
-    financialYear,
-    monthlyExpenses
-  );
 
   // Array of 12 unique color gradients for each month
   const monthColors = [

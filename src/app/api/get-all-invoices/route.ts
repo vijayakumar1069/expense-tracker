@@ -8,6 +8,8 @@ import { z } from "zod";
 const querySchema = z.object({
     clientName: z.string().optional(),
     invoiceNumber: z.string().optional(),
+    clientCompanyName: z.string().optional(),
+    status: z.string().optional(),
     limit: z.string().transform(val => parseInt(val)).optional(),
     page: z.string().transform(val => parseInt(val)).optional(),
 });
@@ -33,6 +35,8 @@ export async function GET(request: NextRequest) {
             limit: searchParams.get("limit") || "10",
             clientName: searchParams.get("clientName") || undefined,
             invoiceNumber: searchParams.get("invoiceNumber") || undefined,
+            clientCompanyName: searchParams.get("clientCompanyName") || undefined,
+            status: searchParams.get("status") || undefined,
         });
 
         const {
@@ -40,6 +44,8 @@ export async function GET(request: NextRequest) {
             limit = 10,
             clientName,
             invoiceNumber,
+            clientCompanyName,
+            status,
         } = validatedParams;
 
         // Build where clause for filtering
@@ -59,6 +65,18 @@ export async function GET(request: NextRequest) {
             where.invoiceNumber = {
                 contains: invoiceNumber,
             };
+        }
+
+        // Add clientCompanyName filter if provided
+        if (clientCompanyName) {
+            where.clientCompanyName = {
+                contains: clientCompanyName,
+            };
+        }
+        // Add status filter if provided
+        if (status) {
+            where.status = status as Prisma.EnumInvoiceStatusFilter;
+
         }
 
         // Calculate pagination

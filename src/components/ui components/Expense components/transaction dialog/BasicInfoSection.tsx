@@ -105,12 +105,13 @@ export const BasicInfoSection: React.FC<FormSectionProps> = ({ form }) => {
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-96 p-0">
+              <PopoverContent className="w-96 p-0 h-[300px] overflow-hidden">
                 <Command>
                   <CommandInput
                     placeholder="Search category..."
                     className="h-9"
                   />
+
                   <CommandList className="w-full h-full">
                     <CommandEmpty>No category found.</CommandEmpty>
                     <CommandGroup>

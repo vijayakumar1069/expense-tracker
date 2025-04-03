@@ -42,7 +42,6 @@ const ClientForm = ({
       country: "",
     },
   });
-  console.log(isEditMode);
 
   return (
     <Form {...form}>

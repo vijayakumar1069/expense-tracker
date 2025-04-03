@@ -153,3 +153,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Add this to your global CSS */
+.popover-scroll-container {
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.popover-scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.popover-scroll-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}

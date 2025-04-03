@@ -18,7 +18,14 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { useState } from "react";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { InvoiceStatus } from "@prisma/client";
 // InvoiceFilter; component for filtering/searching invoices
 const InvoiceFilter = ({
   onFilterChange,
@@ -27,6 +34,7 @@ const InvoiceFilter = ({
     clientName?: string;
     clientCompanyName?: string;
     invoiceNumber?: string;
+    status?: InvoiceStatus; // Add this line
   }) => void;
 }) => {
   const [clientNameFilter, setClientNameFilter] = useState<string>("");
@@ -34,6 +42,7 @@ const InvoiceFilter = ({
   const [clientCompanyNameFilter, setClientCompanyNameFilter] =
     useState<string>("");
   const [expanded, setExpanded] = useState<boolean>(false);
+  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "">("");
 
   const handleFilterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +50,7 @@ const InvoiceFilter = ({
       clientName: clientNameFilter || undefined,
       invoiceNumber: invoiceNumberFilter || undefined,
       clientCompanyName: clientCompanyNameFilter || undefined,
+      status: statusFilter || undefined, // Add this line
     });
   };
 
@@ -48,11 +58,15 @@ const InvoiceFilter = ({
     setInvoiceNumberFilter("");
     setClientCompanyNameFilter("");
     setClientNameFilter("");
+    setStatusFilter(""); // Add this line
     onFilterChange({});
   };
 
   const filtersActive =
-    clientNameFilter || invoiceNumberFilter || clientCompanyNameFilter;
+    clientNameFilter ||
+    invoiceNumberFilter ||
+    clientCompanyNameFilter ||
+    statusFilter;
 
   return (
     <Card className="mb-6 border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-950 overflow-hidden">
@@ -164,6 +178,32 @@ const InvoiceFilter = ({
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
                 </div>
               </div>
+              <div className="space-y-2.5 w-full">
+                <Label
+                  htmlFor="statusFilter"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5"
+                >
+                  <SlidersHorizontal className="h-3.5 w-3.5 text-indigo-500" />
+                  Status
+                </Label>
+                <Select
+                  value={statusFilter}
+                  onValueChange={(value: InvoiceStatus) =>
+                    setStatusFilter(value)
+                  }
+                >
+                  <SelectTrigger className="h-10 w-full bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DRAFT">Draft</SelectItem>
+                    <SelectItem value="SENT">Sent</SelectItem>
+                    <SelectItem value="PAID">Paid</SelectItem>
+                    <SelectItem value="OVERDUE">Overdue</SelectItem>
+                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="flex justify-end">
@@ -202,6 +242,13 @@ const InvoiceFilter = ({
               <div className="text-xs flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm">
                 <span className="font-medium mr-1.5">Client Company:</span>{" "}
                 {clientCompanyNameFilter}
+              </div>
+            )}
+
+            {statusFilter && (
+              <div className="text-xs flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm">
+                <span className="font-medium mr-1.5">Status:</span>{" "}
+                {statusFilter}
               </div>
             )}
           </div>
