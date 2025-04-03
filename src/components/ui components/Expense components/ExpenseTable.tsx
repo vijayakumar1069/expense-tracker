@@ -188,7 +188,7 @@ const ExpenseTable = () => {
                       key={transaction.id}
                       className="group hover:bg-blue-50/40 dark:hover:bg-blue-950/20 transition-all duration-200"
                     >
-                      <TableCell className="font-medium max-w-48 text-wrap py-4">
+                      <TableCell className="font-medium max-w-60 text-wrap py-4">
                         <div className="flex flex-col">
                           {transaction.name}
                           {/* {transaction.description && (
