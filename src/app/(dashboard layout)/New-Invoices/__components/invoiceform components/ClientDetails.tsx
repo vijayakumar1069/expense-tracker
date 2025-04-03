@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ClientDetails({ form }: { form: any }) {
+  console.log(form.getValues());
   return (
     <div className="grid grid-cols-2 gap-4 mt-4">
       {/* Client Email */}
@@ -40,16 +41,28 @@ export function ClientDetails({ form }: { form: any }) {
           </FormItem>
         )}
       />
-
-      {/* Client Phone */}
       <FormField
         control={form.control}
-        name="clientPhone"
+        name="clientPhone1"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Client Phone</FormLabel>
+            <FormLabel>Primary Phone</FormLabel>
             <FormControl>
-              <Input {...field} readOnly className="bg-muted" />
+              <Input {...field} readOnly placeholder="Primary Phone Number" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="clientPhone2"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Secondary Phone (Optional)</FormLabel>
+            <FormControl>
+              <Input {...field} readOnly placeholder="Secondary Phone Number" />
             </FormControl>
             <FormMessage />
           </FormItem>

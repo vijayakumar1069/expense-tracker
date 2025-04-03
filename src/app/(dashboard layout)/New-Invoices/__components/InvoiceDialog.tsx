@@ -88,6 +88,7 @@ const InvoiceDialog = ({
     mutationFn: (data: InvoiceFormValues) => {
       const formattedData = {
         ...data,
+        clientPhone2: data.clientPhone2 || undefined,
         invoiceContents: data.invoiceContents.map((item) => ({
           ...item,
           id: crypto.randomUUID(),
@@ -167,6 +168,7 @@ const InvoiceDialog = ({
     mutationFn: (data: InvoiceFormValues & { id: string }) => {
       const formattedData = {
         ...data,
+        clientPhone2: data.clientPhone2 || undefined,
         invoiceContents: data.invoiceContents.map((item) => ({
           ...item,
           id: item.id || crypto.randomUUID(),
@@ -175,7 +177,7 @@ const InvoiceDialog = ({
           invoiceId: data.id,
         })),
       };
-      console.log(formattedData);
+
       return updateInvoice(formattedData);
     },
     onMutate: async (updatedInvoiceData) => {
@@ -360,7 +362,7 @@ const InvoiceDialog = ({
           <h3 className="text-sm font-medium text-muted-foreground">Client</h3>
           <p className="text-base font-medium">{invoice.clientName}</p>
           <p className="text-sm">{invoice.clientEmail}</p>
-          <p className="text-sm">{invoice.clientPhone}</p>
+          <p className="text-sm">{invoice.clientPhone1}</p>
           <p className="text-sm whitespace-pre-wrap">{invoice.clientCountry}</p>
         </div>
 

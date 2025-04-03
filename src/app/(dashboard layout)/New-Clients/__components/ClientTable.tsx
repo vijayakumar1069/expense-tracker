@@ -159,7 +159,7 @@ const ClientTable = () => {
                   >
                     <TableCell className="font-medium">{client.name}</TableCell>
                     <TableCell>{client.email}</TableCell>
-                    <TableCell>{client.phone}</TableCell>
+                    <TableCell>{client.phone1}</TableCell>
                     <TableCell>{client.companyName}</TableCell>
                     <TableCell
                       className="max-w-xs truncate"

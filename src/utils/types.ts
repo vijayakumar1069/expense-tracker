@@ -48,7 +48,8 @@ export interface Client {
     id: string;
     name: string;
     email: string;
-    phone: string;
+    phone1: string;
+    phone2: string;
     streetName: string;
     city: string;
     state: string;
@@ -124,7 +125,8 @@ export const clientSchema = z.object({
     name: z.string().optional(),
     companyName: z.string().optional(),
     email: z.string().email("Please enter a valid email address"),
-    phone: z.string().min(10, "Phone must be at least 10 characters"),
+    phone1: z.string().min(10, "Phone must be at least 10 characters"),
+    phone2: z.string().optional(),
     streetName: z.string().min(5, "Address must be at least 5 characters"),
     city: z.string().min(3, "City must be at least 3 characters"),
     state: z.string().min(3, "State must be at least 3 characters"),

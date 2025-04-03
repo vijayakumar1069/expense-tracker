@@ -32,7 +32,8 @@ const invoiceSchema = z.object({
     clientName: z.string().min(1, "Client name is required"),
     clientCompanyName: z.string().optional(),
     clientEmail: z.string().email("Invalid email address"),
-    clientPhone: z.string().min(1, "Phone is required"),
+    clientPhone1: z.string().min(1, "Phone is required"),
+    clientPhone2: z.string().optional(),
     clientStreetName: z.string().min(1, "Address is required"),
     clientCity: z.string().min(1, "City is required"),
     clientState: z.string().min(1, "State is required"),
@@ -104,14 +105,15 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                     clientName: validatedData.clientName,
                     clientEmail: validatedData.clientEmail,
                     clientCompanyName: validatedData.clientCompanyName ?? "",
-                    clientPhone: validatedData.clientPhone,
+                    clientPhone1: validatedData.clientPhone1,
+                    clientPhone2: validatedData.clientPhone2 ?? "",
                     clientStreetName: validatedData.clientStreetName,
                     clientCity: validatedData.clientCity,
                     clientState: validatedData.clientState,
                     clientZip: validatedData.clientZip,
                     clientCountry: validatedData.clientCountry,
                     invoiceNumber: validatedData.invoiceNumber,
-                    dueDate: validatedData.dueDate,
+                    dueDate: validatedData.dueDate || null,
                     status: validatedData.status,
                     subtotal: validatedData.subtotal,
                     taxRate: validatedData.taxRate,
@@ -245,7 +247,7 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
 
 export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Promise<ActionResponse> {
     try {
-        console.log("Received form data:", formData);
+
 
         // Validate input data
         const validatedData = invoiceSchema.parse(formData);
@@ -302,14 +304,15 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                     clientName: validatedData.clientName,
                     clientEmail: validatedData.clientEmail,
                     clientCompanyName: validatedData.clientCompanyName ?? "",
-                    clientPhone: validatedData.clientPhone,
+                    clientPhone1: validatedData.clientPhone1,
+                    clientPhone2: validatedData.clientPhone2 ?? "",
                     clientStreetName: validatedData.clientStreetName,
                     clientCity: validatedData.clientCity,
                     clientState: validatedData.clientState,
                     clientZip: validatedData.clientZip,
                     clientCountry: validatedData.clientCountry,
                     invoiceNumber: existingInvoice.invoiceNumber,
-                    dueDate: validatedData.dueDate,
+                    dueDate: validatedData.dueDate || null,
                     status: validatedData.status,
                     subtotal: validatedData.subtotal,
                     taxRate: validatedData.taxRate,
@@ -664,7 +667,9 @@ export async function createInvoiceAction(formData: FormData) {
             clientId: rawData.clientId as string,
             clientName: rawData.clientName as string,
             clientEmail: rawData.clientEmail as string,
-            clientPhone: rawData.clientPhone as string,
+            clientPhone1: rawData.clientPhone as string,
+            clientPhone2: rawData.clientPhone2 as string,
+
             clientStreetName: rawData.clientStreetName as string,
             clientCity: rawData.clientCity as string,
             clientState: rawData.clientState as string,

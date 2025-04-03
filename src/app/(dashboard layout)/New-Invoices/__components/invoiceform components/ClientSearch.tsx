@@ -29,7 +29,8 @@ interface Client {
   id: string;
   name: string;
   email: string;
-  phone: string;
+  phone1: string;
+  phone2: string;
   streetName: string;
   companyName: string;
   city: string;
@@ -86,7 +87,8 @@ export function ClientSearch({ form }: { form: any }) {
       form.setValue("clientId", selectedClient.id);
       form.setValue("clientName", selectedClient.name);
       form.setValue("clientEmail", selectedClient.email);
-      form.setValue("clientPhone", selectedClient.phone);
+      form.setValue("clientPhone1", selectedClient.phone1);
+      form.setValue("clientPhone2", selectedClient.phone2);
       form.setValue("clientStreetName", selectedClient.streetName);
       form.setValue("clientCity", selectedClient.city);
       form.setValue("clientZip", selectedClient.zip);

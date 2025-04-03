@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use server"
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { toWords } from "number-to-words";
 
@@ -97,7 +98,7 @@ export async function generateInvoicePDF(invoice: any) {
             });
         });
 
-        yPosition -= 75; // Adjusted position after company info
+        yPosition -= 90; // Adjusted position after company info
 
         // Invoice title moved below company details
         const invoiceTitle = "INVOICE";
@@ -128,7 +129,7 @@ export async function generateInvoicePDF(invoice: any) {
             color: colors.primary
         });
 
-        yPosition -= 18; // Continue to adjust vertical position after the title and underline
+        yPosition -= 29; // ; // Continue to adjust vertical position after the title and underline
         // position for next element
 
         // Client & Company Address Section
@@ -175,8 +176,8 @@ export async function generateInvoicePDF(invoice: any) {
         // }
 
         // Only add phone if it exists
-        if (invoice.clientPhone && invoice.clientPhone.trim() && invoice.clientEmail && invoice.clientEmail.trim()) {
-            clientDetails.push(`Phone: ${invoice.clientPhone} | Email: ${invoice.clientEmail}`);
+        if (invoice.clientPhone1 && invoice.clientPhone1.trim() && invoice.clientEmail && invoice.clientEmail.trim()) {
+            clientDetails.push(`Phone: ${invoice.clientPhone1} ${invoice.clientPhone2 ? ` ${invoice.clientPhone2}` : ''} | Email: ${invoice.clientEmail}`);
         }
 
 

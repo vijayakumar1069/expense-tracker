@@ -5,7 +5,7 @@ import { BarChart2, TrendingDown, Calendar } from "lucide-react";
 export default async function ExpenseCard() {
   const { totalExpense, topExpenseCategories, financialYear, monthlyExpenses } =
     await fetchExpenseData();
-  console.log(monthlyExpenses);
+
   // Array of 12 unique color gradients for each month
   const monthColors = [
     { from: "#FF6B6B", to: "#FF8787" }, // April - Red
@@ -24,7 +24,6 @@ export default async function ExpenseCard() {
 
   // Calculate the highest monthly expense for relative scaling
   const maxMonthlyExpense = Math.max(...monthlyExpenses.map((m) => m.amount));
-  console.log("maxMonthlyExpense", maxMonthlyExpense);
 
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100">

@@ -42,7 +42,8 @@ const ClientDialog = ({
     ? {
         name: client.name,
         email: client.email,
-        phone: client.phone,
+        phone1: client.phone1,
+        phone2: client.phone2,
         companyName: client.companyName || "",
         streetName: client.streetName || "",
         city: client.city || "",
@@ -56,7 +57,7 @@ const ClientDialog = ({
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       // Small delay to avoid visual glitch during closing animation
-      setTimeout(() => setIsEditMode(isNewClient), 100);
+      setTimeout(() => setIsEditMode(isNewClient), 10);
     } else {
       setIsEditMode(isNewClient);
     }
@@ -92,7 +93,8 @@ const ClientDialog = ({
         id: `temp-${Date.now()}`,
         name: newClientData.name,
         email: newClientData.email,
-        phone: newClientData.phone,
+        phone1: newClientData.phone1,
+        phone2: newClientData.phone2,
         companyName: newClientData.companyName,
         streetName: newClientData.streetName,
         city: newClientData.city,
@@ -121,6 +123,7 @@ const ClientDialog = ({
         duration: 2500,
       });
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      setIsEditMode(false);
       handleOpenChange(false);
     },
     onError: (error, _, context) => {
@@ -304,7 +307,7 @@ const ClientDialog = ({
 
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-muted-foreground">Phone</h3>
-          <p className="text-base">{client.phone}</p>
+          <p className="text-base">{client.phone1}</p>
         </div>
 
         <div className="space-y-2">

@@ -33,7 +33,8 @@ const ClientForm = ({
       name: "",
       email: "",
       companyName: "",
-      phone: "",
+      phone1: "",
+      phone2: "",
       streetName: "",
       city: "",
       state: "",
@@ -41,6 +42,7 @@ const ClientForm = ({
       country: "",
     },
   });
+  console.log(isEditMode);
 
   return (
     <Form {...form}>
@@ -109,14 +111,31 @@ const ClientForm = ({
         {/* Phone Field */}
         <FormField
           control={form.control}
-          name="phone"
+          name="phone1"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-primary">Phone Number</FormLabel>
+              <FormLabel className="text-primary">Phone Number 1</FormLabel>
               <FormControl>
                 <Input
                   className="rounded-md border border-accent focus:border-secondary focus:ring-secondary"
                   placeholder="Enter phone number"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="phone2"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-primary">Phone Number 2</FormLabel>
+              <FormControl>
+                <Input
+                  className="rounded-md border border-accent focus:border-secondary focus:ring-secondary"
+                  placeholder="Enter Additional phone number"
                   {...field}
                 />
               </FormControl>

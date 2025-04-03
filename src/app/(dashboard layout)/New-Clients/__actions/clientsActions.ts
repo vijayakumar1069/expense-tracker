@@ -109,7 +109,8 @@ export async function updateClient(
             data: {
                 name: validatedData.name,
                 email: validatedData.email,
-                phone: validatedData.phone,
+                phone1: validatedData.phone1,
+                phone2: validatedData.phone2,
                 companyName: validatedData.companyName,
                 streetName: validatedData.streetName,
                 city: validatedData.city,

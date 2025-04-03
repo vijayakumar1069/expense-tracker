@@ -15,16 +15,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon } from "lucide-react";
-import { format, parseISO } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+// import { CalendarIcon } from "lucide-react";
+// import { format, parseISO } from "date-fns";
+// import { cn } from "@/lib/utils";
+// import { Calendar } from "@/components/ui/calendar";
+// import {
+//   Popover,
+//   PopoverContent,
+//   PopoverTrigger,
+// } from "@/components/ui/popover";
+// import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { generateInvoiceNumber } from "../../__actions/invoiceActions";
 import { UseFormReturn } from "react-hook-form";
@@ -58,15 +58,15 @@ export function InvoiceDetails({
     });
   }, [form, defaultValues]);
 
-  // Convert any string dates to Date objects when the form initializes
-  useEffect(() => {
-    const dueDateValue = form.getValues("dueDate");
+  // // Convert any string dates to Date objects when the form initializes
+  // useEffect(() => {
+  //   const dueDateValue = form.getValues("dueDate");
 
-    // If dueDate exists and is a string, convert it to a Date object
-    if (dueDateValue && typeof dueDateValue === "string") {
-      form.setValue("dueDate", parseISO(dueDateValue));
-    }
-  }, [form]);
+  //   // If dueDate exists and is a string, convert it to a Date object
+  //   if (dueDateValue && typeof dueDateValue === "string") {
+  //     form.setValue("dueDate", parseISO(dueDateValue));
+  //   }
+  // }, [form]);
 
   return (
     <div className="grid gap-4 md:grid-cols-2 mt-6">
@@ -117,7 +117,7 @@ export function InvoiceDetails({
         )}
       />
 
-      <FormField
+      {/* <FormField
         control={form.control}
         name="dueDate"
         render={({ field }) => (
@@ -156,7 +156,7 @@ export function InvoiceDetails({
             <FormMessage />
           </FormItem>
         )}
-      />
+      /> */}
     </div>
   );
 }
