@@ -68,7 +68,7 @@ export const BasicInfoSection: React.FC<FormSectionProps> = ({ form }) => {
         name="name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Name</FormLabel>
+            <FormLabel>Particulars</FormLabel>
             <FormControl>
               <Input
                 {...field}
@@ -153,7 +153,7 @@ export const BasicInfoSection: React.FC<FormSectionProps> = ({ form }) => {
         name="description"
         render={({ field }) => (
           <FormItem className="col-span-2">
-            <FormLabel>Description</FormLabel>
+            <FormLabel>Remarks</FormLabel>
             <FormControl>
               <Textarea
                 {...field}
@@ -165,7 +165,6 @@ export const BasicInfoSection: React.FC<FormSectionProps> = ({ form }) => {
           </FormItem>
         )}
       />
-      {/* Name and Category fields... */}
     </div>
   );
 };

@@ -65,10 +65,11 @@ interface FilterState {
   sortBy?: string;
   sortDirection?: "asc" | "desc";
 }
+const limit = 10;
 
 const ExpenseTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const limit =10;
+
   const [filters, setFilters] = useState<FilterState>({
     sortBy: "createdAt",
     sortDirection: "desc",
@@ -110,8 +111,10 @@ const ExpenseTable = () => {
 
   // Handler for filter changes
   const handleFilterChange = (newFilters: FilterState) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
-    setCurrentPage(1); // Reset to first page when filters change
+    setFilters((prev) => {
+      const isSame = JSON.stringify(prev) === JSON.stringify(newFilters);
+      return isSame ? prev : { ...prev, ...newFilters };
+    });
   };
 
   if (isLoading) {
@@ -269,7 +272,7 @@ const ExpenseTable = () => {
                           </span>
                           <DollarSign className="h-3.5 w-3.5" />
                           <span className="font-bold">
-                            {transaction?.amount.toFixed(2)}
+                            {transaction?.total.toFixed(2)}
                           </span>
                         </div>
                       </TableCell>

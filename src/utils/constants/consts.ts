@@ -1,5 +1,5 @@
 // utils/constants/consts.ts
-import { LayoutDashboard, Receipt, Wallet, FileText } from "lucide-react";
+import { LayoutDashboard, Receipt, Wallet, FileText, PackageCheck, Handshake, BadgePercent, Link, Code, Smartphone, ShoppingCart, BarChart3, UsersRound, Banknote, ServerCog, CloudCog, Briefcase, Code2, BrainCircuitIcon } from "lucide-react";
 import { NavItem } from "../types";
 
 import {
@@ -14,6 +14,7 @@ import {
     FileCheck, FileBadge, Landmark, Award, FileWarning,
     FileStack, Truck, CarFront, BookOpen
 } from "lucide-react";
+
 export const adminNavbarValues: NavItem[] = [
     {
         title: "Dashboard",
@@ -109,6 +110,48 @@ export const CATEGORIES = [
     { id: 48, name: "Vehicle Maintenance", icon: CarFront, color: "#0f766e" },
     { id: 49, name: "Books & Subscriptions", icon: BookOpen, color: "#b45309" },
     { id: 50, name: "Petty Cash Expenses", icon: Wallet, color: "#be123c" },
+    // Sales & Revenue
+    { id: 51, name: "Product Sales", icon: PackageCheck, color: "#2563eb" },
+    { id: 52, name: "Service Revenue", icon: Handshake, color: "#7c3aed" },
+    { id: 53, name: "Subscription Revenue", icon: FileStack, color: "#059669" },
+    { id: 54, name: "Commission Income", icon: BadgePercent, color: "#dc2626" },
+    { id: 55, name: "Affiliate Earnings", icon: Link, color: "#d97706" },
+
+    // Software Development Income
+    { id: 56, name: "Software Development", icon: Code, color: "#1d4ed8" },
+    { id: 57, name: "App Development", icon: Smartphone, color: "#4c1d95" },
+    { id: 58, name: "SaaS Revenue", icon: Cloud, color: "#0284c7" },
+    { id: 59, name: "Software Licensing", icon: FileKey, color: "#7c3aed" },
+    { id: 60, name: "Open Source Donations", icon: UsersRound, color: "#059669" },
+
+    // Web Development Income
+    { id: 61, name: "Website Development", icon: Globe, color: "#4f46e5" },
+    { id: 62, name: "E-commerce Development", icon: ShoppingCart, color: "#c026d3" },
+    { id: 63, name: "Web Hosting Services", icon: Server, color: "#0f766e" },
+    { id: 64, name: "SEO & Digital Marketing", icon: BarChart3, color: "#be185d" },
+    { id: 65, name: "UI/UX Design Services", icon: Palette, color: "#9333ea" },
+
+    // Accounting & Financial Services
+    { id: 66, name: "Accounting Services", icon: Calculator, color: "#4338ca" },
+    { id: 67, name: "Bookkeeping Fees", icon: FileText, color: "#7e22ce" },
+    { id: 68, name: "Tax Advisory Fees", icon: Landmark, color: "#dc2626" },
+    { id: 69, name: "Payroll Services", icon: Banknote, color: "#be123c" },
+    { id: 70, name: "Financial Consulting", icon: BrainCircuit, color: "#0f766e" },
+
+    // IT Consulting & Misc Tech Services
+    { id: 71, name: "IT Consulting", icon: ServerCog, color: "#b45309" },
+    { id: 72, name: "Cloud Migration Services", icon: CloudCog, color: "#1d4ed8" },
+    { id: 73, name: "Cybersecurity Services", icon: Lock, color: "#be185d" },
+    { id: 74, name: "Tech Support", icon: Wrench, color: "#ea580c" },
+    { id: 75, name: "Freelance Software Projects", icon: Briefcase, color: "#c2410c" },
+    { id: 76, name: "AI & ML Development", icon: BrainCircuitIcon, color: "#7c3aed" },
+    { id: 77, name: "API Development & Integration", icon: Code2, color: "#0891b2" },
+    {
+        id: 78,
+        name: "Invoice",
+        icon: Banknote,
+        color: "#059669",
+    }
 ];
 
 

@@ -3,10 +3,49 @@ import { requireAuth } from "@/lib/auth";
 import { z } from "zod";
 import { prisma } from "@/utils/prisma";
 import { Prisma } from "@prisma/client";
-import * as XLSX from 'xlsx';
-import { randomUUID } from "crypto";
+// Make sure you're using the correct package
+import * as XLSX from 'xlsx-js-style';
 
-// Updated validation schema with only CSV format
+// Define TypeScript interfaces for styling
+interface CellStyle {
+    font?: {
+        name?: string;
+        sz?: number;
+        bold?: boolean;
+        color?: { rgb: string };
+    };
+    fill?: {
+        fgColor: { rgb: string };
+    };
+    alignment?: {
+        horizontal?: string;
+        vertical?: string;
+        wrapText?: boolean;
+    };
+    border?: {
+        top?: { style: string; color: { rgb: string } };
+        bottom?: { style: string; color: { rgb: string } };
+        left?: { style: string; color: { rgb: string } };
+        right?: { style: string; color: { rgb: string } };
+    };
+    numFmt?: string;
+}
+
+interface StyledCell {
+    v: string | number; // value
+    t?: string;         // type
+    s: CellStyle;       // style
+}
+
+interface FormattedRow {
+    "S.No": StyledCell;
+    "Date": StyledCell;
+    "Particulars": StyledCell;
+    "Amount": StyledCell;
+    "Remarks": StyledCell;
+}
+
+// Updated validation schema
 const QuerySchema = z.object({
     type: z.enum(['INCOME', 'EXPENSE']).optional(),
     category: z.string().optional(),
@@ -59,15 +98,12 @@ export async function GET(request: NextRequest) {
             sortDirection,
         } = validatedParams;
 
-
-
-
         // Build the where condition for Prisma
         const where: Prisma.TransactionWhereInput = {
             userId: user.id,
         };
 
-        // Add filters (same as in your GET endpoint)
+        // Add filters
         if (type) {
             where.type = type as Prisma.EnumTransactionTypeFilter;
         }
@@ -122,7 +158,7 @@ export async function GET(request: NextRequest) {
             orderBy = { createdAt: sortDirection };
         }
 
-        // Get all transactions (no pagination for export)
+        // Get all transactions
         const transactions = await prisma.transaction.findMany({
             where,
             orderBy,
@@ -131,38 +167,139 @@ export async function GET(request: NextRequest) {
             },
         });
 
-        // Transform data for export (remaining the same)
-        const formattedData = transactions.map(transaction => ({
-            ID: transaction.id,
-            Name: transaction.name,
-            Type: transaction.type,
-            Amount: transaction.amount,
-            Tax: transaction.tax || 'N/A',
-            Total: transaction.total,
-            Category: transaction.category || 'N/A',
-            "Transaction Date": transaction.date.toISOString().split('T')[0],
-            Description: transaction.description || '',
-            'Payment Method': transaction.paymentMethod?.type || 'N/A',
-            'Invoice No': transaction.paymentMethod?.invoiceNo || '',
-            'Received By': transaction.paymentMethod?.receivedBy || '',
-            'Bank Name': transaction.paymentMethod?.bankName || '',
-            'Cheque No': transaction.paymentMethod?.chequeNo || '',
-            "Cheque Date": transaction.paymentMethod?.chequeDate?.toISOString().split('T')[0] || null,
-            'Created At': transaction.createdAt.toISOString().split('T')[0] || "N/A",
-        }));
+        // Calculate total sum of all transaction totals
+        const grandTotal = transactions.reduce((sum, transaction) => sum + transaction.total, 0);
 
-        // Create CSV data directly
-        const worksheet = XLSX.utils.json_to_sheet(formattedData);
-        const csvData = XLSX.utils.sheet_to_csv(worksheet);
+        // Transform data for export with styles
+        const formattedData: FormattedRow[] = transactions.map((transaction, index) => {
+            // Determine color based on whether amount is positive or negative
+            const amountColor = transaction.total >= 0 ? "0000FF" : "FF0000"; // Blue for positive, Red for negative
 
-        // Create filename with date
+            return {
+                "S.No": {
+                    v: (index + 1).toString(),
+                    s: {
+                        alignment: { horizontal: "center" }
+                    }
+                },
+                "Date": {
+                    v: transaction.date.toISOString().split('T')[0],
+                    s: {
+                        alignment: { horizontal: "center" }
+                    }
+                },
+                "Particulars": {
+                    v: transaction.name,
+                    s: {
+                        alignment: { horizontal: "left" }
+                    }
+                },
+                "Amount": {
+                    v: transaction.total,
+                    s: {
+                        font: { color: { rgb: amountColor } },
+                        alignment: { horizontal: "right" },
+                        numFmt: "#,##0.00"
+                    }
+                },
+                "Remarks": {
+                    v: transaction.description || '',
+                    s: {
+                        alignment: { horizontal: "left" }
+                    }
+                }
+            };
+        });
+
+        // Add header row with styles
+        const headerStyle: CellStyle = {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "4472C4" } }, // Blue background
+            alignment: { horizontal: "center", vertical: "center" },
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            }
+        };
+
+        // Append the Grand Total row with special formatting
+        formattedData.push({
+            "S.No": {
+                v: "",
+                s: {
+                    fill: { fgColor: { rgb: "FFC000" } } // Yellow background
+                }
+            },
+            "Date": {
+                v: "",
+                s: {
+                    fill: { fgColor: { rgb: "FFC000" } } // Yellow background
+                }
+            },
+            "Particulars": {
+                v: "Grand Total",
+                s: {
+                    font: { bold: true, color: { rgb: "000000" } }, // Black bold text
+                    fill: { fgColor: { rgb: "FFC000" } }, // Yellow background
+                    alignment: { horizontal: "right" }
+                }
+            },
+            "Amount": {
+                v: grandTotal,
+                s: {
+                    font: { bold: true, color: { rgb: "000000" } }, // Black bold text
+                    fill: { fgColor: { rgb: "FFC000" } }, // Yellow background
+                    alignment: { horizontal: "right" },
+                    numFmt: "#,##0.00"
+                }
+            },
+            "Remarks": {
+                v: "",
+                s: {
+                    fill: { fgColor: { rgb: "FFC000" } } // Yellow background
+                }
+            }
+        });
+
+        // Convert the formatted data to an array that XLSX can work with
+        const wbData = formattedData.map(row => [
+            row["S.No"],
+            row["Date"],
+            row["Particulars"],
+            row["Amount"],
+            row["Remarks"]
+        ]);
+
+        // Add the header row
+        const headers = [
+            { v: "S.No", s: headerStyle },
+            { v: "Date", s: headerStyle },
+            { v: "Particulars", s: headerStyle },
+            { v: "Amount", s: headerStyle },
+            { v: "Remarks", s: headerStyle }
+        ];
+        wbData.unshift(headers);
+
+        // Create a worksheet with the styled data
+        const worksheet = XLSX.utils.aoa_to_sheet(wbData);
+
+        // Create a workbook and add the worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions");
+
+        // Get the Excel file as a buffer
+        const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+        // Create filename
         const date = new Date().toISOString().split('T')[0];
-        const filename = randomUUID() + '_transactions_' + date + '.csv';
+        const filename = `transactions_${date}.xlsx`;
 
-        return new NextResponse(csvData, {
+        return new NextResponse(excelBuffer, {
             headers: {
                 'Content-Disposition': `attachment; filename="${filename}"`,
-                'Content-Type': 'text/csv',
+                'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
                 'Pragma': 'no-cache',
                 'Expires': '0'
@@ -177,12 +314,11 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        console.error("Export error:", error);
         return NextResponse.json(
             { error: "Internal server error" },
             { status: 500 }
         );
     }
+
 }
-
-
-

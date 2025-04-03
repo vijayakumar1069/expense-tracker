@@ -3,6 +3,7 @@
 
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/utils/prisma";
+import { PaymentMethodType } from "@prisma/client";
 import { addDays, format, subDays, subMonths } from "date-fns";
 
 // Types definitions
@@ -62,15 +63,18 @@ type InvoiceData = {
   }[];
 };
 
-// Helper function to format currency
-// export const formatCurrency = (amount: number): string => {
-//   return new Intl.NumberFormat('en-US', {
-//     style: 'currency',
-//     currency: 'USD',
-//     minimumFractionDigits: 2,
-//     maximumFractionDigits: 2,
-//   }).format(amount);
-// };
+// Type for payment method expense data
+type PaymentMethodExpenses = {
+  cash: number;
+  bank: number;
+  cheque: number;
+  total: number;
+  percentages: {
+    cash: number;
+    bank: number;
+    cheque: number;
+  };
+};
 
 // Income data
 export async function fetchIncomeData(): Promise<IncomeData> {
@@ -585,6 +589,99 @@ export async function fetchClientData() {
       activeClients: 0,
       recentClients: [],
       changeRate: 0,
+    };
+  }
+}
+
+// lib/data.ts (add this to your existing file)
+
+// Function to fetch expenses by payment method for current month
+export async function fetchExpensesByPaymentMethod(): Promise<PaymentMethodExpenses> {
+  try {
+    const user = await requireAuth();
+    if (!user) {
+      throw new Error("Not authenticated");
+    }
+
+    // Calculate current month date range
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    // Fetch all transactions for the current month that are expenses
+    const expenses = await prisma.transaction.findMany({
+      where: {
+        userId: user.id,
+        type: "EXPENSE",
+        date: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      },
+      include: {
+        paymentMethod: true,
+      },
+    });
+
+    // Initialize amounts for each payment method
+    let cashAmount = 0;
+    let bankAmount = 0;
+    let chequeAmount = 0;
+
+    // Calculate totals for each payment method
+    for (const expense of expenses) {
+      if (expense.paymentMethod) {
+        switch (expense.paymentMethod.type) {
+          case PaymentMethodType.CASH:
+            cashAmount += expense.total;
+            break;
+          case PaymentMethodType.BANK:
+            bankAmount += expense.total;
+            break;
+          case PaymentMethodType.CHEQUE:
+            chequeAmount += expense.total;
+            break;
+          // Don't count INVOICE in this component
+          default:
+            break;
+        }
+      }
+    }
+
+    const totalAmount = cashAmount + bankAmount + chequeAmount;
+
+    // Calculate percentages
+    const cashPercentage =
+      totalAmount > 0 ? Math.round((cashAmount / totalAmount) * 100) : 0;
+    const bankPercentage =
+      totalAmount > 0 ? Math.round((bankAmount / totalAmount) * 100) : 0;
+    const chequePercentage =
+      totalAmount > 0 ? Math.round((chequeAmount / totalAmount) * 100) : 0;
+
+    return {
+      cash: cashAmount,
+      bank: bankAmount,
+      cheque: chequeAmount,
+      total: totalAmount,
+      percentages: {
+        cash: cashPercentage,
+        bank: bankPercentage,
+        cheque: chequePercentage,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching expenses by payment method:", error);
+    // Return default values in case of error
+    return {
+      cash: 0,
+      bank: 0,
+      cheque: 0,
+      total: 0,
+      percentages: {
+        cash: 0,
+        bank: 0,
+        cheque: 0,
+      },
     };
   }
 }
