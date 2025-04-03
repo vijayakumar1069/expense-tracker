@@ -8,13 +8,13 @@ import TransactionsCard from "./__components/TransactionsCard";
 export default function CardsPage() {
   return (
     <div className="flex flex-col gap-5">
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1  gap-5">
         {/* <IncomeCard/> */}
         <ExpenseCard />
-        <div className="lg:col-span-2 xl:col-span-3">
-          <ExpensePaymentMethods />
-        </div>
         {/* <ProfitCard/> */}
+      </div>
+      <div className="">
+        <ExpensePaymentMethods />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <TransactionsCard />

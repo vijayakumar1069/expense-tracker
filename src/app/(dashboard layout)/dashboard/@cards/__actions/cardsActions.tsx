@@ -2,6 +2,7 @@
 "use server";
 
 import { requireAuth } from "@/lib/auth";
+import { CATEGORIES } from "@/utils/constants/consts";
 import { prisma } from "@/utils/prisma";
 import { PaymentMethodType } from "@prisma/client";
 import { addDays, format, subDays, subMonths } from "date-fns";
@@ -15,17 +16,17 @@ type IncomeData = {
   incomeChange: number;
 };
 
-type ExpenseCategory = {
-  name: string;
-  amount: number;
-  percentage: number;
-  color: string;
-};
+// type ExpenseCategory = {
+//   name: string;
+//   amount: number;
+//   percentage: number;
+//   color: string;
+// };
 
-type ExpenseData = {
-  totalExpense: number;
-  topExpenseCategories: ExpenseCategory[];
-};
+// type ExpenseData = {
+//   totalExpense: number;
+//   topExpenseCategories: ExpenseCategory[];
+// };
 
 type MonthlyData = {
   name: string;
@@ -141,17 +142,44 @@ export async function fetchIncomeData(): Promise<IncomeData> {
 }
 
 // Expense data
-export async function fetchExpenseData(): Promise<ExpenseData> {
+export async function fetchExpenseData(): Promise<FinancialYearExpenseData> {
   try {
     const user = await requireAuth();
     if (!user) {
       throw new Error("Not authenticated");
     }
-    // Get total expenses
+
+    // Calculate financial year dates (April 1 to March 31)
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth() + 1; // JavaScript months are 0-indexed
+
+    // Determine if we're in the current financial year or need to go back
+    // Financial year runs from April 1 to March 31
+    const financialYearStart = new Date(
+      currentMonth >= 4 ? currentYear : currentYear - 1,
+      3, // April (0-indexed, so 3)
+      1
+    );
+
+    const financialYearEnd = new Date(
+      currentMonth >= 4 ? currentYear + 1 : currentYear,
+      2, // March (0-indexed, so 2)
+      31,
+      23,
+      59,
+      59
+    );
+
+    // Get total expenses for the financial year
     const totalExpenseResult = await prisma.transaction.aggregate({
       where: {
         type: "EXPENSE",
         userId: user.id,
+        date: {
+          gte: financialYearStart,
+          lte: financialYearEnd,
+        },
       },
       _sum: {
         amount: true,
@@ -160,11 +188,16 @@ export async function fetchExpenseData(): Promise<ExpenseData> {
 
     const totalExpense = Math.abs(totalExpenseResult._sum.amount || 0);
 
-    // Get expenses by category
+    // Get expenses by category for the financial year
     const expensesByCategory = await prisma.transaction.groupBy({
       by: ["category"],
       where: {
         type: "EXPENSE",
+        userId: user.id,
+        date: {
+          gte: financialYearStart,
+          lte: financialYearEnd,
+        },
       },
       _sum: {
         amount: true,
@@ -172,16 +205,6 @@ export async function fetchExpenseData(): Promise<ExpenseData> {
     });
 
     // Map categories to colors and calculate percentages
-    const categoryColors: Record<string, string> = {
-      Food: "var(--color-food)",
-      Bills: "var(--color-bills)",
-      Transport: "var(--color-transport)",
-      Shopping: "var(--color-shopping)",
-      Health: "var(--color-health)",
-      Housing: "var(--color-housing)",
-      Entertainment: "var(--color-entertainment)",
-      Other: "var(--color-muted)",
-    };
 
     const topExpenseCategories = expensesByCategory
       .map((category) => ({
@@ -190,17 +213,34 @@ export async function fetchExpenseData(): Promise<ExpenseData> {
         percentage: Math.round(
           (Math.abs(category._sum.amount || 0) / totalExpense) * 100
         ),
-        color: categoryColors[category.category] || "var(--color-muted)",
+        color:
+          CATEGORIES.find((c) => c.name === category.category)?.color ||
+          "var(--color-muted)",
       }))
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 3);
 
+    // Get monthly expense data for the financial year
+    const monthlyExpenses = await getMonthlyExpensesForFinancialYear(
+      user.id,
+      financialYearStart
+      // financialYearEnd
+    );
+
     return {
       totalExpense,
       topExpenseCategories,
+      financialYear: {
+        startDate: financialYearStart.toISOString(),
+        endDate: financialYearEnd.toISOString(),
+        label: `FY ${financialYearStart.getFullYear()}-${financialYearEnd.getFullYear().toString().substr(2)}`,
+      },
+      monthlyExpenses,
     };
   } catch (error) {
     console.error("Error fetching expense data:", error);
+
+    // Fallback data - you should adjust this to match your actual data structure
     return {
       totalExpense: 32410.32,
       topExpenseCategories: [
@@ -223,8 +263,111 @@ export async function fetchExpenseData(): Promise<ExpenseData> {
           color: "var(--color-transport)",
         },
       ],
+      financialYear: {
+        startDate: new Date(new Date().getFullYear(), 3, 1).toISOString(),
+        endDate: new Date(new Date().getFullYear() + 1, 2, 31).toISOString(),
+        label: `FY ${new Date().getFullYear()}-${(new Date().getFullYear() + 1).toString().substr(2)}`,
+      },
+      monthlyExpenses: [
+        { month: "Apr", amount: 2500 },
+        { month: "May", amount: 2800 },
+        { month: "Jun", amount: 2600 },
+        { month: "Jul", amount: 2700 },
+        { month: "Aug", amount: 2900 },
+        { month: "Sep", amount: 2750 },
+        { month: "Oct", amount: 2650 },
+        { month: "Nov", amount: 2950 },
+        { month: "Dec", amount: 3500 },
+        { month: "Jan", amount: 2100 },
+        { month: "Feb", amount: 2300 },
+        { month: "Mar", amount: 2400 },
+      ],
     };
   }
+}
+
+// Helper function to get monthly expenses for the financial year
+async function getMonthlyExpensesForFinancialYear(
+  userId: string,
+  startDate: Date
+  // endDate: Date
+): Promise<Array<{ month: string; amount: number }>> {
+  // Array of month names for display
+  const monthNames = [
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
+  ];
+
+  // Array to store the monthly expenses
+  const monthlyExpenses: Array<{ month: string; amount: number }> = [];
+
+  // For each month in the financial year
+  for (let i = 0; i < 12; i++) {
+    // Calculate the start of the month (needs to wrap from December to January)
+    const currentMonthStart = new Date(startDate);
+    currentMonthStart.setMonth(startDate.getMonth() + i);
+    currentMonthStart.setDate(1);
+    currentMonthStart.setHours(0, 0, 0, 0);
+
+    // Calculate the end of the month
+    const currentMonthEnd = new Date(currentMonthStart);
+    currentMonthEnd.setMonth(currentMonthStart.getMonth() + 1);
+    currentMonthEnd.setDate(0); // Last day of current month
+    currentMonthEnd.setHours(23, 59, 59, 999);
+
+    // Query for expenses in this month
+    const monthlyExpenseResult = await prisma.transaction.aggregate({
+      where: {
+        type: "EXPENSE",
+        userId: userId,
+        date: {
+          gte: currentMonthStart,
+          lte: currentMonthEnd,
+        },
+      },
+      _sum: {
+        amount: true,
+      },
+    });
+
+    // Add to the results array
+    monthlyExpenses.push({
+      month: monthNames[i],
+      amount: Math.abs(monthlyExpenseResult._sum.amount || 0),
+    });
+  }
+
+  return monthlyExpenses;
+}
+
+// Define the new return type
+interface FinancialYearExpenseData {
+  totalExpense: number;
+  topExpenseCategories: Array<{
+    name: string;
+    amount: number;
+    percentage: number;
+    color: string;
+  }>;
+  financialYear: {
+    startDate: string;
+    endDate: string;
+    label: string;
+  };
+  monthlyExpenses: Array<{
+    month: string;
+    amount: number;
+  }>;
 }
 
 // Profit data
