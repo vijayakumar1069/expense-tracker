@@ -21,11 +21,10 @@ type ReturnResponse = {
 }
 export async function loginFunction(data: z.infer<typeof LoginSchema>) {
     try {
-        // Validate input
+        // 1. Validate input
         const validatedFields = LoginSchema.safeParse(data);
 
         if (!validatedFields.success) {
-
             return {
                 success: false,
                 message: "Validation failed",
@@ -35,7 +34,17 @@ export async function loginFunction(data: z.infer<typeof LoginSchema>) {
 
         const { email, password, rememberMe } = validatedFields.data;
 
-        // Find user
+        // 2. Check JWT secret is configured
+        if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length === 0) {
+            console.error("JWT_SECRET is not configured");
+            return {
+                success: false,
+                message: "Server configuration error",
+                code: "AUTH_CONFIG_ERROR"
+            };
+        }
+
+        // 3. Find user
         const user = await prisma.user.findUnique({
             where: { email: email.toLowerCase() }
         });
@@ -48,7 +57,7 @@ export async function loginFunction(data: z.infer<typeof LoginSchema>) {
             };
         }
 
-        // Verify password
+        // 4. Verify password
         const passwordMatch = await bcrypt.compare(password, user.password);
 
         if (!passwordMatch) {
@@ -59,42 +68,60 @@ export async function loginFunction(data: z.infer<typeof LoginSchema>) {
             };
         }
 
-        // Generate session token
+        // 5. Clean up expired sessions
+        await prisma.session.deleteMany({
+            where: {
+                userId: user.id,
+                expiresAt: { lt: new Date() }
+            }
+        });
+
+        // 6. Generate session token
         const sessionToken = nanoid(32);
 
-        // Create session in database
+        // 7. Set expiration times
+        const shortExpiryTime = 12 * 60 * 60 * 1000; // 12 hours
+        const longExpiryTime = 12 * 24 * 60 * 60 * 1000; // 12 days
+        const expiresAt = new Date(
+            Date.now() + (rememberMe ? longExpiryTime : shortExpiryTime)
+        );
+
+        // 8. Create session in database
         await prisma.session.create({
             data: {
                 id: sessionToken,
                 userId: user.id,
-                expiresAt: rememberMe
-                    ? new Date(Date.now() + 12 * 24 * 60 * 60 * 1000) // 12 days
-                    : new Date(Date.now() + 2 * 60 * 60 * 1000) // 12 hours
+                expiresAt
             }
         });
 
-        // Generate JWT
+        // 9. Generate JWT
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
         const token = await new SignJWT({
             userId: user.id,
             email: user.email,
-            sessionToken
+            sessionToken,
+            role: user.role
         })
             .setProtectedHeader({ alg: "HS256" })
             .setIssuedAt()
             .setExpirationTime(rememberMe ? "12d" : "12h")
             .sign(secret);
 
-        // Set cookies
+        // 10. Set cookies
         const cookieStore = await cookies();
         cookieStore.set("Expense-tracker-session", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
-            expires: rememberMe
-                ? new Date(Date.now() + 12 * 24 * 60 * 60 * 1000)
-                : new Date(Date.now() + 12 * 60 * 60 * 1000)
+            expires: expiresAt
+        });
+
+        console.log("Login successful for user:", {
+            userId: user.id,
+            email: user.email,
+            expiresAt
         });
 
         return {
@@ -102,7 +129,10 @@ export async function loginFunction(data: z.infer<typeof LoginSchema>) {
             message: "Login successful"
         };
     } catch (error) {
-        console.error("Login error:", error);
+        console.error("Login error:", {
+            error: error instanceof Error ? error.message : String(error),
+            stack: error instanceof Error ? error.stack : undefined
+        });
 
         return {
             success: false,
