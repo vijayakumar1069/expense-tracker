@@ -272,6 +272,10 @@ const ExpenseTable = () => {
                             {transaction?.paymentMethod.type === "CHEQUE" && (
                               <FileCheck className="h-3 w-3 text-teal-600" />
                             )}
+                            {transaction?.paymentMethod.type === "INVOICE" && (
+                              <FileDigit className="h-3 w-3 text-blue-600" />
+                              // <FileCheck className="h-3 w-3 text-teal-600" />
+                            )}
                           </span>
                           <span className="font-medium text-gray-700 dark:text-gray-300 text-sm">
                             {formatPaymentMethodName(
