@@ -431,7 +431,7 @@ export async function generateInvoicePDF(invoice: any) {
         }
 
         // Payment Details Section with compact layout
-        const paymentY = totalsY - 115; // Reduced distance from totals section
+        const paymentY = totalsY - 100; // Reduced distance from totals section
 
         // Background rectangle - reduced height
         page.drawRectangle({
@@ -732,7 +732,7 @@ export async function generateInvoicePDF(invoice: any) {
         // Second line text (in white, centered)
         page.drawText(companyInfoText, {
             x: (width - companyInfoTextWidth) / 2,  // Center the text
-            y: 20 + footerBottomPadding, // Using the renamed variable
+            y: 23 + footerBottomPadding, // Using the renamed variable
             size: fontSize.small,
             font: regularFont,
             color: rgb(1, 1, 1)         // White color
