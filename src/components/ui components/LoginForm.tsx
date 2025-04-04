@@ -155,6 +155,10 @@ export const LoginForm = () => {
             )}
           </form>
         </Form>
+        <div className="flex justify-center mt-4 flex-col gap-2 items-center">
+          <div>User Name : v@gmail.com</div>
+          <div>Password : 2</div>
+        </div>
       </Card>
     </div>
   );

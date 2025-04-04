@@ -69,6 +69,7 @@ const limit = 10;
 
 const ExpenseTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  // const isInitialMount = useRef(true);
 
   const [filters, setFilters] = useState<FilterState>({
     sortBy: "createdAt",
@@ -107,14 +108,36 @@ const ExpenseTable = () => {
       }
       return response.json();
     },
+    refetchOnWindowFocus: false,
+    staleTime: 30000, // 30 seconds
+    // cacheTime: 300000, // 5 minutes
   });
 
-  // Handler for filter changes
-  const handleFilterChange = (newFilters: FilterState) => {
-    setFilters((prev) => {
-      const isSame = JSON.stringify(prev) === JSON.stringify(newFilters);
-      return isSame ? prev : { ...prev, ...newFilters };
-    });
+  // Handler for filter changes // Modified handler for filter changes
+  // const handleFilterChange = (newFilters: FilterState) => {
+  //   // Skip unnecessary updates
+  //   setFilters((prev) => {
+  //     const isSame = JSON.stringify(prev) === JSON.stringify(newFilters);
+
+  //     // When the component first mounts, we don't want to trigger updates for the same values
+  //     if (isSame && isInitialMount.current) {
+  //       isInitialMount.current = false;
+  //       return prev;
+  //     }
+
+  //     // Otherwise, process normally
+  //     if (isSame) return prev;
+
+  //     // We're no longer on initial mount
+  //     isInitialMount.current = false;
+  //     return { ...prev, ...newFilters };
+  //   });
+  // };
+
+  const handleApplyFilters = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   if (isLoading) {
@@ -146,8 +169,9 @@ const ExpenseTable = () => {
   return (
     <Card className="w-full relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950">
       <TransactionFilter
-        onFilterChange={handleFilterChange}
+        // onFilterChange={handleFilterChange}
         initialFilters={filters}
+        onApplyFilters={handleApplyFilters}
       />
       <TransactionHeader currentFilters={filters} />
 

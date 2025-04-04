@@ -8,7 +8,7 @@ import { Prisma } from "@prisma/client";
 const QuerySchema = z.object({
   page: z.string().transform(Number).default("1"),
   limit: z.string().transform(Number).default("10"),
-  type: z.enum(['INCOME', 'EXPENSE']).optional(),
+  type: z.enum(['INCOME', 'EXPENSE', 'ALL']).optional(),
   category: z.string().optional(),
 
   paymentMethodType: z.enum(['CASH', 'BANK', 'CHEQUE', 'INVOICE']).optional(),

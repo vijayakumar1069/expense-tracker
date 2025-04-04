@@ -6,6 +6,7 @@ import {
   useEffect,
   ForwardRefExoticComponent,
   RefAttributes,
+  // useRef,
 } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -20,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
-import { CalendarIcon, Filter, LucideProps, X } from "lucide-react";
+import { CalendarIcon, Crosshair, Filter, LucideProps, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { PaymentType } from "@/utils/types";
@@ -32,7 +33,7 @@ import {
 } from "@/components/ui/popover";
 
 interface FilterProps {
-  onFilterChange: (filters: {
+  onApplyFilters: (filters: {
     type?: string;
     category?: string;
     paymentMethodType?: string;
@@ -58,10 +59,17 @@ interface FilterProps {
   };
 }
 const TransactionFilter = ({
-  onFilterChange,
+  // onFilterChange,
   initialFilters = {},
+
+  onApplyFilters,
 }: FilterProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  // const isInitialMount = useRef(true); // Add this ref to track initial mount
+  // const initialSearch = useRef(initialFilters.search || "");
+  // const effectRef = useRef(true);
+  const [searchValue, setSearchValue] = useState(initialFilters.search || "");
+
   const [filters, setFilters] = useState({
     type: initialFilters.type || "",
     category: initialFilters.category || "",
@@ -97,7 +105,7 @@ const TransactionFilter = ({
         : undefined,
     };
 
-    onFilterChange(formattedFilters);
+    onApplyFilters(formattedFilters);
     setIsOpen(false);
   };
 
@@ -116,15 +124,27 @@ const TransactionFilter = ({
     };
 
     setFilters(resetValues);
-    onFilterChange(resetValues);
-    setIsOpen(false);
+    setSearchValue("");
+
+    const formattedResetValues = {
+      ...resetValues,
+      startDate: undefined,
+      endDate: undefined,
+    };
+
+    onApplyFilters(formattedResetValues);
+    // setIsOpen(false);
   };
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      if (filters.search !== initialFilters.search) {
+      if (searchValue !== filters.search) {
+        setFilters((prev) => ({ ...prev, search: searchValue }));
+
+        // Immediately apply search filter
         const formattedFilters = {
           ...filters,
+          search: searchValue,
           startDate: filters.startDate
             ? format(filters.startDate, "yyyy-MM-dd")
             : undefined,
@@ -133,12 +153,12 @@ const TransactionFilter = ({
             : undefined,
         };
 
-        onFilterChange({ ...formattedFilters });
+        onApplyFilters(formattedFilters);
       }
     }, 500);
 
     return () => clearTimeout(debounceTimer);
-  }, [filters, onFilterChange, initialFilters.search]);
+  }, [filters, onApplyFilters, searchValue]);
 
   return (
     <div className="py-4 px-6">
@@ -196,10 +216,9 @@ const TransactionFilter = ({
                     onValueChange={(value) => handleFilterChange("type", value)}
                   >
                     <SelectTrigger id="type">
-                      <SelectValue placeholder="All Types" />
+                      <SelectValue placeholder="Expense Types" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all-type">All Types</SelectItem>
                       <SelectItem value="INCOME">Income</SelectItem>
                       <SelectItem value="EXPENSE">Expense</SelectItem>
                     </SelectContent>
@@ -215,12 +234,9 @@ const TransactionFilter = ({
                     }
                   >
                     <SelectTrigger id="category">
-                      <SelectValue placeholder="All Categories" />
+                      <SelectValue placeholder="Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all-categories">
-                        All Categories
-                      </SelectItem>
                       {CATEGORIES?.map(
                         (category: {
                           id: number;
@@ -249,12 +265,9 @@ const TransactionFilter = ({
                     }
                   >
                     <SelectTrigger id="paymentMethodType">
-                      <SelectValue placeholder="All Payment Methods" />
+                      <SelectValue placeholder="Payment Methods" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all-payment-methods">
-                        All Payment Methods
-                      </SelectItem>
                       {PAYMENT_METHODS?.map((method: PaymentType) => (
                         <SelectItem key={method.id} value={method.id}>
                           {method.name}
@@ -391,21 +404,33 @@ const TransactionFilter = ({
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center justify-between pt-2 gap-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={resetFilters}
-                    className="flex items-center gap-1"
+                    className="flex items-center gap-2 text-white hover:text-white bg-red-500 hover:bg-red-600 border-red-200"
                   >
-                    <X className="h-3.5 w-3.5" />
+                    <X className="h-4 w-4" />
                     Reset
                   </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-2 bg-black text-white hover:text-white hover:bg-black border-gray-200"
+                  >
+                    <Crosshair className="h-4 w-4" />
+                    Close
+                  </Button>
+
                   <Button
                     size="sm"
                     onClick={applyFilters}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2"
                   >
+                    <Filter className="h-4 w-4 text-white" />
                     Apply Filters
                   </Button>
                 </div>
