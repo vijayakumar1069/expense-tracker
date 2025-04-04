@@ -44,7 +44,9 @@ interface chartDataType {
 }
 
 export function IncomeExpenseChartComponent() {
-  const [timeRange, setTimeRange] = React.useState<"7d" | "30d" | "90d">("7d");
+  const [timeRange, setTimeRange] = React.useState<
+    "7d" | "30d" | "90d" | "1yr"
+  >("7d");
   const [chartData, setChartData] = React.useState<chartDataType[]>([]);
 
   React.useEffect(() => {
@@ -83,6 +85,9 @@ export function IncomeExpenseChartComponent() {
             <SelectItem value="7d" className="hover:bg-gray-50 text-gray-700">
               Last 7 days
             </SelectItem>
+            <SelectItem value="1yr" className="hover:bg-gray-50 text-gray-700">
+              Last year
+            </SelectItem>
           </SelectContent>
         </Select>
       </CardHeader>
@@ -94,6 +99,8 @@ export function IncomeExpenseChartComponent() {
           <BarChart
             data={chartData}
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            barGap={4}
+            barCategoryGap={timeRange === "1yr" ? 1 : 16} // tighter for long-range
           >
             <defs>
               <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">

@@ -2,7 +2,7 @@
 
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/utils/prisma";
-import { subDays, startOfDay, endOfDay, formatISO } from "date-fns";
+import { subDays, startOfDay, endOfDay, formatISO, subYears } from "date-fns";
 
 interface returnType {
   date: string;
@@ -16,23 +16,27 @@ interface DailyTotal {
 }
 
 export async function getTransactionChartData(
-  timeRange: "7d" | "30d" | "90d"
+  timeRange: "7d" | "30d" | "90d" | "1yr"
 ): Promise<returnType[]> {
   try {
     const user = await requireAuth();
     if (!user) {
       throw new Error("Not authenticated");
     }
-    // Validate input
-    if (!["7d", "30d", "90d"].includes(timeRange)) {
+    if (!["7d", "30d", "90d", "1yr"].includes(timeRange)) {
       throw new Error("Invalid time range specified");
     }
+
+
 
     // Calculate date range
     const now = new Date();
     const endDate = endOfDay(now);
     const startDate = startOfDay(
-      subDays(now, timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : 90)
+      timeRange === "7d" ? subDays(now, 7) :
+        timeRange === "30d" ? subDays(now, 30) :
+          timeRange === "90d" ? subDays(now, 90) :
+            subYears(now, 1) // Changed from 365 days to subYears
     );
 
     // Fetch transactions
