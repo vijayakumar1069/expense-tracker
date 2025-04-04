@@ -94,6 +94,11 @@ export async function loginFunction(data: z.infer<typeof LoginSchema>) {
                 expiresAt
             }
         });
+        console.log("Login successful for user:", {
+            userId: user.id,
+            email: user.email,
+            expiresAt
+        })
 
         // 9. Generate JWT
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
