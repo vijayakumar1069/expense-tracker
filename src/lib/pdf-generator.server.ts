@@ -57,11 +57,11 @@ export async function generateInvoicePDF(invoice: any) {
         const companyInfoWidth = contentWidth * 0.75;
         const companyInfo = [
             { text: "Gliggo Technologies India Pvt. Ltd.", size: fontSize.large },
-            { text: "57/1-A VOC Nagar 2nd Cross Street,", size: fontSize.base },
+            { text: "57/1-A, VOC Nagar 2nd Cross Street,", size: fontSize.base },
             { text: "Anna Nagar East, Chennai - 600 102,Tamil Nadu,India.", size: fontSize.base },
             { text: "Phone: +91 72006 58885 | Email: furqaan.hussain@gliggo.com", size: fontSize.base },
             {
-                text: "Web : www.gliggo.com", size: fontSize.base
+                text: "Web: www.gliggo.com", size: fontSize.base
             }
 
         ];
@@ -428,7 +428,7 @@ export async function generateInvoicePDF(invoice: any) {
         });
         // Amount in Words
         try {
-            const amountWords = "INR : " + toWords(invoice.invoiceTotal)
+            const amountWords = "INR " + toWords(invoice.invoiceTotal)
                 .split(' ')
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                 .join(' ') + " Only."
@@ -444,7 +444,7 @@ export async function generateInvoicePDF(invoice: any) {
             let currentLine: string[] = [];
 
             // First line with "Amount in Words:" label
-            page.drawText("Amount in Words:", {
+            page.drawText("Amount in words:", {
                 x: startX,
                 y: currentY,
                 size: fontSize.base,
@@ -602,7 +602,7 @@ export async function generateInvoicePDF(invoice: any) {
 
         // Notes content (with width restriction to stay in 70% area)
         const notesContent = invoice.notes || [
-            `1. PAN No: ${process.env.PAN_NUMBER || "ABC123456789"}`,
+            `1. Our PAN No: ${process.env.PAN_NUMBER || "ABC123456789"}`,
             "2. Payment can be made through Cheque/Neft in favour of Gliggo Technologies India Pvt Ltd.",
             "3. Kindly keep us informed about the remittance (online payment) by mail to furqaan.hussain@gliggo.com."
         ];
