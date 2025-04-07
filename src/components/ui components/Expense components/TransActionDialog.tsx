@@ -179,7 +179,7 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
       <DialogTrigger asChild>
         <Button
           variant="default"
-          className="bg-gradient-to-r from-primary to-[#8b5cf6]"
+          className="bg-gradient-to-r from-primary to-[#8b5cf6] w-fit"
         >
           {mode === "add" ? "Add Transaction" : "Edit Transaction"}
         </Button>

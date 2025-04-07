@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { DownloadCloud, Activity, FileText } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { DownloadCloud, FileText } from "lucide-react";
+// import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardHeader } from "@/components/ui/card";
 
 import { toast } from "sonner";
 
@@ -88,9 +88,9 @@ const TransactionHeader = ({ currentFilters = {} }) => {
         title="Download Frame"
       />
 
-      <CardHeader className="p-6 sm:px-8 border-b border-slate-100 dark:border-slate-800 bg-gradient-to-r from-white to-slate-50 dark:from-slate-900 dark:to-slate-900/90">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div className="space-y-1.5">
+      <CardHeader>
+        <div>
+          {/* <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20 shadow-sm">
                 <Activity className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
@@ -110,9 +110,9 @@ const TransactionHeader = ({ currentFilters = {} }) => {
                 </CardDescription>
               </div>
             </div>
-          </div>
+          </div> */}
 
-          <div className="flex items-center gap-3 ml-auto">
+          <div>
             {/* <Button
               variant="outline"
               size="icon"
@@ -135,7 +135,7 @@ const TransactionHeader = ({ currentFilters = {} }) => {
             <Button
               onClick={handleDownload}
               disabled={isDownloading}
-              className="h-10 px-5 rounded-lg font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
+              className=" rounded-lg w-fit font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-200 "
             >
               {isDownloading ? (
                 <>
@@ -152,7 +152,7 @@ const TransactionHeader = ({ currentFilters = {} }) => {
           </div>
         </div>
 
-        <div className="mt-6 hidden sm:flex items-center justify-between text-xs">
+        {/* <div className="mt-6 hidden sm:flex items-center justify-between text-xs">
           <div className="flex items-center gap-6 bg-white dark:bg-slate-800/50 p-2.5 px-4 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded-full bg-green-500 shadow-sm shadow-green-200 dark:shadow-none"></div>
@@ -171,7 +171,7 @@ const TransactionHeader = ({ currentFilters = {} }) => {
               </span>
             </div>
           </div>
-        </div>
+        </div> */}
       </CardHeader>
     </>
   );

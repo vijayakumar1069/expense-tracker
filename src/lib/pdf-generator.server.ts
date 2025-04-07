@@ -20,7 +20,8 @@ export async function generateInvoicePDF(invoice: any) {
             secondary: rgb(0.2, 0.2, 0.2),        // Dark gray
             accent: rgb(0.95, 0.95, 0.95),        // Light gray
             text: rgb(0.2, 0.2, 0.2),             // Main text
-            success: rgb(0.176, 0.706, 0.176)     // Green for totals
+            success: rgb(0.176, 0.706, 0.176),     // Green for totals
+            danger: rgb(0.95, 0.15, 0.15),     // Red for totals
         };
 
         // Layout constants
@@ -59,6 +60,10 @@ export async function generateInvoicePDF(invoice: any) {
             { text: "57/1-A VOC Nagar 2nd Cross Street,", size: fontSize.base },
             { text: "Anna Nagar East, Chennai - 600 102,Tamil Nadu,India.", size: fontSize.base },
             { text: "Phone: +91 72006 58885 | Email: furqaan.hussain@gliggo.com", size: fontSize.base },
+            {
+                text: "Web : www.gliggo.com", size: fontSize.base
+            }
+
         ];
 
         companyInfo.forEach((line, index) => {
@@ -66,7 +71,7 @@ export async function generateInvoicePDF(invoice: any) {
                 x: margin.left + 1,
                 y: yPosition - (index * 16),
                 size: line.size,
-                font: index === 0 ? boldFont : mediumFont,
+                font: index === 0 ? boldFont : regularFont,
                 color: index === 0 ? colors.primary : colors.secondary
             });
         });
@@ -100,7 +105,7 @@ export async function generateInvoicePDF(invoice: any) {
         yPosition -= 90; // Adjusted position after company info
 
         // Invoice title moved below company details
-        const invoiceTitle = "INVOICE";
+        const invoiceTitle = "TAX INVOICE";
         const titleWidth = boldFont.widthOfTextAtSize(invoiceTitle, fontSize.medium);
         page.drawText(invoiceTitle, {
             x: (width - titleWidth) / 2,
@@ -111,7 +116,7 @@ export async function generateInvoicePDF(invoice: any) {
         });
 
         // Add underline to the INVOICE title
-        const underlineExtension = 8; // Slight extension beyond text on each side
+        const underlineExtension = 2.5; // Slight extension beyond text on each side
         const underlineThickness = 1.5; // Slightly thicker than default but not too much
         const underlineGap = 5; // Space between text and underline
 
@@ -169,15 +174,13 @@ export async function generateInvoicePDF(invoice: any) {
             clientDetails.push(`${addressParts.join(', ')},`);
         }
 
-        // Only add country if it exists
-        // if (invoice.clientCountry && invoice.clientCountry.trim()) {
-        //     clientDetails.push(`${invoice.clientCountry}.`);
-        // }
 
         // Only add phone if it exists
         if (invoice.clientPhone1 && invoice.clientPhone1.trim() && invoice.clientEmail && invoice.clientEmail.trim()) {
             clientDetails.push(`Phone: ${invoice.clientPhone1} ${invoice.clientPhone2 ? ` ${invoice.clientPhone2}` : ''} | Email: ${invoice.clientEmail}`);
         }
+        clientDetails.push(`Place of Supply: Tamil Nadu.`);
+
 
 
 
@@ -211,7 +214,9 @@ export async function generateInvoicePDF(invoice: any) {
             });
         });
 
-        yPosition -= 123; // Adjusted position after client & company address
+
+
+        yPosition -= 127; // Adjusted position after client & company address
 
         // Enhanced Table Constants
         const tableConfig = {
@@ -269,7 +274,7 @@ export async function generateInvoicePDF(invoice: any) {
 
         // Draw column headers
         // Column Headers with perfect alignment
-        ["DESCRIPTION", "AMOUNT"].forEach((header, index) => {
+        ["DESCRIPTION", "AMOUNT (INR)"].forEach((header, index) => {
             const isAmountColumn = index === 1;
             const xPosition = margin.left + (isAmountColumn ? tableConfig.columnWidths.description : 0);
 
@@ -367,9 +372,9 @@ export async function generateInvoicePDF(invoice: any) {
 
         let totalsStartY = currentY - (rowCount * tableConfig.rowHeight) - 20;
         const totals = [
-            { label: "Subtotal", value: invoice.subtotal },
-            { label: `Tax (${invoice.taxRate}%)`, value: invoice.taxAmount },
-            { label: "Total", value: Math.round(invoice?.invoiceTotal ?? 0) }
+            { label: "Subtotal : ", value: invoice.subtotal },
+            { label: `Tax (${invoice.taxRate}%) : `, value: invoice.taxAmount },
+            { label: "Total : ", value: Math.round(invoice?.invoiceTotal ?? 0) }
         ];
 
         totals.forEach((total, index) => {
@@ -423,10 +428,10 @@ export async function generateInvoicePDF(invoice: any) {
         });
         // Amount in Words
         try {
-            const amountWords = toWords(invoice.invoiceTotal)
+            const amountWords = "INR : " + toWords(invoice.invoiceTotal)
                 .split(' ')
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(' ') + " Rupees Only";
+                .join(' ') + " Only."
 
             // Fixed width constraints
             const maxWidth = 260; // Adjust based on your layout
@@ -434,7 +439,7 @@ export async function generateInvoicePDF(invoice: any) {
             const startX = margin.left + 8;
             let currentY = totalsStartY - 0;
 
-            // Split into multiple lines if needed
+            // Split into multiple lines if needed`
             const words = amountWords.split(' ');
             let currentLine: string[] = [];
 
@@ -491,7 +496,7 @@ export async function generateInvoicePDF(invoice: any) {
         }
 
         // Payment Details Section with compact layout
-        const paymentY = totalsStartY - 95; // Reduced distance from totals section
+        const paymentY = totalsStartY - 115; // Reduced distance from totals section
 
         // Background rectangle - reduced height
         page.drawRectangle({
@@ -520,7 +525,7 @@ export async function generateInvoicePDF(invoice: any) {
 
         // Payment details with separated labels and values
         const paymentInfo = [
-            { label: "A/C Name:", value: process.env.ACCOUNT_NAME || "ABC Bank" },
+            { label: "Account Name:", value: process.env.ACCOUNT_NAME || "ABC Bank" },
             { label: "Account Number:", value: process.env.ACCOUNT_NUMBER || "1234567890" },
             { label: "Bank Name:", value: process.env.BANK_NAME || "ABC Bank" },
             { label: "Branch:", value: process.env.BRANCH_NAME || "XYZ Branch" },
@@ -529,7 +534,7 @@ export async function generateInvoicePDF(invoice: any) {
 
         // Column positions - reduced spacing
         const labelX = margin.left + leftPadding;
-        const valueX = margin.left + 130; // Reduced from 150
+        const valueX = margin.left + 110; // Reduced from 150
 
         // Line spacing - more compact
         const lineHeight = 14; // Reduced from 16
@@ -571,18 +576,29 @@ export async function generateInvoicePDF(invoice: any) {
         const notesY = paymentY - 18;
 
         // Calculate widths for the 75/25 split
-        const notesWidth = contentWidth * 0.70; // 70% of available width
-        const signatureWidth = contentWidth * 0.30; // 30% of available width
-
+        const notesWidth = contentWidth * 0.65; // 70% of available width
+        const signatureWidth = contentWidth * 0.35; // 30% of available width
+        const noteText = "Note:";
+        const noteTextWidth = boldFont.widthOfTextAtSize(noteText, fontSize.medium);
         // NOTES SECTION (Left 70%)
-        // Draw notes title
-        page.drawText("Notes:", {
+        // Draw "Note:" text
+        page.drawText(noteText, {
             x: margin.left,
             y: notesY,
             size: fontSize.medium,
             font: boldFont,
-            color: colors.primary
+            color: colors.danger
         });
+
+        // Draw underline specifically for "Note:" text
+        page.drawLine({
+            start: { x: margin.left, y: notesY - 4 },  // 4 units below text baseline
+            end: { x: margin.left + noteTextWidth, y: notesY - 4 },
+            thickness: 1.2,
+            color: colors.danger
+        });
+
+
 
         // Notes content (with width restriction to stay in 70% area)
         const notesContent = invoice.notes || [
@@ -606,13 +622,13 @@ export async function generateInvoicePDF(invoice: any) {
                     const restOfText = numberedMatch[2];  // The text after the number
 
                     // Calculate the width of the number prefix
-                    const numberPrefixWidth = regularFont.widthOfTextAtSize(numberPrefix, fontSize.base);
+                    const numberPrefixWidth = regularFont.widthOfTextAtSize(numberPrefix, fontSize.small);
 
                     // Draw the number prefix
                     page.drawText(numberPrefix, {
                         x: margin.left,
                         y: currentY,
-                        size: fontSize.base,
+                        size: fontSize.small,
                         font: regularFont,
                         color: colors.text
                     });
@@ -634,7 +650,7 @@ export async function generateInvoicePDF(invoice: any) {
                             const availableWidth = isFirstLine
                                 ? maxNoteWidth - numberPrefixWidth
                                 : maxNoteWidth;
-                            const lineWidth = regularFont.widthOfTextAtSize(testLine, fontSize.base);
+                            const lineWidth = regularFont.widthOfTextAtSize(testLine, fontSize.small);
 
                             if (lineWidth > availableWidth) {
                                 // Draw current line and start a new one
@@ -645,7 +661,7 @@ export async function generateInvoicePDF(invoice: any) {
                                 page.drawText(currentLine.join(' '), {
                                     x: xPosition,
                                     y: currentY,
-                                    size: fontSize.base,
+                                    size: fontSize.small,
                                     font: regularFont,
                                     color: colors.text
                                 });
@@ -666,7 +682,7 @@ export async function generateInvoicePDF(invoice: any) {
                         page.drawText(currentLine.join(' '), {
                             x: xPosition,
                             y: currentY,
-                            size: fontSize.base,
+                            size: fontSize.small,
                             font: regularFont,
                             color: colors.text
                         });
@@ -682,7 +698,7 @@ export async function generateInvoicePDF(invoice: any) {
                     for (let i = 1; i < words.length; i++) {
                         const word = words[i];
                         const testLine = [...currentLine, word].join(' ');
-                        const lineWidth = regularFont.widthOfTextAtSize(testLine, fontSize.base);
+                        const lineWidth = regularFont.widthOfTextAtSize(testLine, fontSize.small);
 
                         if (lineWidth <= maxNoteWidth) {
                             currentLine.push(word);
@@ -691,7 +707,7 @@ export async function generateInvoicePDF(invoice: any) {
                             page.drawText(currentLine.join(' '), {
                                 x: margin.left,
                                 y: currentY,
-                                size: fontSize.base,
+                                size: fontSize.small,
                                 font: regularFont,
                                 color: colors.text
                             });
@@ -706,7 +722,7 @@ export async function generateInvoicePDF(invoice: any) {
                         page.drawText(currentLine.join(' '), {
                             x: margin.left + 10,
                             y: currentY,
-                            size: fontSize.base,
+                            size: fontSize.small,
                             font: regularFont,
                             color: colors.text
                         });
@@ -737,7 +753,7 @@ export async function generateInvoicePDF(invoice: any) {
         });
 
         // Signature Text (Centered in its column)
-        const signatureText = "Authorized Signature";
+        const signatureText = "For Gliggo Technologies India Pvt Ltd.";
         const signatureTextWidth = regularFont.widthOfTextAtSize(signatureText, fontSize.base);
         page.drawText(signatureText, {
             x: signatureCenterX - (signatureTextWidth / 2), // Center text
@@ -746,7 +762,15 @@ export async function generateInvoicePDF(invoice: any) {
             font: regularFont,
             color: colors.text
         });
-
+        const signatureText1 = "Authorized Signature";
+        const signatureTextWidth1 = regularFont.widthOfTextAtSize(signatureText1, fontSize.base);
+        page.drawText(signatureText1, {
+            x: signatureCenterX - (signatureTextWidth1 / 2), // Center text
+            y: signatureLineY - 32,
+            size: fontSize.base,
+            font: regularFont,
+            color: colors.text
+        });
 
         // Footer with full width background and centered text (with added bottom padding)
         // Text content to center

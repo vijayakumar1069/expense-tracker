@@ -163,7 +163,7 @@ const TransactionFilter = ({
   return (
     <div className="py-4 px-6">
       <div className="flex items-center justify-between gap-4">
-        <div className="relative w-full md:w-96">
+        <div className="relative w-full md:w-48">
           <Input
             placeholder="Search transactions..."
             value={filters.search}

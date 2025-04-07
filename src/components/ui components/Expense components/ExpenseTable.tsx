@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import TransactionFilter from "./TransactionFilter";
 import TransactionHeader from "./TransactionHeader";
+import TransActionDialog from "./TransActionDialog";
 
 // Helper function to format payment method names
 export const formatPaymentMethodName = (method: string) => {
@@ -113,27 +114,6 @@ const ExpenseTable = () => {
     // cacheTime: 300000, // 5 minutes
   });
 
-  // Handler for filter changes // Modified handler for filter changes
-  // const handleFilterChange = (newFilters: FilterState) => {
-  //   // Skip unnecessary updates
-  //   setFilters((prev) => {
-  //     const isSame = JSON.stringify(prev) === JSON.stringify(newFilters);
-
-  //     // When the component first mounts, we don't want to trigger updates for the same values
-  //     if (isSame && isInitialMount.current) {
-  //       isInitialMount.current = false;
-  //       return prev;
-  //     }
-
-  //     // Otherwise, process normally
-  //     if (isSame) return prev;
-
-  //     // We're no longer on initial mount
-  //     isInitialMount.current = false;
-  //     return { ...prev, ...newFilters };
-  //   });
-  // };
-
   const handleApplyFilters = (newFilters: FilterState) => {
     setFilters(newFilters);
     // Reset to first page when filters change
@@ -167,15 +147,17 @@ const ExpenseTable = () => {
   }
 
   return (
-    <Card className="w-full relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950">
-      <TransactionFilter
-        // onFilterChange={handleFilterChange}
-        initialFilters={filters}
-        onApplyFilters={handleApplyFilters}
-      />
-      <TransactionHeader currentFilters={filters} />
-
-      <CardContent className="p-6">
+    <Card className="w-full flex flex-col relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 mb-0">
+      <div className="flex w-full flex-col justify-end items-end lg:max-w-5xl lg:w-3/4 lg:flex-row  lg:justify-between space-y-3 lg:space-y-0 lg:items-center px-6  rounded-tl-xl rounded-tr-xl mb-0  lg:ml-auto">
+        <TransActionDialog mode="add" />
+        <TransactionHeader currentFilters={filters} />
+        <TransactionFilter
+          // onFilterChange={handleFilterChange}
+          initialFilters={filters}
+          onApplyFilters={handleApplyFilters}
+        />
+      </div>
+      <CardContent className="px-6 mt-0">
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
           <Table>
             <TableHeader className="bg-gray-50 dark:bg-gray-900/60">
