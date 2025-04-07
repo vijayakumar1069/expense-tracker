@@ -1,23 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import {
-  Filter,
-  Search,
-  Receipt,
-  CalendarRange,
-  SlidersHorizontal,
-} from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SlidersHorizontal, X } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -26,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { InvoiceStatus } from "@prisma/client";
-// InvoiceFilter; component for filtering/searching invoices
+
 const InvoiceFilter = ({
   onFilterChange,
 }: {
@@ -34,227 +26,142 @@ const InvoiceFilter = ({
     clientName?: string;
     clientCompanyName?: string;
     invoiceNumber?: string;
-    status?: InvoiceStatus; // Add this line
+    status?: InvoiceStatus;
   }) => void;
 }) => {
-  const [clientNameFilter, setClientNameFilter] = useState<string>("");
-  const [invoiceNumberFilter, setInvoiceNumberFilter] = useState<string>("");
-  const [clientCompanyNameFilter, setClientCompanyNameFilter] =
-    useState<string>("");
-  const [expanded, setExpanded] = useState<boolean>(false);
-  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "">("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [clientName, setClientName] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [status, setStatus] = useState<InvoiceStatus | "">("");
 
-  const handleFilterSubmit = (e: React.FormEvent) => {
+  const handleApplyFilters = (e: React.FormEvent) => {
     e.preventDefault();
     onFilterChange({
-      clientName: clientNameFilter || undefined,
-      invoiceNumber: invoiceNumberFilter || undefined,
-      clientCompanyName: clientCompanyNameFilter || undefined,
-      status: statusFilter || undefined, // Add this line
+      clientName: clientName || undefined,
+      clientCompanyName: companyName || undefined,
+      invoiceNumber: invoiceNumber || undefined,
+      status: status || undefined,
     });
+    setIsOpen(false);
   };
 
   const handleClearFilters = () => {
-    setInvoiceNumberFilter("");
-    setClientCompanyNameFilter("");
-    setClientNameFilter("");
-    setStatusFilter(""); // Add this line
+    setClientName("");
+    setCompanyName("");
+    setInvoiceNumber("");
+    setStatus("");
     onFilterChange({});
+    setIsOpen(false);
   };
 
-  const filtersActive =
-    clientNameFilter ||
-    invoiceNumberFilter ||
-    clientCompanyNameFilter ||
-    statusFilter;
+  const filtersActive = clientName || companyName || invoiceNumber || status;
 
   return (
-    <Card className="mb-6 border border-gray-200 dark:border-gray-800 shadow-sm bg-white dark:bg-gray-950 overflow-hidden">
-      <CardHeader className="pb-0 pt-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-indigo-50 dark:bg-indigo-900/30 p-2.5 rounded-lg">
-              <SlidersHorizontal className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-            </div>
-            <div>
-              <CardTitle className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                Invoice Filters
-              </CardTitle>
-              <CardDescription className="text-sm text-gray-500 dark:text-gray-400">
-                Find invoices by client or invoice number
-              </CardDescription>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
+    <div className="flex items-center gap-4 w-full">
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="gap-2 group">
+            <SlidersHorizontal className="h-4 w-4 text-white group-hover:text-primary" />
+            <span className="text-white group-hover:text-primary">Filters</span>
             {filtersActive && (
+              <span className="ml-1 rounded-full group-hover:bg-primary bg-white group-hover:text-primary text-white  w-2 h-2" />
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[340px] p-0" align="end">
+          <div className="p-4 grid gap-4">
+            <div className="space-y-2">
+              <Label>Client Name</Label>
+              <Input
+                placeholder="Search by client name"
+                value={clientName}
+                onChange={(e) => setClientName(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Company Name</Label>
+              <Input
+                placeholder="Search by company"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Invoice Number</Label>
+              <Input
+                placeholder="Search by invoice #"
+                value={invoiceNumber}
+                onChange={(e) => setInvoiceNumber(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select
+                value={status}
+                onValueChange={(value: InvoiceStatus) => setStatus(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DRAFT">Draft</SelectItem>
+                  <SelectItem value="SENT">Sent</SelectItem>
+                  <SelectItem value="PAID">Paid</SelectItem>
+                  <SelectItem value="OVERDUE">Overdue</SelectItem>
+                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between gap-2">
               <Button
-                variant="destructive"
-                size="sm"
+                variant="outline"
                 onClick={handleClearFilters}
-                className="text-xs h-8 px-3 border-gray-200 dark:border-gray-700 text-white hover:bg-red-600 dark:text-gray-100 dark:hover:bg-red-700"
+                className="flex items-center gap-2"
               >
-                Clear Filters
+                <X className="h-4 w-4" />
+                Clear
               </Button>
-            )}
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setExpanded(!expanded)}
-              className="h-9 px-4 rounded-lg text-white bg-accent-foreground hover:bg-accent-foreground/50 dark:bg-gray-800 dark:hover:bg-gray-700"
-            >
-              {expanded ? "Close Search" : "Search Invoice"}
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="">
-        <div
-          className={`overflow-hidden transition-all duration-300 ${
-            expanded ? "max-h-80" : "max-h-0"
-          }`}
-        >
-          <form
-            onSubmit={handleFilterSubmit}
-            className="grid gap-5 mt-3 p-2 border border-gray-100 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-gray-900"
-          >
-            <div className="grid md:grid-cols-2 gap-5">
-              <div className="space-y-2.5">
-                <Label
-                  htmlFor="clientNameFilter"
-                  className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5"
-                >
-                  <Receipt className="h-3.5 w-3.5 text-indigo-500" />
-                  Client Name
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="clientNameFilter"
-                    placeholder="Filter by client name"
-                    value={clientNameFilter}
-                    onChange={(e) => setClientNameFilter(e.target.value)}
-                    className="pl-9 h-10 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                </div>
-              </div>
-              <div className="space-y-2.5">
-                <Label
-                  htmlFor="clientCompanyNameFilter"
-                  className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5"
-                >
-                  Client Company Name
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="clientCompanyNameFilter"
-                    placeholder="Filter by client name"
-                    value={clientCompanyNameFilter}
-                    onChange={(e) => setClientCompanyNameFilter(e.target.value)}
-                    className="pl-9 h-10 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                </div>
-              </div>
-
-              <div className="space-y-2.5">
-                <Label
-                  htmlFor="invoiceNumberFilter"
-                  className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5"
-                >
-                  <CalendarRange className="h-3.5 w-3.5 text-indigo-500" />
-                  Invoice Number
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="invoiceNumberFilter"
-                    placeholder="Filter by invoice #"
-                    value={invoiceNumberFilter}
-                    onChange={(e) => setInvoiceNumberFilter(e.target.value)}
-                    className="pl-9 h-10 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                </div>
-              </div>
-              <div className="space-y-2.5 w-full">
-                <Label
-                  htmlFor="statusFilter"
-                  className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5"
-                >
-                  <SlidersHorizontal className="h-3.5 w-3.5 text-indigo-500" />
-                  Status
-                </Label>
-                <Select
-                  value={statusFilter}
-                  onValueChange={(value: InvoiceStatus) =>
-                    setStatusFilter(value)
-                  }
-                >
-                  <SelectTrigger className="h-10 w-full bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="DRAFT">Draft</SelectItem>
-                    <SelectItem value="SENT">Sent</SelectItem>
-                    <SelectItem value="PAID">Paid</SelectItem>
-                    <SelectItem value="OVERDUE">Overdue</SelectItem>
-                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <Button
-                type="submit"
-                className="px-5 h-10 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm hover:shadow transition-all duration-150"
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Apply Filters
+              <Button onClick={handleApplyFilters} className="ml-auto">
+                Apply
               </Button>
             </div>
-          </form>
-        </div>
-
-        {!expanded && filtersActive && (
-          <div className="flex flex-wrap items-center gap-2 mt-3 py-1.5">
-            <div className="text-xs px-2.5 py-1.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 rounded-md font-medium">
-              Active Filters:
-            </div>
-
-            {clientNameFilter && (
-              <div className="text-xs flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm">
-                <span className="font-medium mr-1.5">Client:</span>{" "}
-                {clientNameFilter}
-              </div>
-            )}
-
-            {invoiceNumberFilter && (
-              <div className="text-xs flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm">
-                <span className="font-medium mr-1.5">Invoice #:</span>{" "}
-                {invoiceNumberFilter}
-              </div>
-            )}
-
-            {clientCompanyNameFilter && (
-              <div className="text-xs flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm">
-                <span className="font-medium mr-1.5">Client Company:</span>{" "}
-                {clientCompanyNameFilter}
-              </div>
-            )}
-
-            {statusFilter && (
-              <div className="text-xs flex items-center px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shadow-sm">
-                <span className="font-medium mr-1.5">Status:</span>{" "}
-                {statusFilter}
-              </div>
-            )}
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {filtersActive && (
+            <div className="p-4 border-t">
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Active filters:</span>
+                {clientName && (
+                  <span className="px-2 py-1 rounded bg-accent">
+                    Client: {clientName}
+                  </span>
+                )}
+                {companyName && (
+                  <span className="px-2 py-1 rounded bg-accent">
+                    Company: {companyName}
+                  </span>
+                )}
+                {invoiceNumber && (
+                  <span className="px-2 py-1 rounded bg-accent">
+                    Invoice #: {invoiceNumber}
+                  </span>
+                )}
+                {status && (
+                  <span className="px-2 py-1 rounded bg-accent">
+                    Status: {status.toLowerCase()}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 };
 

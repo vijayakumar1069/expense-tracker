@@ -155,15 +155,26 @@ const InvoiceTable = () => {
 
   return (
     <div>
-      <InvoiceFilter onFilterChange={setFilters} />
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+        {/* Left Side - Title */}
+        <h1 className="text-2xl lg:text-3xl font-bold text-primary lg:order-1">
+          Invoice Management
+        </h1>
 
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Invoice List</h2>
-        <Button onClick={handleAddNew} className="flex items-center gap-1">
-          <Plus className="h-4 w-4" />
-          Add New Invoice
-        </Button>
+        {/* Right Side - Controls */}
+        <div className="flex flex-col xs:flex-row md:flex-row gap-3 items-stretch justify-end lg:order-2">
+          {/* Filters - Takes available space on mobile */}
+
+          <Button onClick={handleAddNew} className="flex items-center gap-1">
+            <Plus className="h-4 w-4" />
+            Add New Invoice
+          </Button>
+          <div className=" xs:flex-none">
+            <InvoiceFilter onFilterChange={setFilters} />
+          </div>
+        </div>
       </div>
+      {/* <InvoiceFilter onFilterChange={setFilters} /> */}
 
       <InvoiceDialog
         invoice={selectedInvoice}

@@ -47,7 +47,7 @@ const ClientForm = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-6 p-2 lg:p-4 grid grid-cols-1 lg:grid-cols-2 gap-3"
+        className="space-y-2 p-2 lg:p-4 grid grid-cols-1 lg:grid-cols-2 gap-3"
       >
         {/* Name Field */}
         <FormField
@@ -258,12 +258,12 @@ const ClientForm = ({
         /> */}
 
         {/* Submit Button */}
-        <div className="w-full flex justify-end mt-5">
+        <div className="w-full flex justify-center mt-2 col-span-2">
           <Button
             type="submit"
             disabled={isSubmitting}
             // onClick={form.handleSubmit(onSubmit)}
-            className="w-fit flex justify-center items-end bg-primary text-white hover:bg-primary/90 focus:ring-primary"
+            className="w-fit flex justify-center items-center bg-primary text-white hover:bg-primary/90 focus:ring-primary"
           >
             {isSubmitting
               ? "Submitting..."

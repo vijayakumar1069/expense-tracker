@@ -407,22 +407,22 @@ const InvoiceDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-6xl bg-primary-foreground max-h-[90vh] overflow-y-auto ">
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent className="sm:max-w-5xl bg-primary-foreground max-h-[90vh] overflow-y-auto text-center">
+        <DialogHeader className="text-center">
+          <DialogTitle className="text-center">
             {isNewInvoice
               ? "Create New Invoice"
               : isEditMode
                 ? "Edit Invoice"
                 : "Invoice Details"}
           </DialogTitle>
-          <DialogDescription>
+          {/* <DialogDescription>
             {isNewInvoice
               ? "Fill out the form below to create a new invoice."
               : isEditMode
                 ? "Update the invoice information below."
                 : `Invoice #${invoice?.invoiceNumber}`}
-          </DialogDescription>
+          </DialogDescription> */}
         </DialogHeader>
 
         {isEditMode || isNewInvoice ? (

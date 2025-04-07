@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
         if (clientName) {
             where.clientName = {
                 contains: clientName,
+                mode: "insensitive",
             };
         }
 
@@ -64,6 +65,7 @@ export async function GET(request: NextRequest) {
         if (invoiceNumber) {
             where.invoiceNumber = {
                 contains: invoiceNumber,
+                mode: "insensitive",
             };
         }
 
@@ -71,6 +73,7 @@ export async function GET(request: NextRequest) {
         if (clientCompanyName) {
             where.clientCompanyName = {
                 contains: clientCompanyName,
+                mode: "insensitive",
             };
         }
         // Add status filter if provided

@@ -294,7 +294,7 @@ const ClientDialog = ({
     if (!client) return null;
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-4">
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-muted-foreground">Name</h3>
           <p className="text-base">{client.name}</p>
@@ -311,10 +311,16 @@ const ClientDialog = ({
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-muted-foreground">
-            CompanyName
-          </h3>
-          <p className="text-base whitespace-pre-wrap">{client.companyName}</p>
+          {client.companyName && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                CompanyName
+              </h3>
+              <p className="text-base whitespace-pre-wrap">
+                {client.companyName}
+              </p>
+            </div>
+          )}
         </div>
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-muted-foreground">City</h3>
@@ -332,20 +338,20 @@ const ClientDialog = ({
         }}
       >
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-center font-bold text-2xl">
             {isNewClient
               ? "Add New Client"
               : isEditMode
                 ? "Edit Client"
                 : "Client Details"}
           </DialogTitle>
-          <DialogDescription>
+          {/* <DialogDescription>
             {isNewClient
               ? "Fill out the form below to add a new client."
               : isEditMode
                 ? "Update the client's information below."
                 : "View client information below."}
-          </DialogDescription>
+          </DialogDescription> */}
         </DialogHeader>
 
         {isEditMode || isNewClient ? (
@@ -361,7 +367,7 @@ const ClientDialog = ({
 
         {/* Footer only shows in view mode */}
         {!isNewClient && !isEditMode && (
-          <DialogFooter className="flex justify-between sm:justify-between">
+          <DialogFooter className="flex justify-between sm:justify-between px-4 pb-4">
             <div>
               <Button
                 variant="destructive"
@@ -400,7 +406,10 @@ const ClientDialog = ({
           <div className="flex justify-end mt-4">
             <Button
               variant="outline"
-              onClick={() => setIsEditMode(false)}
+              onClick={() => {
+                setIsEditMode(false);
+                handleOpenChange(false);
+              }}
               className="mr-2"
             >
               Cancel

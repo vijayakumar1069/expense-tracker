@@ -119,10 +119,10 @@ export default function InvoiceForm({
           className="flex-1 flex flex-col h-full"
         >
           {/* This card will take the full height of the parent */}
-          <Card className="max-w-7xl mx-auto h-full flex flex-col py-2">
+          <Card className="max-w-7xl mx-auto h-full flex flex-col py-0">
             {/* Scrollable content area */}
             <CardContent className="p-0 flex-1 overflow-y-auto">
-              <div className="p-4 md:pX-6 space-y-6">
+              <div className="p-4 md:px-6 space-y-6">
                 {/* Client and invoice details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="space-y-4">

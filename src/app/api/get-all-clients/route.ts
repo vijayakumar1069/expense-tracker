@@ -54,6 +54,7 @@ export async function GET(request: NextRequest) {
         if (name) {
             where.name = {
                 contains: name,
+                mode: "insensitive",
             };
         }
 
@@ -61,11 +62,13 @@ export async function GET(request: NextRequest) {
         if (email) {
             where.email = {
                 contains: email,
+                mode: "insensitive",
             };
         }
         if (companyName) {
             where.companyName = {
                 contains: companyName,
+                mode: "insensitive",
             };
         }
 
