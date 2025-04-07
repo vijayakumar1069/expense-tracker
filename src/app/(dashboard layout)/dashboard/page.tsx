@@ -13,42 +13,42 @@ export const dynamic = "force-dynamic";
 
 export default async function Admin_Dashboard() {
   return (
-    <div className="p-6 bg-background rounded-lg">
-      <Tabs defaultValue="cards" className="w-full">
-        <TabsList className="flex w-full overflow-x-auto px-1 py-2 bg-white border-b rounded-none gap-1 h-auto md:h-12">
+    <div className="p-6 bg-background/10 rounded-lg">
+      <Tabs defaultValue="cards" className="w-full rounded-xl">
+        <TabsList className="flex w-full overflow-x-auto px-1 py-2 bg-white border-b gap-1 h-auto md:h-12 rounded-xl">
           <TabsTrigger
             value="cards"
-            className="rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-blue-100 data-[state=active]:border-b-2 data-[state=active]:border-primary whitespace-nowrap"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-black data-[state=active]:text-primary data-[state=active]:bg-blue-100 data-[state=active]:border-b-2 data-[state=active]:border-primary whitespace-nowrap"
           >
             Financial Overview
           </TabsTrigger>
           <TabsTrigger
             value="expensePaymentMethods"
-            className="rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-blue-100 data-[state=active]:border-b-2 data-[state=active]:border-primary whitespace-nowrap"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-black data-[state=active]:text-primary data-[state=active]:bg-blue-100 data-[state=active]:border-b-2 data-[state=active]:border-primary whitespace-nowrap"
           >
             Payment Methods
           </TabsTrigger>
           <TabsTrigger
             value="RecentTransActionAndPendingInvoices"
-            className="rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-blue-100 data-[state=active]:border-b-2 data-[state=active]:border-primary whitespace-nowrap truncate"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-black data-[state=active]:text-primary data-[state=active]:bg-blue-100 data-[state=active]:border-b-2 data-[state=active]:border-primary whitespace-nowrap truncate"
           >
             Transactions & Invoices
           </TabsTrigger>
           <TabsTrigger
             value="IncomeVsExpense"
-            className="rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-blue-100 data-[state=active]:border-b-2 data-[state=active]:border-primary whitespace-nowrap"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-black data-[state=active]:text-primary data-[state=active]:bg-blue-100 data-[state=active]:border-b-2 data-[state=active]:border-primary whitespace-nowrap"
           >
             Income vs Expense
           </TabsTrigger>
           <TabsTrigger
             value="categoryDistributionAndRecentTransactions"
-            className="rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground data-[state=active]:text-primary data-[state=active]:bg-blue-100 data-[state=active]:border-b-2 data-[state=active]:border-primary whitespace-nowrap truncate"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-black data-[state=active]:text-primary data-[state=active]:bg-blue-100 data-[state=active]:border-b-2 data-[state=active]:border-primary whitespace-nowrap truncate"
           >
             Category Distribution
           </TabsTrigger>
         </TabsList>
 
-        <div className="mt-6">
+        <div className="mt-2">
           <TabsContent value="cards">
             <Card className="border-0 shadow-none p-2">
               <CardContent className="p-0 space-y-6">
