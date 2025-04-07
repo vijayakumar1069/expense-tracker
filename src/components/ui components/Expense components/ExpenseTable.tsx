@@ -147,17 +147,27 @@ const ExpenseTable = () => {
   }
 
   return (
-    <Card className="w-full flex flex-col relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 mb-0">
-      <div className="flex w-full flex-col justify-end items-end lg:max-w-5xl lg:w-3/4 lg:flex-row  lg:justify-between space-y-3 lg:space-y-0 lg:items-center px-6  rounded-tl-xl rounded-tr-xl mb-0  lg:ml-auto">
-        <TransActionDialog mode="add" />
-        <TransactionHeader currentFilters={filters} />
-        <TransactionFilter
-          // onFilterChange={handleFilterChange}
-          initialFilters={filters}
-          onApplyFilters={handleApplyFilters}
-        />
+    <Card className="w-full flex flex-col relative overflow-hidden border-0 space-y-0 gap-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 mb-0">
+      <div className="grid md:grid-cols-3 gap-4 justify-end items-center w-full md:w-4/6 ml-auto">
+        {/* First item - right-aligned */}
+        <div className="md:col-start-1 justify-self-end">
+          <TransActionDialog mode="add" />
+        </div>
+
+        {/* Second item - right-aligned */}
+        <div className="md:col-start-2 md:justify-self-center justify-self-end">
+          <TransactionHeader currentFilters={filters} />
+        </div>
+
+        {/* Third item - centered in third column */}
+        <div>
+          <TransactionFilter
+            initialFilters={filters}
+            onApplyFilters={handleApplyFilters}
+          />
+        </div>
       </div>
-      <CardContent className="px-6 mt-0">
+      <CardContent className="px-6 mt-0 m-0 py-0 ">
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
           <Table>
             <TableHeader className="bg-gray-50 dark:bg-gray-900/60">
@@ -402,7 +412,7 @@ const ExpenseTable = () => {
               disabled={currentPage === 1 || isLoading}
               className="group border-gray-300 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-all"
             >
-              <ChevronLeft className="h-4 w-4 mr-1 text-indigo-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+              <ChevronLeft className="h-4 w-4 mr-1 text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
               <span className="group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                 Previous
               </span>
@@ -422,7 +432,7 @@ const ExpenseTable = () => {
               <span className="group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                 Next
               </span>
-              <ChevronRight className="h-4 w-4 ml-1 text-indigo-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+              <ChevronRight className="h-4 w-4 ml-1 text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
             </Button>
           </div>
         </div>

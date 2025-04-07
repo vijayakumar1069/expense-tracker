@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { DownloadCloud, FileText } from "lucide-react";
 // import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CardHeader } from "@/components/ui/card";
+// import { CardHeader } from "@/components/ui/card";
 
 import { toast } from "sonner";
 
@@ -88,7 +88,7 @@ const TransactionHeader = ({ currentFilters = {} }) => {
         title="Download Frame"
       />
 
-      <CardHeader>
+      <div className="p-0 m-0 gap-0">
         <div>
           {/* <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -172,7 +172,7 @@ const TransactionHeader = ({ currentFilters = {} }) => {
             </div>
           </div>
         </div> */}
-      </CardHeader>
+      </div>
     </>
   );
 };
