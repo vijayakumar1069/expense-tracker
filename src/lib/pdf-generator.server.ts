@@ -12,7 +12,7 @@ export async function generateInvoicePDF(invoice: any) {
         // Font setup
         const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
         const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-        const mediumFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+        const mediumFont = await pdfDoc.embedFont(StandardFonts.HelveticaBoldOblique);
 
         // Modern color scheme
         const colors = {
@@ -55,7 +55,7 @@ export async function generateInvoicePDF(invoice: any) {
         // Company Info with modern layout - taking 75% width
         const companyInfoWidth = contentWidth * 0.75;
         const companyInfo = [
-            { text: "Gliggo Technologies India Pvt Ltd", size: fontSize.large },
+            { text: "Gliggo Technologies India Pvt. Ltd.", size: fontSize.large },
             { text: "57/1-A VOC Nagar 2nd Cross Street,", size: fontSize.base },
             { text: "Anna Nagar East, Chennai - 600 102,Tamil Nadu,India.", size: fontSize.base },
             { text: "Phone: +91 72006 58885 | Email: furqaan.hussain@gliggo.com", size: fontSize.base },
@@ -66,11 +66,10 @@ export async function generateInvoicePDF(invoice: any) {
                 x: margin.left + 1,
                 y: yPosition - (index * 16),
                 size: line.size,
-                font: index === 0 ? boldFont : regularFont,
+                font: index === 0 ? boldFont : mediumFont,
                 color: index === 0 ? colors.primary : colors.secondary
             });
         });
-
         // Invoice number and issue date on right side - taking 25% width
         const invoiceDetailX = margin.left + companyInfoWidth + 20;
         const invoiceDetailsRight = [
@@ -214,152 +213,213 @@ export async function generateInvoicePDF(invoice: any) {
 
         yPosition -= 123; // Adjusted position after client & company address
 
-        // Items Table with 2 columns
-        const tableHeaderY = yPosition;
-        const rowHeight = 20;
-        const columnWidths = {
-            description: contentWidth * 0.6,  // 60% for description
-            total: contentWidth * 0.4         // 40% for total
+        // Enhanced Table Constants
+        const tableConfig = {
+            headerHeight: 18,
+            rowHeight: 20,
+            columnWidths: {
+                description: contentWidth * 0.6,
+                total: contentWidth * 0.4
+            },
+            padding: {
+                vertical: 8,
+                horizontal: 12
+            }
         };
+
+
+        // ====== Items Table ======
+        const tableStartY = yPosition;
+        const rowCount = invoice.invoiceContents.length;
+        const totalsRowCount = 3; // Subtotal, Tax, Total
+        const totalTableHeight =
+            tableConfig.headerHeight +
+            (rowCount * tableConfig.rowHeight) +
+            (totalsRowCount * tableConfig.rowHeight) - 18;
+
+        page.drawRectangle({
+            x: margin.left,
+            y: tableStartY - totalTableHeight,
+            width: contentWidth,
+            height: totalTableHeight,
+            borderColor: colors.primary,
+            borderWidth: 1,
+        });
+
+        // Remove main container border drawing (we'll handle borders per-row)
 
         // Table Header
         page.drawRectangle({
             x: margin.left,
-            y: tableHeaderY + 2,
+            y: tableStartY,
             width: contentWidth,
-            height: rowHeight,
+            height: tableConfig.headerHeight,
+            color: colors.primary,
+            opacity: 1,
+            borderColor: colors.primary,
+            borderWidth: 1,
+        });
+        page.drawRectangle({
+            x: margin.left,
+            y: tableStartY,
+            width: contentWidth,
+            height: tableConfig.headerHeight,
             color: colors.primary
         });
 
         // Draw column headers
+        // Column Headers with perfect alignment
         ["DESCRIPTION", "AMOUNT"].forEach((header, index) => {
-            const xPos = margin.left + Object.values(columnWidths)
-                .slice(0, index)
-                .reduce((a, b) => a + b, 0);
-
-            // Right-align total header
-            const alignRight = index === 1;
-            const textX = alignRight ?
-                xPos + columnWidths.total - regularFont.widthOfTextAtSize(header, fontSize.base) - 10 :
-                xPos + 10;
+            const isAmountColumn = index === 1;
+            const xPosition = margin.left + (isAmountColumn ? tableConfig.columnWidths.description : 0);
 
             page.drawText(header, {
-                x: textX,
-                y: tableHeaderY + 8,
+                x: isAmountColumn
+                    ? xPosition + tableConfig.columnWidths.total - boldFont.widthOfTextAtSize(header, fontSize.base) - tableConfig.padding.horizontal
+                    : xPosition + tableConfig.padding.horizontal + 130,
+                y: tableStartY + (tableConfig.headerHeight - fontSize.base) / 2 + 1,
                 size: fontSize.base,
                 font: boldFont,
-                color: rgb(1, 1, 1) // White text
+                color: rgb(1, 1, 1),
+                opacity: 0.95
             });
         });
 
-        // Table Rows
-        let currentY = tableHeaderY - rowHeight;
+
+        // Table Rows with full borders
+        const currentY = tableStartY
         invoice.invoiceContents.forEach((item: any, index: number) => {
-            // Alternate row colors
+            const rowY = currentY - (index * tableConfig.rowHeight);
+
+            // Zebra striping
             if (index % 2 === 0) {
                 page.drawRectangle({
-                    x: margin.left,
-                    y: currentY - 2,
-                    width: contentWidth,
-                    height: rowHeight,
-                    color: colors.accent
+                    x: margin.left + 2,
+                    y: rowY - tableConfig.rowHeight,
+                    width: contentWidth - 4,
+                    height: tableConfig.rowHeight,
+                    color: colors.accent,
+                    opacity: 0.6
                 });
             }
 
-            // Row content
-            const description = item.description.length > 40 ?
-                `${item.description.substring(0, 37)}...` :
-                item.description;
+            // Vertical line between columns
+            page.drawLine({
+                start: { x: margin.left + tableConfig.columnWidths.description + 50, y: rowY },
+                end: { x: margin.left + tableConfig.columnWidths.description + 50, y: rowY - tableConfig.rowHeight },
+                thickness: 0.8,
+                color: colors.primary,
+                opacity: 1
+            });
 
-            const total = `${parseFloat(item.total).toFixed(2)}`;
+            // Horizontal lines (top border for each row)
+            page.drawLine({
+                start: { x: margin.left, y: rowY },
+                end: { x: margin.left + contentWidth, y: rowY },
+                thickness: 0.5,
+                color: colors.primary,
+                opacity: 1
+            });
 
-            // Description column
+            // Content
+            const description = truncateText(item.description, 65);
+            const total = `${parseFloat(item.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+
+            // Description
             page.drawText(description, {
-                x: margin.left + 10,
-                y: currentY + 4,
+                x: margin.left + tableConfig.padding.horizontal - 8,
+                y: rowY - tableConfig.rowHeight + (tableConfig.rowHeight - fontSize.base) / 2 + 2,
                 size: fontSize.base,
                 font: regularFont,
                 color: colors.text
             });
 
-            // Total column (right-aligned)
-            const totalTextX = margin.left + columnWidths.description +
-                columnWidths.total -
-                regularFont.widthOfTextAtSize(total, fontSize.base) - 10;
+            // Amount (right-aligned)
+            const amountX = margin.left + tableConfig.columnWidths.description +
+                tableConfig.columnWidths.total -
+                regularFont.widthOfTextAtSize(total, fontSize.base) -
+                tableConfig.padding.horizontal;
 
             page.drawText(total, {
-                x: totalTextX,
-                y: currentY + 4,
+                x: amountX,
+                y: rowY - tableConfig.rowHeight + (tableConfig.rowHeight - fontSize.base) / 2 + 2,
                 size: fontSize.base,
                 font: regularFont,
                 color: colors.text
             });
 
-            currentY -= rowHeight;
+            // Draw bottom border for last row
+            if (index === rowCount - 1) {
+                page.drawLine({
+                    start: { x: margin.left, y: rowY - tableConfig.rowHeight },
+                    end: { x: margin.left + contentWidth, y: rowY - tableConfig.rowHeight },
+                    thickness: 0.8,
+                    color: colors.primary,
+                    opacity: 1
+                });
+            }
         });
 
-        // Table Footer with right alignment
-        let totalsY = currentY - 6.5;
+
+
+
+
+
+        let totalsStartY = currentY - (rowCount * tableConfig.rowHeight) - 20;
         const totals = [
             { label: "Subtotal", value: invoice.subtotal },
             { label: `Tax (${invoice.taxRate}%)`, value: invoice.taxAmount },
             { label: "Total", value: Math.round(invoice?.invoiceTotal ?? 0) }
-
         ];
 
-        // Right margin for text (padding from edge)
-        const textRightPadding = 10;
-
-        // In the totals.forEach block with right alignment:
         totals.forEach((total, index) => {
-            const yPos = totalsY - (index * 20);
+            const rowY = totalsStartY - (index * tableConfig.rowHeight);
 
-            // Calculate text widths for proper alignment
-            const labelText = total.label;
-            const valueText = `${total.value.toFixed(2)}`;
-            const labelWidth = boldFont.widthOfTextAtSize(labelText, fontSize.base);
-            const valueWidth = boldFont.widthOfTextAtSize(valueText, fontSize.base);
-
-            // Right edge of the label column
-            const labelColumnRightEdge = margin.left + columnWidths.description + columnWidths.total / 2;
-
-            // Right edge of the value column
-            const valueColumnRightEdge = margin.left + columnWidths.description + columnWidths.total;
-
-            // Label (right-aligned in its area)
-            page.drawText(labelText, {
-                x: labelColumnRightEdge - labelWidth - textRightPadding,
-                y: yPos,
-                size: fontSize.base,
-                font: boldFont,
-                color: colors.text
-            });
-
-            // Value (right-aligned in its area)
-            page.drawText(valueText, {
-                x: valueColumnRightEdge - valueWidth - textRightPadding,
-                y: yPos,
-                size: fontSize.base,
-                font: boldFont,
-                color: colors.success
-            });
-
-            // Add line between tax and total
-            if (index === 1) { // Index 1 is the tax entry
-                const lineY = yPos - 8; // Adjust this value to position the line
+            // Horizontal line above total row
+            if (index === totals.length - 1) {
                 page.drawLine({
-                    start: {
-                        x: labelColumnRightEdge - labelWidth - textRightPadding - 5,
-                        y: lineY
-                    }, // Start before the label
-                    end: {
-                        x: valueColumnRightEdge - textRightPadding + 5,
-                        y: lineY
-                    }, // End after the value
-                    thickness: 1,
+                    start: { x: margin.left + 347, y: rowY + tableConfig.rowHeight },
+                    end: { x: margin.left + contentWidth, y: rowY + tableConfig.rowHeight },
+                    thickness: 0.8,
                     color: colors.primary
                 });
             }
+
+            // Vertical line between columns
+            page.drawLine({
+                start: { x: margin.left + tableConfig.columnWidths.description + 50, y: rowY + tableConfig.rowHeight },
+                end: { x: margin.left + tableConfig.columnWidths.description + 50, y: rowY },
+                thickness: 0.8,
+                color: colors.primary,
+                opacity: 1
+            });
+
+
+
+            // Total content
+            const isTotal = index === totals.length - 1;
+            const labelX = margin.left + tableConfig.padding.horizontal;
+            const valueX = margin.left + tableConfig.columnWidths.description +
+                tableConfig.columnWidths.total -
+                regularFont.widthOfTextAtSize(total.value.toFixed(2), fontSize.base) -
+                tableConfig.padding.horizontal - 15;
+
+            page.drawText(total.label, {
+                x: labelX + 340,
+                y: rowY + (tableConfig.rowHeight - fontSize.base) / 2,
+                size: fontSize.base,
+                font: isTotal ? boldFont : regularFont,
+                color: isTotal ? colors.success : colors.text
+            });
+
+
+            page.drawText(`${total.value.toFixed(2)}`, {
+                x: valueX + 15,
+                y: rowY + (tableConfig.rowHeight - fontSize.base) / 2,
+                size: fontSize.base,
+                font: isTotal ? boldFont : regularFont,
+                color: isTotal ? colors.success : colors.text
+            });
         });
         // Amount in Words
         try {
@@ -369,10 +429,10 @@ export async function generateInvoicePDF(invoice: any) {
                 .join(' ') + " Rupees Only";
 
             // Fixed width constraints
-            const maxWidth = 230; // Adjust based on your layout
+            const maxWidth = 260; // Adjust based on your layout
             const lineHeight = 15;
-            const startX = margin.left;
-            let currentY = totalsY - 0;
+            const startX = margin.left + 8;
+            let currentY = totalsStartY - 0;
 
             // Split into multiple lines if needed
             const words = amountWords.split(' ');
@@ -424,14 +484,14 @@ export async function generateInvoicePDF(invoice: any) {
             }
 
             // Adjust totals position based on lines used
-            totalsY = currentY - 20;
+            totalsStartY = currentY - 20;
 
         } catch (error) {
             console.error("Amount words conversion error:", error);
         }
 
         // Payment Details Section with compact layout
-        const paymentY = totalsY - 100; // Reduced distance from totals section
+        const paymentY = totalsStartY - 95; // Reduced distance from totals section
 
         // Background rectangle - reduced height
         page.drawRectangle({
@@ -750,3 +810,7 @@ export async function generateInvoicePDF(invoice: any) {
         throw error;
     }
 }
+
+
+const truncateText = (text: string, maxLength: number) =>
+    text.length > maxLength ? `${text.substring(0, maxLength - 3)}...` : text;
