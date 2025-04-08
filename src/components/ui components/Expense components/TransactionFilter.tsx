@@ -432,7 +432,7 @@ const TransactionFilter = ({
                           className="justify-start text-left font-normal"
                           disabled={!!filters.byMonth}
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          <CalendarIcon className=" h-4 w-4" />
                           {filters.startDate ? (
                             format(filters.startDate, "PPP")
                           ) : (
@@ -458,7 +458,7 @@ const TransactionFilter = ({
                           className="justify-start text-left font-normal"
                           disabled={!!filters.byMonth}
                         >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          <CalendarIcon className=" h-4 w-4" />
                           {filters.endDate ? (
                             format(filters.endDate, "PPP")
                           ) : (
