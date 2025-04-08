@@ -188,7 +188,7 @@ const InvoiceTable = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Invoice #</TableHead>
-                <TableHead>Client Name</TableHead>
+                <TableHead>Name</TableHead>
                 <TableHead>Issue Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>

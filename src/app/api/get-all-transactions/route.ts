@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
       sortBy: searchParams.get("sortBy") || "createdAt",
       sortDirection: searchParams.get("sortDirection") || "desc",
     });
-    console.log(validatedParams);
+
 
 
 
@@ -99,8 +99,7 @@ export async function GET(request: NextRequest) {
     // Add date range filters
     if (startDate || endDate) {
 
-      console.log("startDate", startDate);
-      console.log("endDate", endDate);
+
       where.date = {};
       if (startDate) {
         where.date.gte = new Date(startDate);
@@ -143,7 +142,7 @@ export async function GET(request: NextRequest) {
     }
 
     const skip = (page - 1) * limit;
-    console.log(where)
+
 
     // Execute queries in parallel for better performance
     const [transactions, totalItems, aggregates] = await Promise.all([
@@ -173,7 +172,7 @@ export async function GET(request: NextRequest) {
         },
       }),
     ]);
-    // console.log(transactions)
+
 
     // Calculate total income and expenses
     const totalIncome = aggregates.find(agg => agg.type === "INCOME")?._sum.amount ?? 0;

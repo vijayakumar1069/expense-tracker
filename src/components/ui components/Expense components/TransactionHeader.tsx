@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const TransactionHeader = ({ currentFilters = {} }) => {
-  console.log("currentFilters", currentFilters);
   const [isDownloading, setIsDownloading] = useState(false);
   // Create a ref for the download iframe
   const downloadIframeRef = useRef<HTMLIFrameElement | null>(null);
