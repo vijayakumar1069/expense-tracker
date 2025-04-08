@@ -20,9 +20,10 @@ export async function GET(req: NextRequest) {
         where: {
             userId: user.id,
             OR: [
-                { name: { contains: query } },
-                { email: { contains: query } },
-                { companyName: { contains: query } },
+                { name: { contains: query, mode: 'insensitive' } },
+                { email: { contains: query, mode: 'insensitive' } },
+                { companyName: { contains: query, mode: 'insensitive' } },
+
             ],
         },
     });

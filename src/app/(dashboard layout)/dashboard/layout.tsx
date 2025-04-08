@@ -1,24 +1,106 @@
-import React, { ReactNode } from "react";
-import "../../../app/globals.css";
+// app/dashboard/layout.tsx
+"use client";
 
-export default function LayoutForDashboard({
+import { Suspense, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { TabSelector } from "./__components/TabSelector";
+
+export default function DashboardLayout({
   children,
+  financial,
+  payment_methods,
+  transactions_invoices,
+  income_expense,
+  category_distribution,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
+  financial: React.ReactNode;
+  payment_methods: React.ReactNode;
+  transactions_invoices: React.ReactNode;
+  income_expense: React.ReactNode;
+  category_distribution: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const [activeTab, setActiveTab] = useState<string | null>(null);
+
+  // Determine which tab is active based on URL
+  useEffect(() => {
+    if (pathname === "/dashboard") {
+      setActiveTab(null);
+    } else if (pathname === "/dashboard/financial") {
+      setActiveTab("financial");
+    } else if (pathname === "/dashboard/payment_methods") {
+      setActiveTab("payment_methods");
+    } else if (pathname === "/dashboard/transactions_invoices") {
+      setActiveTab("transactions_invoices");
+    } else if (pathname === "/dashboard/income_expense") {
+      setActiveTab("income_expense");
+    } else if (pathname === "/dashboard/category_distribution") {
+      setActiveTab("category_distribution");
+    }
+  }, [pathname]);
+
+  // Function to render the active content
+  const renderActiveContent = () => {
+    if (!activeTab) {
+      return children; // Default dashboard view
+    }
+
+    // Return the appropriate content based on the active tab
+    switch (activeTab) {
+      case "financial":
+        return (
+          <Suspense
+            fallback={<div className="p-4">Loading financial data...</div>}
+          >
+            {financial}
+          </Suspense>
+        );
+      case "payment_methods":
+        return (
+          <Suspense
+            fallback={<div className="p-4">Loading payment methods...</div>}
+          >
+            {payment_methods}
+          </Suspense>
+        );
+      case "transactions_invoices":
+        return (
+          <Suspense
+            fallback={<div className="p-4">Loading transactions...</div>}
+          >
+            {transactions_invoices}
+          </Suspense>
+        );
+      case "income_expense":
+        return (
+          <Suspense
+            fallback={<div className="p-4">Loading income vs expense...</div>}
+          >
+            {income_expense}
+          </Suspense>
+        );
+      case "category_distribution":
+        return (
+          <Suspense
+            fallback={
+              <div className="p-4">Loading category distribution...</div>
+            }
+          >
+            {category_distribution}
+          </Suspense>
+        );
+      default:
+        return children;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0">
-        {/* Main content container with proper spacing */}
+    <div className="p-6 bg-background/10 rounded-lg max-w-7xl mx-auto">
+      <TabSelector activeTab={activeTab} />
 
-        {/* Hero section with subtle animation */}
-        <div className="animate-fade-in-up">{children}</div>
-      </div>
-
-      {/* Footer with subtle attribution */}
-      <div className="mt-12 pt-6 border-t border-slate-200 dark:border-slate-700 text-center text-sm text-slate-500 dark:text-slate-400">
-        <p>Expense Tracker Dashboard • {new Date().getFullYear()}</p>
-      </div>
+      {/* Only render the active content */}
+      <div className="mt-2">{renderActiveContent()}</div>
     </div>
   );
 }

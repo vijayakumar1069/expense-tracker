@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+// app/layout.tsx
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -14,6 +15,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Separate viewport configuration
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#4ade80",
+};
+
 export const metadata: Metadata = {
   title: "Expense Tracker | Manage Your Finances",
   description:
@@ -27,7 +35,6 @@ export const metadata: Metadata = {
     "income tracking",
   ],
   authors: [{ name: "Your Name" }],
-  viewport: "width=device-width, initial-scale=1.0",
   openGraph: {
     title: "Expense Tracker | Manage Your Finances",
     description:
@@ -43,7 +50,7 @@ export const metadata: Metadata = {
     icon: "/favicon.ico",
     apple: "/apple-icon.png",
   },
-  themeColor: "#4ade80",
+  // Remove themeColor from here
 };
 
 export default function RootLayout({
