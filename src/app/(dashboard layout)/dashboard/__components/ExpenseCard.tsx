@@ -1,6 +1,7 @@
 // app/dashboard/@expense/page.tsx
 import { fetchExpenseData } from "../__actions/cardsActions";
-import { BarChart2, TrendingDown, Calendar } from "lucide-react";
+import { TrendingDown, Calendar } from "lucide-react";
+import TopCategories from "./TopCategories";
 
 export default async function ExpenseCard() {
   const { totalExpense, topExpenseCategories, financialYear, monthlyExpenses } =
@@ -28,7 +29,7 @@ export default async function ExpenseCard() {
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100">
       {/* Header with financial year indicator */}
-      <div className="p-5 bg-gradient-to-r from-rose-50 to-indigo-50 flex items-center justify-between">
+      <div className="p-2 bg-gradient-to-r from-rose-50 to-indigo-50 flex items-center justify-between relative">
         <div>
           <h3 className="text-lg font-semibold text-gray-800">
             Expense Overview
@@ -44,66 +45,24 @@ export default async function ExpenseCard() {
       </div>
 
       {/* Main content */}
-      <div className="p-5">
+      <div className="p-5 relative">
         {/* Total amount with decoration */}
-        <div className="relative mb-6">
+        <div className="relative">
           <div className="absolute -left-2 top-1/2 -translate-y-1/2 h-14 w-1 bg-gradient-to-b from-rose-400 to-rose-600 rounded-full"></div>
-          <div className="ml-4">
+          <div className="ml-4 relative">
             <p className="text-sm text-gray-500 font-medium">Total Expenses</p>
-            <p className="text-4xl font-bold text-gray-800">
+            <p className="text-xl font-bold text-gray-800">
               ${totalExpense.toLocaleString()}
             </p>
           </div>
         </div>
 
-        {/* Category breakdown */}
-        <div className="space-y-4 mb-6">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-gray-700 flex items-center">
-              <BarChart2 className="h-4 w-4 mr-1.5 text-indigo-500" />
-              Top Categories
-            </h4>
-          </div>
-
-          <div className="grid gap-3">
-            {topExpenseCategories.map((category, index) => (
-              <div
-                key={index}
-                className="bg-gray-50 rounded-lg p-3 transition-all hover:shadow-md"
-              >
-                <div className="flex justify-between mb-1.5">
-                  <div className="flex items-center">
-                    <div
-                      className="h-3 w-3 rounded-full mr-2"
-                      style={{ backgroundColor: category.color }}
-                    />
-                    <span className="text-sm font-medium">{category.name}</span>
-                  </div>
-                  <span className="text-sm font-semibold">
-                    ${category.amount.toLocaleString()}
-                  </span>
-                </div>
-                <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full transition-all duration-500 ease-out"
-                    style={{
-                      width: `${category.percentage}%`,
-                      backgroundColor: category.color,
-                    }}
-                  />
-                </div>
-                <div className="mt-1 text-right">
-                  <span className="text-xs text-gray-500">
-                    {category.percentage}% of total
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Top Categories Button - Fixed Position */}
+        <div className="w-full ">
+          <TopCategories categories={topExpenseCategories} />
         </div>
 
-        {/* Monthly trend visualization */}
-
+        {/* Monthly Chart - Always in the same position */}
         <div className="mt-10 p-3">
           <div className="flex h-40 items-end justify-between space-x-1.5">
             {monthlyExpenses.map((month, index) => {
@@ -113,7 +72,7 @@ export default async function ExpenseCard() {
               return (
                 <div
                   key={index}
-                  className="flex flex-col items-center h-full justify-end" // Added h-full and justify-end
+                  className="flex flex-col items-center h-full justify-end"
                 >
                   <div
                     className="w-8 rounded-t-md transition-all duration-500 group relative"
