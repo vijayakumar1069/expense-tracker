@@ -57,6 +57,7 @@ const QuerySchema = z.object({
     search: z.string().optional(),
     sortBy: z.enum(['date', 'amount', 'name', 'createdAt']).default('createdAt'),
     sortDirection: z.enum(['asc', 'desc']).default('desc'),
+    byMonth: z.enum(['ThisMonth', 'LastMonth', 'Last2Months', 'Last3Months', 'Last6Months', 'LastYear']).optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -83,19 +84,21 @@ export async function GET(request: NextRequest) {
             search: searchParams.get("search") || undefined,
             sortBy: searchParams.get("sortBy") || "createdAt",
             sortDirection: searchParams.get("sortDirection") || "desc",
+            byMonth: searchParams.get("byMonth") || undefined,
         });
 
         const {
             type,
             category,
             paymentMethodType,
-            startDate,
-            endDate,
+            startDate: queryStartDate,
+            endDate: queryEndDate,
             minAmount,
             maxAmount,
             search,
             sortBy,
             sortDirection,
+            byMonth,
         } = validatedParams;
 
         // Build the where condition for Prisma
@@ -117,14 +120,53 @@ export async function GET(request: NextRequest) {
                 type: paymentMethodType
             };
         }
+        if (byMonth) {
+            const now = new Date();
+            const currentYear = now.getUTCFullYear();
+            const currentMonth = now.getUTCMonth();
 
-        if (startDate || endDate) {
-            where.date = {};
-            if (startDate) {
-                where.date.gte = new Date(startDate);
+            let computedStartDate: Date;
+            let computedEndDate: Date;
+
+            switch (byMonth) {
+                case 'ThisMonth':
+                    computedStartDate = new Date(Date.UTC(currentYear, currentMonth, 1));
+                    computedEndDate = new Date(Date.UTC(currentYear, currentMonth + 1, 0, 23, 59, 59, 999));
+                    break;
+                case 'LastMonth':
+                    computedStartDate = new Date(Date.UTC(currentYear, currentMonth - 1, 1));
+                    computedEndDate = new Date(Date.UTC(currentYear, currentMonth, 0, 23, 59, 59, 999));
+                    break;
+                case 'Last2Months':
+                    computedStartDate = new Date(Date.UTC(currentYear, currentMonth - 2, 1));
+                    computedEndDate = new Date(Date.UTC(currentYear, currentMonth, 0, 23, 59, 59, 999));
+                    break;
+                case 'Last3Months':
+                    computedStartDate = new Date(Date.UTC(currentYear, currentMonth - 3, 1));
+                    computedEndDate = new Date(Date.UTC(currentYear, currentMonth, 0, 23, 59, 59, 999));
+                    break;
+                case 'Last6Months':
+                    computedStartDate = new Date(Date.UTC(currentYear, currentMonth - 6, 1));
+                    computedEndDate = new Date(Date.UTC(currentYear, currentMonth, 0, 23, 59, 59, 999));
+                    break;
+                case 'LastYear':
+                    computedStartDate = new Date(Date.UTC(currentYear - 1, 0, 1));
+                    computedEndDate = new Date(Date.UTC(currentYear - 1, 11, 31, 23, 59, 59, 999));
+                    break;
+                default:
+                    throw new Error('Invalid byMonth value');
             }
-            if (endDate) {
-                where.date.lte = new Date(endDate);
+
+            where.date = {
+                gte: computedStartDate,
+                lte: computedEndDate,
+            };
+        } else {
+            // Handle manual date range only if byMonth is not set
+            if (queryStartDate || queryEndDate) {
+                where.date = {};
+                if (queryStartDate) where.date.gte = new Date(queryStartDate);
+                if (queryEndDate) where.date.lte = new Date(queryEndDate);
             }
         }
 
@@ -195,7 +237,7 @@ export async function GET(request: NextRequest) {
                     }
                 },
                 "Amount": {
-                    v: transaction.total,
+                    v: transaction.total.toFixed(2),
                     s: {
                         font: { color: { rgb: amountColor } },
                         alignment: { horizontal: "right" },
@@ -210,7 +252,15 @@ export async function GET(request: NextRequest) {
                 }
             };
         });
-
+        for (let i = 0; i < 3; i++) {
+            formattedData.push({
+                "S.No": { v: "", s: {} },
+                "Date": { v: "", s: {} },
+                "Particulars": { v: "", s: {} },
+                "Amount": { v: "", s: {} },
+                "Remarks": { v: "", s: {} }
+            });
+        }
         // Add header row with styles
         const headerStyle: CellStyle = {
             font: { bold: true, color: { rgb: "FFFFFF" } },
@@ -229,13 +279,13 @@ export async function GET(request: NextRequest) {
             "S.No": {
                 v: "",
                 s: {
-                    fill: { fgColor: { rgb: "FFC000" } } // Yellow background
+                    // fill: { fgColor: { rgb: "FFC000" } } // Yellow background
                 }
             },
             "Date": {
                 v: "",
                 s: {
-                    fill: { fgColor: { rgb: "FFC000" } } // Yellow background
+                    // fill: { fgColor: { rgb: "FFC000" } } // Yellow background
                 }
             },
             "Particulars": {
@@ -243,22 +293,22 @@ export async function GET(request: NextRequest) {
                 s: {
                     font: { bold: true, color: { rgb: "000000" } }, // Black bold text
                     fill: { fgColor: { rgb: "FFC000" } }, // Yellow background
-                    alignment: { horizontal: "right" }
+                    alignment: { horizontal: "center" }
                 }
             },
             "Amount": {
-                v: grandTotal,
+                v: grandTotal.toFixed(2),
                 s: {
                     font: { bold: true, color: { rgb: "000000" } }, // Black bold text
                     fill: { fgColor: { rgb: "FFC000" } }, // Yellow background
-                    alignment: { horizontal: "right" },
+                    alignment: { horizontal: "center" },
                     numFmt: "#,##0.00"
                 }
             },
             "Remarks": {
                 v: "",
                 s: {
-                    fill: { fgColor: { rgb: "FFC000" } } // Yellow background
+                    // fill: { fgColor: { rgb: "FFC000" } } // Yellow background
                 }
             }
         });

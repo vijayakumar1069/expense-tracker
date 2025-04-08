@@ -63,7 +63,7 @@ const InvoiceFilter = ({
         <PopoverTrigger asChild>
           <Button variant="outline" className="gap-2 group">
             <SlidersHorizontal className="h-4 w-4 text-white group-hover:text-primary" />
-            <span className="text-white group-hover:text-primary">Filters</span>
+            <span className="text-white group-hover:text-primary">Search</span>
             {filtersActive && (
               <span className="ml-1 rounded-full group-hover:bg-primary bg-white group-hover:text-primary text-white  w-2 h-2" />
             )}

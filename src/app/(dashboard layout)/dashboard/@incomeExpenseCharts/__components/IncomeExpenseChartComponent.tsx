@@ -76,15 +76,16 @@ export function IncomeExpenseChartComponent() {
             <SelectValue placeholder="Select range" />
           </SelectTrigger>
           <SelectContent className="rounded-xl bg-white border-gray-200">
-            <SelectItem value="90d" className="hover:bg-gray-50 text-gray-700">
-              Last 3 months
+            <SelectItem value="7d" className="hover:bg-gray-50 text-gray-700">
+              Last 7 days
             </SelectItem>
             <SelectItem value="30d" className="hover:bg-gray-50 text-gray-700">
               Last 30 days
             </SelectItem>
-            <SelectItem value="7d" className="hover:bg-gray-50 text-gray-700">
-              Last 7 days
+            <SelectItem value="90d" className="hover:bg-gray-50 text-gray-700">
+              Last 3 months
             </SelectItem>
+
             <SelectItem value="1yr" className="hover:bg-gray-50 text-gray-700">
               Last year
             </SelectItem>

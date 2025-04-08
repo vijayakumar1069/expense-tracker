@@ -50,7 +50,7 @@ const ClientFilters = ({
         <PopoverTrigger asChild>
           <Button variant="outline" className="gap-2 group">
             <SlidersHorizontal className="h-4 w-4  text-white group-hover:text-primary" />
-            <span className="text-white group-hover:text-primary">Filters</span>
+            <span className="text-white group-hover:text-primary">Search</span>
             {filtersActive && (
               <span className="ml-1 rounded-full bg-white group-hover:bg-primary w-2 h-2" />
             )}

@@ -44,6 +44,7 @@ interface FilterProps {
     search?: string;
     sortBy?: string;
     sortDirection?: "asc" | "desc";
+    byMonth?: string;
   }) => void;
   initialFilters?: {
     type?: string;
@@ -56,8 +57,49 @@ interface FilterProps {
     search?: string;
     sortBy?: string;
     sortDirection?: "asc" | "desc";
+    byMonth?: string;
   };
 }
+
+const getDateRangeForMonth = (byMonth: string) => {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+  let startDate: Date;
+  let endDate: Date;
+
+  switch (byMonth) {
+    case "ThisMonth":
+      startDate = new Date(currentYear, currentMonth, 1);
+      endDate = new Date(currentYear, currentMonth + 1, 0);
+      break;
+    case "LastMonth":
+      startDate = new Date(currentYear, currentMonth - 1, 1);
+      endDate = new Date(currentYear, currentMonth, 0);
+      break;
+    case "Last2Months":
+      startDate = new Date(currentYear, currentMonth - 2, 1);
+      endDate = new Date(currentYear, currentMonth, 0);
+      break;
+    case "Last3Months":
+      startDate = new Date(currentYear, currentMonth - 3, 1);
+      endDate = new Date(currentYear, currentMonth, 0);
+      break;
+    case "Last6Months":
+      startDate = new Date(currentYear, currentMonth - 6, 1);
+      endDate = new Date(currentYear, currentMonth, 0);
+      break;
+    case "LastYear":
+      startDate = new Date(currentYear - 1, 0, 1);
+      endDate = new Date(currentYear - 1, 11, 31);
+      break;
+    default:
+      return { startDate: undefined, endDate: undefined };
+  }
+
+  return { startDate, endDate };
+};
+
 const TransactionFilter = ({
   // onFilterChange,
   initialFilters = {},
@@ -85,26 +127,60 @@ const TransactionFilter = ({
     search: initialFilters.search || "",
     sortBy: initialFilters.sortBy || "createdAt",
     sortDirection: initialFilters.sortDirection || ("desc" as "asc" | "desc"),
+    byMonth: initialFilters.byMonth || "",
   });
 
   const handleFilterChange = (
     field: string,
     value: string | Date | undefined
   ) => {
-    setFilters((prev) => ({ ...prev, [field]: value }));
+    setFilters((prev) => {
+      // Clear date range when selecting byMonth
+      if (field === "byMonth") {
+        return {
+          ...prev,
+          byMonth: value as string,
+          startDate: undefined,
+          endDate: undefined,
+        };
+      }
+
+      // Clear byMonth when selecting manual dates
+      if (field === "startDate" || field === "endDate") {
+        return {
+          ...prev,
+          byMonth: "",
+          [field]: value,
+        };
+      }
+
+      return { ...prev, [field]: value };
+    });
   };
 
   const applyFilters = () => {
+    // If byMonth is selected, convert it to actual date range
+    const filtersToApply = { ...filters };
+
+    if (filters.byMonth) {
+      const { startDate, endDate } = getDateRangeForMonth(filters.byMonth);
+      filtersToApply.startDate = startDate;
+      filtersToApply.endDate = endDate;
+    }
+
     const formattedFilters = {
-      ...filters,
-      startDate: filters.startDate
-        ? format(filters.startDate, "yyyy-MM-dd")
+      ...filtersToApply,
+      startDate: filtersToApply.startDate
+        ? format(filtersToApply.startDate, "yyyy-MM-dd")
         : undefined,
-      endDate: filters.endDate
-        ? format(filters.endDate, "yyyy-MM-dd")
+      endDate: filtersToApply.endDate
+        ? format(filtersToApply.endDate, "yyyy-MM-dd")
         : undefined,
+      // Don't send byMonth to the backend
+      byMonth: undefined,
     };
 
+    console.log("formattedFilters", formattedFilters);
     onApplyFilters(formattedFilters);
     setIsOpen(false);
   };
@@ -121,6 +197,7 @@ const TransactionFilter = ({
       search: "",
       sortBy: "createdAt",
       sortDirection: "desc" as "asc" | "desc",
+      byMonth: "",
     };
 
     setFilters(resetValues);
@@ -141,16 +218,24 @@ const TransactionFilter = ({
       if (searchValue !== filters.search) {
         setFilters((prev) => ({ ...prev, search: searchValue }));
 
-        // Immediately apply search filter
+        // Apply search filter with date conversion if byMonth is set
+        const filtersToApply = { ...filters, search: searchValue };
+
+        if (filters.byMonth) {
+          const { startDate, endDate } = getDateRangeForMonth(filters.byMonth);
+          filtersToApply.startDate = startDate;
+          filtersToApply.endDate = endDate;
+        }
+
         const formattedFilters = {
-          ...filters,
-          search: searchValue,
-          startDate: filters.startDate
-            ? format(filters.startDate, "yyyy-MM-dd")
+          ...filtersToApply,
+          startDate: filtersToApply.startDate
+            ? format(filtersToApply.startDate, "yyyy-MM-dd")
             : undefined,
-          endDate: filters.endDate
-            ? format(filters.endDate, "yyyy-MM-dd")
+          endDate: filtersToApply.endDate
+            ? format(filtersToApply.endDate, "yyyy-MM-dd")
             : undefined,
+          byMonth: undefined,
         };
 
         onApplyFilters(formattedFilters);
@@ -161,9 +246,9 @@ const TransactionFilter = ({
   }, [filters, onApplyFilters, searchValue]);
 
   return (
-    <div className="py-4 px-6">
-      <div className="flex items-center justify-center gap-4">
-        <div className="relative w-full md:w-48">
+    <div className="">
+      <div className="flex items-center justify-center space-x-4">
+        <div className="relative w-full md:w-72">
           <Input
             placeholder="Search transactions..."
             value={filters.search}
@@ -188,24 +273,28 @@ const TransactionFilter = ({
 
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <Filter className="h-4 w-4" />
-              Filters
+            <Button variant="outline" className="gap-2 group">
+              <Filter className="h-4 w-4 text-white group-hover:text-primary " />
+              <span className="text-white group-hover:text-primary">
+                Search
+              </span>
               {Object.values(filters).some(
                 (value) =>
                   value &&
                   value !== "" &&
                   value !== "createdAt" &&
                   value !== "desc"
-              ) && <span className="ml-1 rounded-full bg-primary w-2 h-2" />}
+              ) && (
+                <span className="ml-1 rounded-full bg-white group-hover:bg-primary w-2 h-2 text-white" />
+              )}
             </Button>
           </PopoverTrigger>
           <PopoverContent
             className="w-[340px] p-0"
             align="end"
-            onInteractOutside={(e) => {
-              e.preventDefault();
-            }}
+            // onInteractOutside={(e) => {
+            //   e.preventDefault();
+            // }}
           >
             <Card className="border-0">
               <CardContent className="p-4 grid gap-4">
@@ -223,6 +312,32 @@ const TransactionFilter = ({
                       <SelectItem value="EXPENSE">Expense</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="byMonth">Transaction By Month</Label>
+                  <Select
+                    value={filters.byMonth}
+                    onValueChange={(value) =>
+                      handleFilterChange("byMonth", value)
+                    }
+                  >
+                    <SelectTrigger id="byMonth">
+                      <SelectValue placeholder="Transaction By Month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ThisMonth">This Month</SelectItem>
+                      <SelectItem value="LastMonth">Last Month</SelectItem>
+                      <SelectItem value="Last2Months">Last 2 Months</SelectItem>
+                      <SelectItem value="Last3Months">Last 3 Months</SelectItem>
+                      <SelectItem value="Last6Months">Last 6 Months</SelectItem>
+                      <SelectItem value="LastYear">Last Year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {filters.byMonth && (
+                    <p className="text-xs text-muted-foreground">
+                      Date range selection is disabled when filtering by month
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -316,6 +431,7 @@ const TransactionFilter = ({
                         <Button
                           variant="outline"
                           className="justify-start text-left font-normal"
+                          disabled={!!filters.byMonth}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {filters.startDate ? (
@@ -341,6 +457,7 @@ const TransactionFilter = ({
                         <Button
                           variant="outline"
                           className="justify-start text-left font-normal"
+                          disabled={!!filters.byMonth}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {filters.endDate ? (

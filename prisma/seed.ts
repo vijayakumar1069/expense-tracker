@@ -114,7 +114,11 @@ const TAX_TYPES = [
     { id: "TCS-1", name: "TCS 1%", rate: 0.01 },
 ];
 
-const FY_START = new Date('2025-04-01');
+const FY_PERIODS = [
+    { start: new Date('2024-04-01'), end: new Date('2025-03-31') },
+    { start: new Date('2025-04-01'), end: new Date('2026-03-31') },
+    { start: new Date('2026-04-01'), end: new Date('2027-03-31') }
+];
 // const FY_END = new Date('2026-03-31');
 
 async function seed() {
@@ -157,43 +161,38 @@ async function seed() {
             clients.push(client);
         }
 
-        // Create transactions - 100 per month with all payment methods and types
         const transactions = [];
         const paymentMethods = ['CASH', 'BANK', 'CHEQUE', 'INVOICE'] as const;
 
-        // Generate array of months in the financial year
-        const months = Array.from({ length: 12 }, (_, index) => {
-            const start = new Date(FY_START);
-            start.setMonth(FY_START.getMonth() + index);
-            const end = new Date(start);
-            end.setMonth(end.getMonth() + 1);
-            end.setDate(0); // Last day of the month
-            return { start, end };
-        });
+        // Create transactions for each fiscal year
+        for (const fiscalYear of FY_PERIODS) {
+            // Generate array of months in the financial year
+            const months = Array.from({ length: 12 }, (_, index) => {
+                const start = new Date(fiscalYear.start);
+                start.setMonth(fiscalYear.start.getMonth() + index);
+                const end = new Date(start);
+                end.setMonth(end.getMonth() + 1);
+                end.setDate(0); // Last day of the month
+                return { start, end };
+            });
 
-        // Create transactions for each month
-        for (const { start: monthStart, end: monthEnd } of months) {
-            // Create 25 transactions per payment method (12 income + 13 expense)
-            for (const method of paymentMethods) {
-                // Income transactions
-                for (let i = 0; i < 12; i++) {
+            // Create transactions for each month
+            for (const { start: monthStart, end: monthEnd } of months) {
+                // Create 10 transactions per month, ensuring all payment methods are covered
+                for (let i = 0; i < 10; i++) {
+                    // Determine transaction type - alternate between income and expense
+                    const type = i % 2 === 0 ? TransactionType.INCOME : TransactionType.EXPENSE;
+
+                    // Ensure all payment methods are covered by cycling through them
+                    const method = paymentMethods[i % paymentMethods.length];
+
                     const transaction = await createTransaction(
-                        TransactionType.INCOME,
+                        type,
                         method,
                         monthStart,
                         monthEnd
                     );
-                    transactions.push(transaction);
-                }
 
-                // Expense transactions
-                for (let i = 0; i < 13; i++) {
-                    const transaction = await createTransaction(
-                        TransactionType.EXPENSE,
-                        method,
-                        monthStart,
-                        monthEnd
-                    );
                     transactions.push(transaction);
                 }
             }

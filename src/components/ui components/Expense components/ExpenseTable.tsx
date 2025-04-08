@@ -65,6 +65,7 @@ interface FilterState {
   search?: string;
   sortBy?: string;
   sortDirection?: "asc" | "desc";
+  byMonth?: string;
 }
 const limit = 10;
 
@@ -100,6 +101,7 @@ const ExpenseTable = () => {
       if (filters.sortBy) params.append("sortBy", filters.sortBy);
       if (filters.sortDirection)
         params.append("sortDirection", filters.sortDirection);
+      if (filters.byMonth) params.append("byMonth", filters.byMonth);
 
       const response = await fetch(
         `/api/get-all-transactions?${params.toString()}`
@@ -148,25 +150,34 @@ const ExpenseTable = () => {
 
   return (
     <Card className="w-full flex flex-col relative overflow-hidden border-0 space-y-0 gap-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 mb-0">
-      <div className="grid md:grid-cols-3 gap-4 justify-end items-center w-full md:w-4/6 ml-auto">
-        {/* First item - right-aligned */}
-        <div className="md:col-start-1 justify-self-end">
-          <TransActionDialog mode="add" />
-        </div>
+      {/* Replace the existing grid div with this */}
+      <div className=" w-full mb-4 px-6 ">
+        {/* Filter header positioned absolutely at top */}
 
-        {/* Second item - right-aligned */}
-        <div className="md:col-start-2 md:justify-self-center justify-self-end">
-          <TransactionHeader currentFilters={filters} />
-        </div>
-
-        {/* Third item - centered in third column */}
-        <div>
-          <TransactionFilter
-            initialFilters={filters}
-            onApplyFilters={handleApplyFilters}
-          />
+        {/* Main controls container */}
+        <div className="flex flex-wrap md:flex-nowrap gap-4 items-center justify-end w-full">
+          {/* Left column: Add Transaction button */}
+          <div className="w-full md:w-auto ">
+            <TransActionDialog mode="add" />
+          </div>
+          {Object.values(filters).some(
+            (value) =>
+              value && value !== "" && value !== "createdAt" && value !== "desc"
+          ) && (
+            <div className="">
+              <TransactionHeader currentFilters={filters} />
+            </div>
+          )}
+          {/* Right column: Search and Filter */}
+          <div className="flex w-full md:w-auto items-center gap-4 justify-center">
+            <TransactionFilter
+              initialFilters={filters}
+              onApplyFilters={handleApplyFilters}
+            />
+          </div>
         </div>
       </div>
+
       <CardContent className="px-6 mt-0 m-0 py-0 ">
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
           <Table>
