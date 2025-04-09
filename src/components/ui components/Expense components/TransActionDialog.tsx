@@ -176,12 +176,13 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
       mutation.mutate(data);
     });
   };
+  console.log(viewMode);
 
   return (
     <Dialog
       open={open}
       onOpenChange={(isOpen) => {
-        setViewMode(true); // Reset viewMode when closing
+        setViewMode(false); // Reset viewMode when closing
         setOpen(isOpen);
       }}
     >
