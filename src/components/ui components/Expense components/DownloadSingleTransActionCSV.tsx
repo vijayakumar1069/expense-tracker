@@ -52,7 +52,7 @@ const DownloadSingleTransActionCSV = ({ id }: { id?: string }) => {
       <Button
         onClick={handleDownload}
         disabled={isLoading}
-        className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2"
+        className="bg-green-600 w-full hover:bg-green-700 text-white flex items-center transition-colors "
         variant="default"
       >
         {isLoading ? (

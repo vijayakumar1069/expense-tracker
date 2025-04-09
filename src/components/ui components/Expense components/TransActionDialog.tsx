@@ -181,10 +181,8 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
     <Dialog
       open={open}
       onOpenChange={(isOpen) => {
+        setViewMode(true); // Reset viewMode when closing
         setOpen(isOpen);
-        if (!isOpen) {
-          setViewMode(false); // Reset viewMode when closing
-        }
       }}
     >
       <DialogTrigger asChild>

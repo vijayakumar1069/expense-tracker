@@ -243,7 +243,13 @@ export const TransActionEditButton: React.FC<{
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setViewMode(true); // Reset viewMode when closing
+        setOpen(isOpen);
+      }}
+    >
       <DialogTrigger asChild>
         <Button
           size="sm"
@@ -251,7 +257,7 @@ export const TransActionEditButton: React.FC<{
           className="mr-2  bg-primary hover:bg-purple-500"
         >
           <Eye className="h-4 w-4 mr-1 text-white" />
-          <span className="text-white">View</span>
+          {/* <span className="text-white">View</span> */}
         </Button>
       </DialogTrigger>
       <DialogContent

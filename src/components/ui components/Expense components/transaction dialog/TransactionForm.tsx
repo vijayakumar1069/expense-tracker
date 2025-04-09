@@ -45,9 +45,9 @@ export const TransactionForm: React.FC<{
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-5 overflow-y-auto"
+        className="space-y-2 overflow-y-auto"
       >
-        <div className="flex flex-col space-y-5">
+        <div className="flex flex-col space-y-3">
           <BasicInfoSection
             form={form}
             isPending={isPending}
@@ -75,7 +75,7 @@ export const TransactionForm: React.FC<{
             viewMode={viewMode}
           />
         </div>
-        <div className="flex justify-end items-end w-full">
+        <div className="flex justify-end items-center w-full">
           <TransactionFormSubmitButton
             isPending={isPending}
             mode={mode}

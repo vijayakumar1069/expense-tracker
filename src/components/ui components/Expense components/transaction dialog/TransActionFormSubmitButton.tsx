@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import DownloadSingleTransActionCSV from "../DownloadSingleTransActionCSV";
+import DownloadProofButton from "../DownloadProofButton";
 
 export const TransactionFormSubmitButton = ({
   isPending,
@@ -27,7 +28,8 @@ export const TransactionFormSubmitButton = ({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-3 gap-2">
+      {viewMode && <DownloadProofButton id={id} />}
       {viewMode && <DownloadSingleTransActionCSV id={id} />}
       <Button
         type={viewMode ? "button" : "submit"}

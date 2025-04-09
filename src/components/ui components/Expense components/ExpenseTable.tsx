@@ -195,6 +195,9 @@ const ExpenseTable = () => {
                 <TableHead className="text-center font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400">
                   Actions
                 </TableHead>
+                <TableHead className="text-center font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                  Attachments
+                </TableHead>
               </TableRow>
             </TableHeader>
 
@@ -303,12 +306,13 @@ const ExpenseTable = () => {
                           <DeleteTransactionButton
                             transactionId={transaction.id}
                           />
-
-                          {Array.isArray(transaction?.attachments) &&
-                            transaction.attachments.length > 0 && (
-                              <DownloadProofButton id={transaction.id} />
-                            )}
                         </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {Array.isArray(transaction?.attachments) &&
+                          transaction.attachments.length > 0 && (
+                            <DownloadProofButton id={transaction.id} />
+                          )}
                       </TableCell>
                     </TableRow>
                   )

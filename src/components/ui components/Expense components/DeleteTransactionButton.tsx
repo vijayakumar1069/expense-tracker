@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { deleteExpense } from "@/app/(dashboard layout)/New-Transactions/__actions/transactionActions";
+import { Trash2 } from "lucide-react";
 
 interface DeleteTransactionButtonProps {
   transactionId: string;
@@ -156,7 +157,7 @@ const DeleteTransactionButton: React.FC<DeleteTransactionButtonProps> = ({
         onClick={handleOpenDialog}
         disabled={deleteMutation.isPending}
       >
-        Delete
+        <Trash2 />
       </Button>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

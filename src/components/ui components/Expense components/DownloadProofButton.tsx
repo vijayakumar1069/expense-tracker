@@ -3,15 +3,13 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Download } from "lucide-react";
 
-const DownloadProofButton = ({ id }: { id: string }) => {
+const DownloadProofButton = ({ id }: { id?: string }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleDownload = async () => {
     const controller = new AbortController();
     try {
       setIsLoading(true);
-      setError(null);
 
       const response = await fetch(
         `/api/transactions/attachments-download/${id}`,
@@ -47,9 +45,7 @@ const DownloadProofButton = ({ id }: { id: string }) => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      if ((error as Error).name !== "AbortError") {
-        setError(error instanceof Error ? error.message : "Download failed");
-      }
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -60,7 +56,7 @@ const DownloadProofButton = ({ id }: { id: string }) => {
       <Button
         onClick={handleDownload}
         disabled={isLoading}
-        className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2"
+        className="bg-green-800 hover:bg-green-700 text-white flex items-center gap-2 transition-colors duration-300 shadow-md"
         variant="default"
       >
         {isLoading ? (
@@ -68,13 +64,8 @@ const DownloadProofButton = ({ id }: { id: string }) => {
         ) : (
           <Download className="h-4 w-4" />
         )}
+        Download Proof
       </Button>
-
-      {error && (
-        <p className="text-sm text-red-500 mt-2 absolute top-full left-0">
-          {error}
-        </p>
-      )}
     </div>
   );
 };
