@@ -329,7 +329,7 @@ const ExpenseTable = () => {
               )}
             </TableBody>
 
-            <TableFooter className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
+            <TableFooter className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 w-full">
               {data?.summary?.totalIncome !== undefined &&
                 data?.summary?.totalIncome > 0 && (
                   <TableRow className="border-t-2 border-gray-200 dark:border-gray-800 hover:bg-transparent">
@@ -344,7 +344,7 @@ const ExpenseTable = () => {
                     </TableCell>
                     <TableCell
                       className="text-right font-bold text-green-600 dark:text-green-500"
-                      colSpan={4}
+                      colSpan={3}
                     >
                       <div className="flex items-center justify-end gap-1">
                         <IndianRupee className="h-4 w-4" />
@@ -369,7 +369,7 @@ const ExpenseTable = () => {
                     </TableCell>
                     <TableCell
                       className="text-right font-bold text-red-600 dark:text-red-500"
-                      colSpan={4}
+                      colSpan={3}
                     >
                       <div className="flex items-center justify-end gap-1">
                         <IndianRupee className="h-4 w-4" />
@@ -391,7 +391,7 @@ const ExpenseTable = () => {
                     Net Amount
                   </div>
                 </TableCell>
-                <TableCell className="text-right font-extrabold" colSpan={4}>
+                <TableCell className="text-right font-extrabold" colSpan={3}>
                   <div
                     className={`flex items-center justify-end gap-1 ${
                       data?.summary?.netAmount !== undefined &&
