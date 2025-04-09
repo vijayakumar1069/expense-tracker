@@ -35,7 +35,7 @@ export const TransActionEditButton: React.FC<{
     TransactionFormValues | undefined
   >(undefined);
   const [viewMode, setViewMode] = useState(viewTransaction);
-  console.log("viewTransaction", viewTransaction);
+
   const queryClient = useQueryClient();
 
   // Fetch transaction details when dialog opens

@@ -22,7 +22,6 @@ export const TransactionFormSubmitButton = ({
     }
     // If we're in edit mode, the form's native submit behavior will trigger
   };
-  console.log("viewMode", viewMode);
 
   return (
     <Button

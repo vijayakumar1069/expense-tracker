@@ -37,6 +37,7 @@ import {
 import TransactionFilter from "./TransactionFilter";
 import TransactionHeader from "./TransactionHeader";
 import TransActionDialog from "./TransActionDialog";
+import DownloadProofButton from "./DownloadProofButton";
 
 // Helper function to format payment method names
 export const formatPaymentMethodName = (method: string) => {
@@ -103,6 +104,7 @@ const ExpenseTable = () => {
       const response = await fetch(
         `/api/get-all-transactions?${params.toString()}`
       );
+
       if (!response.ok) {
         throw new Error("Failed to fetch transactions");
       }
@@ -301,6 +303,11 @@ const ExpenseTable = () => {
                           <DeleteTransactionButton
                             transactionId={transaction.id}
                           />
+
+                          {Array.isArray(transaction?.attachments) &&
+                            transaction.attachments.length > 0 && (
+                              <DownloadProofButton id={transaction.id} />
+                            )}
                         </div>
                       </TableCell>
                     </TableRow>

@@ -42,7 +42,6 @@ export function InvoiceSummary({
 
     return () => subscription.unsubscribe();
   }, [form]);
-  console.log(form.getValues());
 
   return (
     <Card className="mt-6">

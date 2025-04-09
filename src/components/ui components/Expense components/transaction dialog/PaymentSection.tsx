@@ -25,8 +25,6 @@ export const PaymentSection: React.FC<FormSectionProps> = ({
   form,
   viewMode = false,
 }) => {
-  console.log(form.getValues());
-
   // Helper function to find display values for selections
   interface DisplayValueItem {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

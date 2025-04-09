@@ -94,7 +94,13 @@ type PaymentMethod = {
     createdAt: Date;
     updatedAt: Date;
 };
+interface Attachements {
+    id: string;
+    url: string;
+    transactionId: string;
+}
 export interface TransactionWithPaymentMethod extends PrismaTransaction {
+    attachments: Attachements[];
     paymentMethod: PaymentMethod;
 }
 export type TransactionFormValues = z.infer<typeof expenseFormSchema>;
