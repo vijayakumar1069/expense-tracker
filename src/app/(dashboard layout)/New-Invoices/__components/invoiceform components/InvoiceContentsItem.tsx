@@ -53,7 +53,7 @@ export function InvoiceContentsItem({
                   {...field}
                   placeholder="0.00"
                   onChange={(e) => {
-                    field.onChange(Number(e.target.value) || 0); // Convert to number here
+                    field.onChange(Number(e.target.value) || "0"); // Convert to number here
                   }}
                 />
               </FormControl>

@@ -82,7 +82,13 @@ export function InvoiceDetails({
             <FormLabel>Status</FormLabel>
             <Select
               onValueChange={(
-                value: "DRAFT" | "SENT" | "PAID" | "OVERDUE" | "CANCELLED"
+                value:
+                  | "DRAFT"
+                  | "Raised"
+                  | "SENT"
+                  | "PAID"
+                  | "OVERDUE"
+                  | "CANCELLED"
               ) => {
                 field.onChange(value);
                 form.setValue("status", value, { shouldValidate: true });
@@ -96,6 +102,7 @@ export function InvoiceDetails({
               </FormControl>
               <SelectContent>
                 <SelectItem value="DRAFT">Draft</SelectItem>
+                <SelectItem value="Raised">Raised</SelectItem>
                 <SelectItem value="SENT">Sent</SelectItem>
                 <SelectItem value="PAID">Paid</SelectItem>
                 <SelectItem value="OVERDUE">Overdue</SelectItem>

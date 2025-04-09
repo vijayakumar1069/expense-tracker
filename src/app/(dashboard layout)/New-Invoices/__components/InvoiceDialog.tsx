@@ -334,6 +334,7 @@ const InvoiceDialog = ({
 
     const statusColors = {
       DRAFT: "bg-gray-200 text-gray-800",
+      Raised: "bg-yellow-100 text-yellow-800",
       SENT: "bg-blue-100 text-blue-800",
       PAID: "bg-green-100 text-green-800",
       OVERDUE: "bg-red-100 text-red-800",
@@ -477,7 +478,7 @@ const InvoiceDialog = ({
           </DialogFooter>
         )}
         {!isNewInvoice && isEditMode && (
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end ">
             <Button
               variant="outline"
               onClick={() => setIsEditMode(false)}

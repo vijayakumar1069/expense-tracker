@@ -109,6 +109,7 @@ const InvoiceFilter = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="DRAFT">Draft</SelectItem>
+                  <SelectItem value="Raised">Raised</SelectItem>
                   <SelectItem value="SENT">Sent</SelectItem>
                   <SelectItem value="PAID">Paid</SelectItem>
                   <SelectItem value="OVERDUE">Overdue</SelectItem>

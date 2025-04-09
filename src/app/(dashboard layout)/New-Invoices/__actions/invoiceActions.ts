@@ -226,6 +226,10 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
         //         error: graphResponse.message || "Failed to send email",
         //     };
         // }
+        await prisma.invoice.update({
+            where: { id: newInvoice.id },
+            data: { status: "Raised" },
+        });
         return {
             success: true,
             data: newInvoice,

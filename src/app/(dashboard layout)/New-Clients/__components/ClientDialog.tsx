@@ -403,7 +403,7 @@ const ClientDialog = ({
 
         {/* Cancel button for edit mode */}
         {!isNewClient && isEditMode && (
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end ">
             <Button
               variant="outline"
               onClick={() => {

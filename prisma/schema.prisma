@@ -188,6 +188,7 @@ model InvoiceContents{
 
 enum InvoiceStatus {
   DRAFT
+  Raised
   SENT
   PAID
   OVERDUE

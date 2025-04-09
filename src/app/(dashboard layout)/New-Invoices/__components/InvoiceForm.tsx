@@ -36,7 +36,7 @@ const invoiceSchema = z.object({
 
   clientCompanyName: z.string().optional(),
   status: z
-    .enum(["DRAFT", "SENT", "PAID", "OVERDUE", "CANCELLED"])
+    .enum(["DRAFT", "Raised", "SENT", "PAID", "OVERDUE", "CANCELLED"])
     .default("DRAFT"),
   invoiceContents: z
     .array(invoiceItemSchema)
