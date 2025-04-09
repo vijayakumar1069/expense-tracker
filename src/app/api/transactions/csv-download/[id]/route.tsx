@@ -1,5 +1,5 @@
 // app/api/transaction/export/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/utils/prisma";
 import * as XLSX from "xlsx-js-style";
@@ -44,8 +44,8 @@ interface FormattedRow {
 }
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Authenticate user

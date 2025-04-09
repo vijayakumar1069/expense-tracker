@@ -14,7 +14,7 @@ const DownloadProofButton = ({ id }: { id: string }) => {
       setError(null);
 
       const response = await fetch(
-        `/api/transactions/${id}/attachments-download`,
+        `/api/transactions/attachments-download/${id}`,
         {
           method: "GET",
           signal: controller.signal,

@@ -11,7 +11,7 @@ const DownloadSingleTransActionCSV = ({ id }: { id?: string }) => {
     try {
       setIsLoading(true);
 
-      const response = await fetch(`/api/transactions/${id}/csv-download`, {
+      const response = await fetch(`/api/transactions/csv-download/${id}`, {
         method: "GET",
         signal: controller.signal,
       });
