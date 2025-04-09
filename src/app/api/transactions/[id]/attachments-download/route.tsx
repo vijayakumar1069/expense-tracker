@@ -23,6 +23,12 @@ export async function GET(
       return new Response("No attachments found", { status: 404 });
     }
 
+    // Generate a safe filename from transaction name
+    const safeTransactionName = transaction.name
+      .replace(/[^a-zA-Z0-9-_]/g, "_") // Replace invalid filename chars with underscore
+      .replace(/_{2,}/g, "_") // Replace multiple underscores with single one
+      .trim();
+
     // If there's only one attachment, return it directly
     if (transaction.attachments.length === 1) {
       const attachment = transaction.attachments[0];
@@ -46,9 +52,11 @@ export async function GET(
         else if (urlLower.endsWith(".gif")) contentType = "image/gif";
         // Add more content types as needed
 
-        // Get filename from URL or use a default name
-        const fileName =
-          attachment.url.split("/").pop() || `attachment-${id}.file`;
+        // Get file extension from original URL
+        const originalExtension = attachment.url.split(".").pop() || "file";
+
+        // Create filename using transaction name and extension
+        const fileName = `${safeTransactionName}.${originalExtension}`;
 
         // Set headers for direct file download
         const headers = {
@@ -80,7 +88,7 @@ export async function GET(
     // Set headers for zip download
     const headers = {
       "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename="transaction-${id}-attachments.zip"`,
+      "Content-Disposition": `attachment; filename="${safeTransactionName}-attachments.zip"`,
     };
 
     // Create array to store chunks
@@ -114,7 +122,7 @@ export async function GET(
     });
 
     // Add files to zip
-    for (const attachment of transaction.attachments) {
+    for (const [index, attachment] of transaction.attachments.entries()) {
       try {
         const response = await fetch(attachment.url);
         if (!response.ok) {
@@ -125,10 +133,11 @@ export async function GET(
         const arrayBuffer = await response.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Get filename from URL or use a default name with index
-        const fileName =
-          attachment.url.split("/").pop() ||
-          `attachment-${transaction.attachments.indexOf(attachment)}.file`;
+        // Get original file extension from URL
+        const originalExtension = attachment.url.split(".").pop() || "file";
+
+        // Create filename using transaction name and index for multiple files
+        const fileName = `${safeTransactionName}_${index + 1}.${originalExtension}`;
 
         archive.append(buffer, { name: fileName });
       } catch (err) {

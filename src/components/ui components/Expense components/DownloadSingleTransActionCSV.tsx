@@ -3,23 +3,18 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Download } from "lucide-react";
 
-const DownloadProofButton = ({ id }: { id: string }) => {
+const DownloadSingleTransActionCSV = ({ id }: { id?: string }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleDownload = async () => {
     const controller = new AbortController();
     try {
       setIsLoading(true);
-      setError(null);
 
-      const response = await fetch(
-        `/api/transactions/${id}/attachments-download`,
-        {
-          method: "GET",
-          signal: controller.signal,
-        }
-      );
+      const response = await fetch(`/api/transactions/${id}/csv-download`, {
+        method: "GET",
+        signal: controller.signal,
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -30,7 +25,7 @@ const DownloadProofButton = ({ id }: { id: string }) => {
       const contentDisposition = response.headers.get("Content-Disposition");
       const filename =
         contentDisposition?.split("filename=")[1]?.replace(/"/g, "") ||
-        `transaction-${id}-attachments.zip`;
+        `transaction-${id}.csv`;
 
       // Create blob from response stream
       const blob = await response.blob();
@@ -47,14 +42,11 @@ const DownloadProofButton = ({ id }: { id: string }) => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      if ((error as Error).name !== "AbortError") {
-        setError(error instanceof Error ? error.message : "Download failed");
-      }
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="inline-block relative">
       <Button
@@ -68,15 +60,10 @@ const DownloadProofButton = ({ id }: { id: string }) => {
         ) : (
           <Download className="h-4 w-4" />
         )}
+        Download CSV
       </Button>
-
-      {error && (
-        <p className="text-sm text-red-500 mt-2 absolute top-full left-0">
-          {error}
-        </p>
-      )}
     </div>
   );
 };
 
-export default DownloadProofButton;
+export default DownloadSingleTransActionCSV;

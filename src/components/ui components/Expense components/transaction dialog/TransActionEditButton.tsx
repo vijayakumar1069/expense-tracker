@@ -279,6 +279,7 @@ export const TransActionEditButton: React.FC<{
             initialValues={formValues}
             viewMode={viewMode}
             setViewMode={setViewMode}
+            id={transactionId}
           />
         )}
       </DialogContent>

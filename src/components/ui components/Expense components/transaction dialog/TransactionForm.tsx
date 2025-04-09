@@ -19,6 +19,7 @@ export const TransactionForm: React.FC<{
   initialValues?: TransactionFormValues;
   viewMode: boolean;
   setViewMode?: (viewMode: boolean) => void;
+  id?: string;
 }> = ({
   form,
   onSubmit,
@@ -27,6 +28,7 @@ export const TransactionForm: React.FC<{
   initialValues,
   viewMode = false,
   setViewMode = () => {},
+  id,
 }) => {
   useEffect(() => {
     if (initialValues) {
@@ -79,6 +81,7 @@ export const TransactionForm: React.FC<{
             mode={mode}
             viewMode={viewMode}
             setViewMode={setViewMode}
+            id={id}
           />
         </div>
       </form>

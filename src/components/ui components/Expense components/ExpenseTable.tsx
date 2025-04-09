@@ -192,7 +192,7 @@ const ExpenseTable = () => {
                 <TableHead className="text-right font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400">
                   Amount
                 </TableHead>
-                <TableHead className="text-right font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                <TableHead className="text-center font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400">
                   Actions
                 </TableHead>
               </TableRow>
@@ -294,7 +294,7 @@ const ExpenseTable = () => {
                         </div>
                       </TableCell>
 
-                      <TableCell className="text-right">
+                      <TableCell className="text-center">
                         <div className="flex items-center justify-end space-x-2 opacity-80 group-hover:opacity-100 transition-opacity">
                           <TransActionEditButton
                             transactionId={transaction.id}
