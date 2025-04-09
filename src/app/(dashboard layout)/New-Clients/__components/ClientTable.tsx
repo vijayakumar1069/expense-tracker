@@ -144,10 +144,10 @@ const ClientTable = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Client/Company Name</TableHead>
+                <TableHead>Client Name</TableHead>
+                <TableHead>Company</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
-                <TableHead>Company</TableHead>
                 <TableHead>Address</TableHead>
                 {/* <TableHead className="text-right">Actions</TableHead> */}
               </TableRow>
@@ -174,9 +174,9 @@ const ClientTable = () => {
                     <TableCell className="font-medium">
                       {client.name || client.companyName}
                     </TableCell>
+                    <TableCell>{client.companyName}</TableCell>
                     <TableCell>{client.email}</TableCell>
                     <TableCell>{client.phone1}</TableCell>
-                    <TableCell>{client.companyName}</TableCell>
                     <TableCell
                       className="max-w-xs truncate"
                       title={client.city}
