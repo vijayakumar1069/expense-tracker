@@ -35,7 +35,7 @@ jobs:
           npx prisma migrate deploy
           env:
           DATABASE_URL: ${{ secrets.MANAGER_DATABASE_URL }}
-          POSTGRES_URL_NON_POOLING: ${{ secrets.POSTGRES_URL_NON_POOLING }}
+          POSTGRES_URL_NON_POOLING: ${{ secrets.MANAGER_DATABASE_URL }}
 
       # Pull Vercel environment
       - name: Vercel Environment Pull
