@@ -28,6 +28,11 @@ jobs:
         run: |
           npm cache clean --force
           npm install --legacy-peer-deps
+        # Run database migrations
+      - name: Run Prisma Migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.MANAGER_DATABASE_URL }}
 
       # Pull Vercel environment
       - name: Vercel Environment Pull
