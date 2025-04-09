@@ -412,7 +412,7 @@ const InvoiceDialog = ({
         <DialogHeader className="text-center">
           <DialogTitle className="text-center">
             {isNewInvoice
-              ? "Create New Invoice"
+              ? "Create Invoice"
               : isEditMode
                 ? "Edit Invoice"
                 : "Invoice Details"}

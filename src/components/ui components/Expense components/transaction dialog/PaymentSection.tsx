@@ -19,9 +19,30 @@ import {
   transferModeOption,
 } from "@/utils/constants/consts";
 import { FormSectionProps } from "@/utils/types";
+import { cn } from "@/lib/utils";
 
-export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
+export const PaymentSection: React.FC<FormSectionProps> = ({
+  form,
+  viewMode = false,
+}) => {
   console.log(form.getValues());
+
+  // Helper function to find display values for selections
+  interface DisplayValueItem {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [key: string]: any;
+  }
+
+  const getDisplayValue = (
+    array: DisplayValueItem[],
+    field: { value: string | number | undefined },
+    idKey: string = "id",
+    displayKey: string = "name"
+  ): string => {
+    const item = array.find((item) => item[idKey] === field.value);
+    return item ? item[displayKey] : "";
+  };
+
   return (
     <div className="grid grid-cols-3 gap-1">
       {/* Payment Method */}
@@ -31,24 +52,33 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Payment Method</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value || ""}>
-              <FormControl className="w-full">
-                <SelectTrigger className="border-primary/20 w-full focus:border-primary/30">
-                  <SelectValue placeholder="Select payment method" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {PAYMENT_METHODS.map((method) => (
-                  <SelectItem key={method.id} value={method.id}>
-                    {method.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {viewMode ? (
+              <Input
+                value={getDisplayValue(PAYMENT_METHODS, field)}
+                readOnly
+                className="bg-gray-50 cursor-not-allowed"
+              />
+            ) : (
+              <Select onValueChange={field.onChange} value={field.value || ""}>
+                <FormControl className="w-full">
+                  <SelectTrigger className="border-primary/20 w-full focus:border-primary/30">
+                    <SelectValue placeholder="Select payment method" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {PAYMENT_METHODS.map((method) => (
+                    <SelectItem key={method.id} value={method.id}>
+                      {method.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <FormMessage />
           </FormItem>
         )}
       />
+
       {/* Conditional Fields */}
       {form.watch("paymentMethodType") === "CASH" && (
         <FormField
@@ -60,7 +90,11 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
               <FormControl>
                 <Input
                   {...field}
-                  className="border-primary/20 w-full focus:border-primary/30"
+                  readOnly={viewMode}
+                  className={cn(
+                    "border-primary/20 w-full focus:border-primary/30",
+                    viewMode && "bg-gray-50 cursor-not-allowed"
+                  )}
                 />
               </FormControl>
               <FormMessage />
@@ -68,6 +102,7 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
           )}
         />
       )}
+
       {form.watch("paymentMethodType") === "BANK" && (
         <>
           <FormField
@@ -76,32 +111,35 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Bank Name</FormLabel>
-                {/* <FormControl>
+                {viewMode ? (
                   <Input
-                    {...field}
-                    className="border-primary/20 w-full focus:border-primary/30"
+                    value={field.value || ""}
+                    readOnly
+                    className="bg-gray-50 cursor-not-allowed"
                   />
-                </FormControl> */}
-                <Select
-                  onValueChange={field.onChange}
-                  value={
-                    AvailableBanks.find((option) => option.name === field.value)
-                      ?.name || ""
-                  }
-                >
-                  <FormControl>
-                    <SelectTrigger className="border-primary/20 focus:border-primary/30 w-full">
-                      <SelectValue placeholder="Select transfer mode" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {AvailableBanks.map((option) => (
-                      <SelectItem key={option.id} value={option.name}>
-                        {option.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                ) : (
+                  <Select
+                    onValueChange={field.onChange}
+                    value={
+                      AvailableBanks.find(
+                        (option) => option.name === field.value
+                      )?.name || ""
+                    }
+                  >
+                    <FormControl>
+                      <SelectTrigger className="border-primary/20 focus:border-primary/30 w-full">
+                        <SelectValue placeholder="Select transfer mode" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {AvailableBanks.map((option) => (
+                        <SelectItem key={option.id} value={option.name}>
+                          {option.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
                 <FormMessage />
               </FormItem>
             )}
@@ -113,33 +151,46 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Transfer Mode</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={
-                    transferModeOption.find(
-                      (option) => option.value === field.value
-                    )?.label || ""
-                  }
-                >
-                  <FormControl>
-                    <SelectTrigger className="border-primary/20 focus:border-primary/30 w-full">
-                      <SelectValue placeholder="Select transfer mode" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {transferModeOption.map((option) => (
-                      <SelectItem key={option.id} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {viewMode ? (
+                  <Input
+                    value={
+                      transferModeOption.find(
+                        (option) => option.value === field.value
+                      )?.label || ""
+                    }
+                    readOnly
+                    className="bg-gray-50 cursor-not-allowed"
+                  />
+                ) : (
+                  <Select
+                    onValueChange={field.onChange}
+                    value={
+                      transferModeOption.find(
+                        (option) => option.value === field.value
+                      )?.label || ""
+                    }
+                  >
+                    <FormControl>
+                      <SelectTrigger className="border-primary/20 focus:border-primary/30 w-full">
+                        <SelectValue placeholder="Select transfer mode" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {transferModeOption.map((option) => (
+                        <SelectItem key={option.id} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
                 <FormMessage />
               </FormItem>
             )}
           />
         </>
       )}
+
       {form.watch("paymentMethodType") === "CHEQUE" && (
         <>
           <FormField
@@ -151,7 +202,11 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
                 <FormControl>
                   <Input
                     {...field}
-                    className="border-primary/20 w-full focus:border-primary/30"
+                    readOnly={viewMode}
+                    className={cn(
+                      "border-primary/20 w-full focus:border-primary/30",
+                      viewMode && "bg-gray-50 cursor-not-allowed"
+                    )}
                   />
                 </FormControl>
                 <FormMessage />
@@ -168,7 +223,11 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
                   <Input
                     type="date"
                     {...field}
-                    className="border-primary/20 w-full focus:border-primary/30"
+                    readOnly={viewMode}
+                    className={cn(
+                      "border-primary/20 w-full focus:border-primary/30",
+                      viewMode && "bg-gray-50 cursor-not-allowed"
+                    )}
                   />
                 </FormControl>
                 <FormMessage />
@@ -177,6 +236,7 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
           />
         </>
       )}
+
       {form.watch("paymentMethodType") === "INVOICE" && (
         <FormField
           control={form.control}
@@ -187,7 +247,11 @@ export const PaymentSection: React.FC<FormSectionProps> = ({ form }) => {
               <FormControl>
                 <Input
                   {...field}
-                  className="border-primary/20 w-full focus:border-primary/30"
+                  readOnly={viewMode}
+                  className={cn(
+                    "border-primary/20 w-full focus:border-primary/30",
+                    viewMode && "bg-gray-50 cursor-not-allowed"
+                  )}
                 />
               </FormControl>
               <FormMessage />

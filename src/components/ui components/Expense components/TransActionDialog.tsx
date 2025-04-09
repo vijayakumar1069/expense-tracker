@@ -37,6 +37,7 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
   //   onExpenseFormSubmit,
 }) => {
   const [open, setOpen] = useState(false);
+  const [viewMode, setViewMode] = useState(false); // Add this state
   const [isPending, startTransition] = useTransition();
   const queryClient = useQueryClient();
 
@@ -134,6 +135,7 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
         position: "top-center",
       });
 
+      setViewMode(true);
       setOpen(false);
       form.reset();
 
@@ -176,7 +178,15 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen);
+        if (!isOpen) {
+          setViewMode(false); // Reset viewMode when closing
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button
           variant="default"
@@ -203,6 +213,7 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
             onSubmit={onFormSubmit}
             isPending={isPending}
             mode={mode}
+            viewMode={viewMode}
           />
         </div>
       </DialogContent>

@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, DollarSign, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, IndianRupee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from "./CategoryBadge";
 import {
@@ -32,7 +32,6 @@ import {
   FileCheck,
   TrendingUp,
   TrendingDown,
-  CircleDollarSign,
   FileDigit,
 } from "lucide-react";
 import TransactionFilter from "./TransactionFilter";
@@ -286,10 +285,7 @@ const ExpenseTable = () => {
                               : "text-red-600 dark:text-red-500"
                           }`}
                         >
-                          <span className="text-lg font-bold">
-                            {transaction.type === "INCOME" ? "+" : "-"}
-                          </span>
-                          <DollarSign className="h-3.5 w-3.5" />
+                          <IndianRupee className="h-3.5 w-3.5" />
                           <span className="font-bold">
                             {transaction?.total.toFixed(2)}
                           </span>
@@ -300,6 +296,7 @@ const ExpenseTable = () => {
                         <div className="flex items-center justify-end space-x-2 opacity-80 group-hover:opacity-100 transition-opacity">
                           <TransActionEditButton
                             transactionId={transaction.id}
+                            viewTransaction={true}
                           />
                           <DeleteTransactionButton
                             transactionId={transaction.id}
@@ -339,7 +336,7 @@ const ExpenseTable = () => {
                       colSpan={4}
                     >
                       <div className="flex items-center justify-end gap-1">
-                        <DollarSign className="h-4 w-4" />
+                        <IndianRupee className="h-4 w-4" />
                         <span className="text-lg">
                           {data?.summary?.totalIncome.toFixed(2) || "0.00"}
                         </span>
@@ -364,7 +361,7 @@ const ExpenseTable = () => {
                       colSpan={4}
                     >
                       <div className="flex items-center justify-end gap-1">
-                        <DollarSign className="h-4 w-4" />
+                        <IndianRupee className="h-4 w-4" />
                         <span className="text-lg">
                           {data?.summary?.totalExpenses.toFixed(2) || "0.00"}
                         </span>
@@ -379,7 +376,7 @@ const ExpenseTable = () => {
                   className="font-extrabold text-gray-900 dark:text-white"
                 >
                   <div className="flex items-center gap-2">
-                    <CircleDollarSign className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                    <IndianRupee className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                     Net Amount
                   </div>
                 </TableCell>
@@ -392,9 +389,9 @@ const ExpenseTable = () => {
                         : "text-red-600 dark:text-red-500"
                     }`}
                   >
-                    <DollarSign className="h-5 w-5" />
+                    <IndianRupee className="h-5 w-5" />
                     <span className="text-xl">
-                      {(data?.summary?.netAmount || 0).toFixed(2)}
+                      {Math.abs(data?.summary?.netAmount || 0).toFixed(2)}
                     </span>
                   </div>
                 </TableCell>

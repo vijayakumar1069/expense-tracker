@@ -167,7 +167,7 @@ const InvoiceTable = () => {
 
           <Button onClick={handleAddNew} className="flex items-center gap-1">
             <Plus className="h-4 w-4" />
-            Add New Invoice
+            Add Invoice
           </Button>
           <div className=" xs:flex-none">
             <InvoiceFilter onFilterChange={setFilters} />

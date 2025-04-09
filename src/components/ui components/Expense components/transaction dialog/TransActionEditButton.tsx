@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Pencil, Loader2 } from "lucide-react";
+import { Loader2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,15 +25,17 @@ import { updateTransaction } from "@/app/(dashboard layout)/New-Transactions/__a
 
 type TransactionFormValues = z.infer<typeof expenseFormSchema>;
 
-export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
-  transactionId,
-}) => {
+export const TransActionEditButton: React.FC<{
+  transactionId: string;
+  viewTransaction: boolean;
+}> = ({ transactionId, viewTransaction = false }) => {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [formValues, setFormValues] = useState<
     TransactionFormValues | undefined
   >(undefined);
-
+  const [viewMode, setViewMode] = useState(viewTransaction);
+  console.log("viewTransaction", viewTransaction);
   const queryClient = useQueryClient();
 
   // Fetch transaction details when dialog opens
@@ -200,6 +202,7 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
         position: "top-center",
       });
 
+      setViewMode(true);
       setOpen(false);
       form.reset();
 
@@ -247,8 +250,8 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
           variant="outline"
           className="mr-2  bg-primary hover:bg-purple-500"
         >
-          <Pencil className="h-4 w-4 mr-1 text-white" />
-          <span className="text-white">Edit</span>
+          <Eye className="h-4 w-4 mr-1 text-white" />
+          <span className="text-white">View</span>
         </Button>
       </DialogTrigger>
       <DialogContent
@@ -274,6 +277,8 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
             isPending={isPending}
             mode="edit"
             initialValues={formValues}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
           />
         )}
       </DialogContent>

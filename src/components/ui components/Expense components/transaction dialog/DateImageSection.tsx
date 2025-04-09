@@ -19,6 +19,7 @@ interface imagesProps {
 export const DateImageSection: React.FC<FormSectionProps> = ({
   form,
   mode,
+  viewMode = false,
 }) => {
   const [previewImages, setPreviewImages] = useState<
     Array<{ url: string; file?: File; isExisting?: boolean }>
@@ -165,7 +166,7 @@ export const DateImageSection: React.FC<FormSectionProps> = ({
                         onClick={() => removeImage(idx)}
                         className="absolute top-0 right-0 bg-black/50 rounded-bl-md hover:bg-black/70 transition-colors p-1"
                       >
-                        <X className="h-3 w-3 text-white" />
+                        {!viewMode && <X className="h-3 w-3 text-white" />}
                       </button>
 
                       {/* Small label for existing vs new */}
@@ -180,7 +181,7 @@ export const DateImageSection: React.FC<FormSectionProps> = ({
               )}
 
               {/* Simple add button */}
-              {previewImages.length < 5 && (
+              {previewImages.length < 5 && !viewMode && (
                 <div className="flex items-center">
                   <Button
                     type="button"

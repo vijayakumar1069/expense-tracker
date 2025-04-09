@@ -37,6 +37,6 @@ export const expenseFormSchema = z.object({
     ])).optional(),
     // For tracking deleted images
     deleteImages: z.string().optional(),
-    transferMode: z.enum(["UPI", "NEFT", "RTGS", "IMPS", "SWIFT", "Paypal"]).optional(),
+    transferMode: z.enum(["UPI", "NEFT", "RTGS", "IMPS"]).optional(),
     // attachments?: z.array(z.any()).optional().default([]),
 });

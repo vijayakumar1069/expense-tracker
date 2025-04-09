@@ -17,9 +17,17 @@ export const TransactionForm: React.FC<{
   isPending: boolean;
   mode: "add" | "edit";
   initialValues?: TransactionFormValues;
-
-  //   setOpen: (open: boolean) => void;
-}> = ({ form, onSubmit, isPending, mode, initialValues }) => {
+  viewMode: boolean;
+  setViewMode?: (viewMode: boolean) => void;
+}> = ({
+  form,
+  onSubmit,
+  isPending,
+  mode,
+  initialValues,
+  viewMode = false,
+  setViewMode = () => {},
+}) => {
   useEffect(() => {
     if (initialValues) {
       form.reset(initialValues);
@@ -38,14 +46,40 @@ export const TransactionForm: React.FC<{
         className="space-y-5 overflow-y-auto"
       >
         <div className="flex flex-col space-y-5">
-          <BasicInfoSection form={form} isPending={isPending} />
-          <AmountSection form={form} isPending={isPending} />
-          <PaymentSection form={form} isPending={isPending} />
-          <DateComponent form={form} isPending={isPending} />
-          <DateImageSection form={form} isPending={isPending} mode={mode} />
+          <BasicInfoSection
+            form={form}
+            isPending={isPending}
+            viewMode={viewMode}
+          />
+          <AmountSection
+            form={form}
+            isPending={isPending}
+            viewMode={viewMode}
+          />
+          <PaymentSection
+            form={form}
+            isPending={isPending}
+            viewMode={viewMode}
+          />
+          <DateComponent
+            form={form}
+            isPending={isPending}
+            viewMode={viewMode}
+          />
+          <DateImageSection
+            form={form}
+            isPending={isPending}
+            mode={mode}
+            viewMode={viewMode}
+          />
         </div>
         <div className="flex justify-end items-end w-full">
-          <TransactionFormSubmitButton isPending={isPending} mode={mode} />
+          <TransactionFormSubmitButton
+            isPending={isPending}
+            mode={mode}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+          />
         </div>
       </form>
     </Form>

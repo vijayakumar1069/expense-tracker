@@ -109,6 +109,8 @@ export interface FormSectionProps {
     form: any; // Replace with proper form type
     isPending: boolean;
     mode?: "add" | "edit";
+    viewMode?: boolean;
+    setViewMode?: (viewMode: boolean) => void;
 }
 
 export type UpdateTransactionResult = {

@@ -125,7 +125,7 @@ const ClientTable = () => {
             className="flex items-center gap-1 w-fit xs:w-auto"
           >
             <Plus className="h-4 w-4" />
-            Add New Client
+            Add Client
           </Button>
           <div className=" xs:flex-none">
             <ClientFilters onFilterChange={setFilters} />

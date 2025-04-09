@@ -35,34 +35,47 @@ import { FormSectionProps } from "@/utils/types";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 
-export const BasicInfoSection: React.FC<FormSectionProps> = ({ form }) => {
+export const BasicInfoSection: React.FC<FormSectionProps> = ({
+  form,
+  viewMode = false,
+}) => {
   const [open, setOpen] = useState(false);
+
   return (
-    <div className="grid grid-cols-2  gap-4">
+    <div className="grid grid-cols-2 gap-4">
       <FormField
         control={form.control}
         name="transactionType"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Transaction Type</FormLabel>
-            <Select onValueChange={field.onChange} value={field.value || ""}>
-              <FormControl>
-                <SelectTrigger className="bg-primary/20 w-full">
-                  <SelectValue placeholder="Select Transaction type" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {TRANSACTION_TYPES.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.id}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {viewMode ? (
+              <Input
+                value={field.value || ""}
+                readOnly
+                className="bg-gray-50 cursor-not-allowed"
+              />
+            ) : (
+              <Select onValueChange={field.onChange} value={field.value || ""}>
+                <FormControl>
+                  <SelectTrigger className="bg-primary/20 w-full">
+                    <SelectValue placeholder="Select Transaction type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {TRANSACTION_TYPES.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <FormMessage />
           </FormItem>
         )}
       />
+
       {/* Name */}
       <FormField
         control={form.control}
@@ -73,7 +86,11 @@ export const BasicInfoSection: React.FC<FormSectionProps> = ({ form }) => {
             <FormControl>
               <Input
                 {...field}
-                className="border-primary/20 w-full focus:border-primary/30"
+                readOnly={viewMode}
+                className={cn(
+                  "border-primary/20 w-full focus:border-primary/30",
+                  viewMode && "bg-gray-50 cursor-not-allowed"
+                )}
               />
             </FormControl>
             <FormMessage />
@@ -88,63 +105,71 @@ export const BasicInfoSection: React.FC<FormSectionProps> = ({ form }) => {
         render={({ field }) => (
           <FormItem className="col-span-2">
             <FormLabel>Category</FormLabel>
-            <Popover modal={true} open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild className="w-full">
-                <FormControl>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between bg-white"
-                  >
-                    {field.value
-                      ? CATEGORIES.find(
-                          (category) => category.name === field.value
-                        )?.name
-                      : "Select category..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="max-w-xl p-0">
-                <Command>
-                  <CommandInput
-                    placeholder="Search category..."
-                    className="h-9"
-                  />
-                  <CommandList>
-                    <ScrollArea className="h-[200px] overflow-auto ">
-                      <CommandEmpty>No category found.</CommandEmpty>
-                      <CommandGroup>
-                        {CATEGORIES.map((category) => (
-                          <CommandItem
-                            key={category.id}
-                            value={category.name}
-                            onSelect={(value) => {
-                              form.setValue("category", value, {
-                                shouldValidate: false,
-                              });
-                              setOpen(false);
-                            }}
-                            className="text-sm "
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                field.value === category.name
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
-                            />
-                            {category.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </ScrollArea>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            {viewMode ? (
+              <Input
+                value={field.value || ""}
+                readOnly
+                className="bg-gray-50 cursor-not-allowed"
+              />
+            ) : (
+              <Popover modal={true} open={open} onOpenChange={setOpen}>
+                <PopoverTrigger asChild className="w-full">
+                  <FormControl>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-full justify-between bg-white"
+                    >
+                      {field.value
+                        ? CATEGORIES.find(
+                            (category) => category.name === field.value
+                          )?.name
+                        : "Select category..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="max-w-xl p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Search category..."
+                      className="h-9"
+                    />
+                    <CommandList>
+                      <ScrollArea className="h-[200px] overflow-auto ">
+                        <CommandEmpty>No category found.</CommandEmpty>
+                        <CommandGroup>
+                          {CATEGORIES.map((category) => (
+                            <CommandItem
+                              key={category.id}
+                              value={category.name}
+                              onSelect={(value) => {
+                                form.setValue("category", value, {
+                                  shouldValidate: false,
+                                });
+                                setOpen(false);
+                              }}
+                              className="text-sm "
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  field.value === category.name
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                              {category.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </ScrollArea>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            )}
             <FormMessage />
           </FormItem>
         )}
@@ -160,8 +185,12 @@ export const BasicInfoSection: React.FC<FormSectionProps> = ({ form }) => {
             <FormControl>
               <Textarea
                 {...field}
+                readOnly={viewMode}
                 rows={3}
-                className="border-primary/20 w-full focus:border-primary/30"
+                className={cn(
+                  "border-primary/20 w-full focus:border-primary/30",
+                  viewMode && "bg-gray-50 cursor-not-allowed"
+                )}
               />
             </FormControl>
             <FormMessage />

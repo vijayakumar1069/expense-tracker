@@ -16,8 +16,7 @@ enum PaymentTransferMode {
   NEFT
   IMPS
   RTGS
-  SWIFT
-  PayPal
+
 }
 
 
