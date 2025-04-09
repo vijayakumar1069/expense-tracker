@@ -245,7 +245,7 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
         <Button
           size="sm"
           variant="outline"
-          className="mr-2 bg-primary hover:bg-purple-500"
+          className="mr-2  bg-primary hover:bg-purple-500"
         >
           <Pencil className="h-4 w-4 mr-1 text-white" />
           <span className="text-white">Edit</span>

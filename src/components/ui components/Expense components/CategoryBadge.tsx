@@ -25,7 +25,7 @@ export const CategoryBadge = ({ categoryName }: { categoryName: string }) => {
   return (
     <Badge
       variant="outline"
-      className="flex items-center gap-1 w-fit p-2"
+      className="flex items-center gap-1 w-fit "
       style={{
         borderColor: category.color + "40",
         color: category.color,

@@ -67,7 +67,7 @@ interface FilterState {
   sortDirection?: "asc" | "desc";
   byMonth?: string;
 }
-const limit = 10;
+const limit = 7;
 
 const ExpenseTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -171,9 +171,9 @@ const ExpenseTable = () => {
       <CardContent className="px-6 mt-0 m-0 py-0">
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
           <Table>
-            <TableHeader className="bg-gray-50 dark:bg-gray-900/60">
+            <TableHeader className="bg-gray-50 dark:bg-gray-900/60 p-0">
               <TableRow className="border-b border-gray-200 dark:border-gray-800">
-                <TableHead className="font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400 py-4">
+                <TableHead className="font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400 ">
                   Transaction
                 </TableHead>
                 <TableHead className="font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400">
@@ -197,15 +197,15 @@ const ExpenseTable = () => {
               </TableRow>
             </TableHeader>
 
-            <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
+            <TableBody className="divide-y p-0 divide-gray-100 dark:divide-gray-800">
               {data?.transactions && data.transactions.length > 0 ? (
                 data.transactions.map(
                   (transaction: TransactionWithPaymentMethod) => (
                     <TableRow
                       key={transaction.id}
-                      className="group hover:bg-blue-50/40 dark:hover:bg-blue-950/20 transition-all duration-200"
+                      className="group p-0 hover:bg-blue-50/40 dark:hover:bg-blue-950/20 transition-all duration-200"
                     >
-                      <TableCell className="font-medium max-w-60 text-wrap py-4">
+                      <TableCell className="font-medium max-w-60 text-wrap ">
                         <div className="flex flex-col">
                           {transaction.name}
                           {/* {transaction.description && (
@@ -216,7 +216,7 @@ const ExpenseTable = () => {
                         </div>
                       </TableCell>
 
-                      <TableCell>
+                      <TableCell className="p-0">
                         <CategoryBadge categoryName={transaction.category} />
                       </TableCell>
 
@@ -232,7 +232,7 @@ const ExpenseTable = () => {
                       <TableCell>
                         <Badge
                           variant="outline"
-                          className={`px-2.5 py-1 font-medium text-xs ${
+                          className={` font-medium text-xs ${
                             transaction.type === "INCOME"
                               ? "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-400 dark:border-green-800"
                               : "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800"
@@ -253,7 +253,7 @@ const ExpenseTable = () => {
                       </TableCell>
 
                       <TableCell>
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1">
                           <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800">
                             {transaction?.paymentMethod.type === "CASH" && (
                               <Banknote className="h-3 w-3 text-amber-600" />
