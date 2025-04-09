@@ -188,7 +188,7 @@ const InvoiceTable = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Invoice #</TableHead>
-                <TableHead>Name</TableHead>
+                <TableHead>Client/Company Name</TableHead>
                 <TableHead>Issue Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
@@ -217,7 +217,9 @@ const InvoiceTable = () => {
                     <TableCell className="font-medium">
                       {invoice.invoiceNumber}
                     </TableCell>
-                    <TableCell>{invoice.clientName}</TableCell>
+                    <TableCell>
+                      {invoice.clientName || invoice.clientCompanyName}
+                    </TableCell>
                     <TableCell>
                       {invoice.createdAt
                         ? format(new Date(invoice.createdAt), "dd/MM/yyyy")

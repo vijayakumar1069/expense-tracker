@@ -241,7 +241,11 @@ export const TransActionEditButton: React.FC<{ transactionId: string }> = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="mr-2">
+        <Button
+          size="sm"
+          variant="outline"
+          className="mr-2 bg-primary hover:bg-purple-500"
+        >
           <Pencil className="h-4 w-4 mr-1 text-white" />
           <span className="text-white">Edit</span>
         </Button>

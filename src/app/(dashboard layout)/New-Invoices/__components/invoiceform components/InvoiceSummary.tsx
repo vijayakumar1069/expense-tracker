@@ -13,6 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { UseFormReturn } from "react-hook-form";
 import { InvoiceFormValues } from "../InvoiceForm";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { TAX_TYPES } from "@/utils/constants/consts";
 
 export function InvoiceSummary({
   form,
@@ -34,6 +42,7 @@ export function InvoiceSummary({
 
     return () => subscription.unsubscribe();
   }, [form]);
+  console.log(form.getValues());
 
   return (
     <Card className="mt-6">
@@ -66,19 +75,32 @@ export function InvoiceSummary({
               name="taxRate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tax Rate (%)</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                      onChange={(e) => {
-                        field.onChange(e.target.valueAsNumber || 0);
-                      }}
-                    />
-                  </FormControl>
+                  <FormLabel>Tax Type</FormLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      const selectedTax = TAX_TYPES.find(
+                        (tax) => tax.id === value
+                      );
+                      field.onChange((selectedTax?.rate || 0) * 100);
+                    }}
+                    value={
+                      TAX_TYPES.find((tax) => tax.rate === field.value / 100)
+                        ?.id || ""
+                    }
+                  >
+                    <FormControl className="w-full">
+                      <SelectTrigger className="border-primary/20 w-full focus:border-primary/30">
+                        <SelectValue placeholder="Select tax type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {TAX_TYPES.map((tax) => (
+                        <SelectItem key={tax.id} value={tax.id}>
+                          {tax.name} ({(tax.rate * 100).toFixed(0)}%)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

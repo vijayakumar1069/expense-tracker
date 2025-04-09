@@ -71,7 +71,6 @@ const limit = 10;
 
 const ExpenseTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  // const isInitialMount = useRef(true);
 
   const [filters, setFilters] = useState<FilterState>({
     sortBy: "createdAt",
@@ -112,13 +111,13 @@ const ExpenseTable = () => {
       return response.json();
     },
     refetchOnWindowFocus: false,
-    staleTime: 30000, // 30 seconds
-    // cacheTime: 300000, // 5 minutes
+
+    staleTime: 30000,
   });
 
   const handleApplyFilters = (newFilters: FilterState) => {
     setFilters(newFilters);
-    // Reset to first page when filters change
+
     setCurrentPage(1);
   };
 
@@ -150,14 +149,9 @@ const ExpenseTable = () => {
 
   return (
     <Card className="w-full flex flex-col relative overflow-hidden border-0 space-y-0 gap-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 mb-0">
-      {/* Replace the existing grid div with this */}
-      <div className=" w-full mb-4 px-6 ">
-        {/* Filter header positioned absolutely at top */}
-
-        {/* Main controls container */}
+      <div className="w-full mb-4 px-6">
         <div className="flex flex-wrap md:flex-nowrap gap-4 items-center justify-end w-full">
-          {/* Left column: Add Transaction button */}
-          <div className="w-full md:w-auto ">
+          <div className="w-full md:w-auto">
             <TransActionDialog mode="add" />
           </div>
           {Object.values(filters).some(
@@ -168,7 +162,7 @@ const ExpenseTable = () => {
               <TransactionHeader currentFilters={filters} />
             </div>
           )}
-          {/* Right column: Search and Filter */}
+
           <div className="flex w-full md:w-auto items-center gap-4 justify-center">
             <TransactionFilter
               initialFilters={filters}
@@ -178,7 +172,7 @@ const ExpenseTable = () => {
         </div>
       </div>
 
-      <CardContent className="px-6 mt-0 m-0 py-0 ">
+      <CardContent className="px-6 mt-0 m-0 py-0">
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
           <Table>
             <TableHeader className="bg-gray-50 dark:bg-gray-900/60">
@@ -332,51 +326,56 @@ const ExpenseTable = () => {
             </TableBody>
 
             <TableFooter className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
-              <TableRow className="border-t-2 border-gray-200 dark:border-gray-800 hover:bg-transparent">
-                <TableCell
-                  colSpan={3}
-                  className="font-bold text-gray-800 dark:text-gray-200"
-                >
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-green-500" />
-                    Total Income
-                  </div>
-                </TableCell>
-                <TableCell
-                  className="text-right font-bold text-green-600 dark:text-green-500"
-                  colSpan={4}
-                >
-                  <div className="flex items-center justify-end gap-1">
-                    <DollarSign className="h-4 w-4" />
-                    <span className="text-lg">
-                      {data?.summary?.totalIncome.toFixed(2) || "0.00"}
-                    </span>
-                  </div>
-                </TableCell>
-              </TableRow>
-
-              <TableRow className="hover:bg-transparent">
-                <TableCell
-                  colSpan={3}
-                  className="font-bold text-gray-800 dark:text-gray-200"
-                >
-                  <div className="flex items-center gap-2">
-                    <TrendingDown className="h-4 w-4 text-red-500" />
-                    Total Expense
-                  </div>
-                </TableCell>
-                <TableCell
-                  className="text-right font-bold text-red-600 dark:text-red-500"
-                  colSpan={4}
-                >
-                  <div className="flex items-center justify-end gap-1">
-                    <DollarSign className="h-4 w-4" />
-                    <span className="text-lg">
-                      {data?.summary?.totalExpenses.toFixed(2) || "0.00"}
-                    </span>
-                  </div>
-                </TableCell>
-              </TableRow>
+              {data?.summary?.totalIncome !== undefined &&
+                data?.summary?.totalIncome > 0 && (
+                  <TableRow className="border-t-2 border-gray-200 dark:border-gray-800 hover:bg-transparent">
+                    <TableCell
+                      colSpan={3}
+                      className="font-bold text-gray-800 dark:text-gray-200"
+                    >
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-green-500" />
+                        Total Income
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      className="text-right font-bold text-green-600 dark:text-green-500"
+                      colSpan={4}
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        <DollarSign className="h-4 w-4" />
+                        <span className="text-lg">
+                          {data?.summary?.totalIncome.toFixed(2) || "0.00"}
+                        </span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              {data?.summary?.totalExpenses !== undefined &&
+                data?.summary?.totalExpenses > 0 && (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell
+                      colSpan={3}
+                      className="font-bold text-gray-800 dark:text-gray-200"
+                    >
+                      <div className="flex items-center gap-2">
+                        <TrendingDown className="h-4 w-4 text-red-500" />
+                        Total Expense
+                      </div>
+                    </TableCell>
+                    <TableCell
+                      className="text-right font-bold text-red-600 dark:text-red-500"
+                      colSpan={4}
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        <DollarSign className="h-4 w-4" />
+                        <span className="text-lg">
+                          {data?.summary?.totalExpenses.toFixed(2) || "0.00"}
+                        </span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
 
               <TableRow className="hover:bg-transparent border-t-2 border-gray-200 dark:border-gray-800">
                 <TableCell
@@ -451,5 +450,4 @@ const ExpenseTable = () => {
     </Card>
   );
 };
-
 export default ExpenseTable;

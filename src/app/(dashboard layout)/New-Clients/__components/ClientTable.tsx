@@ -144,7 +144,7 @@ const ClientTable = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>Client/Company Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Company</TableHead>
@@ -171,7 +171,9 @@ const ClientTable = () => {
                     onClick={() => handleViewClient(client)}
                     className="cursor-pointer hover:bg-gray-100"
                   >
-                    <TableCell className="font-medium">{client.name}</TableCell>
+                    <TableCell className="font-medium">
+                      {client.name || client.companyName}
+                    </TableCell>
                     <TableCell>{client.email}</TableCell>
                     <TableCell>{client.phone1}</TableCell>
                     <TableCell>{client.companyName}</TableCell>

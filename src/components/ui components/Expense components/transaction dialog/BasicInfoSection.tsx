@@ -20,6 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -87,7 +88,7 @@ export const BasicInfoSection: React.FC<FormSectionProps> = ({ form }) => {
         render={({ field }) => (
           <FormItem className="col-span-2">
             <FormLabel>Category</FormLabel>
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover modal={true} open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild className="w-full">
                 <FormControl>
                   <Button
@@ -105,40 +106,41 @@ export const BasicInfoSection: React.FC<FormSectionProps> = ({ form }) => {
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-96 p-0 h-[300px] overflow-hidden">
+              <PopoverContent className="max-w-xl p-0">
                 <Command>
                   <CommandInput
                     placeholder="Search category..."
                     className="h-9"
                   />
-
-                  <CommandList className="w-full h-full">
-                    <CommandEmpty>No category found.</CommandEmpty>
-                    <CommandGroup>
-                      {CATEGORIES.map((category) => (
-                        <CommandItem
-                          key={category.id}
-                          value={category.name}
-                          onSelect={(value) => {
-                            form.setValue("category", value, {
-                              shouldValidate: false,
-                            });
-                            setOpen(false);
-                          }}
-                          className="text-sm w-fit "
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              field.value === category.name
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {category.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
+                  <CommandList>
+                    <ScrollArea className="h-[200px] overflow-auto ">
+                      <CommandEmpty>No category found.</CommandEmpty>
+                      <CommandGroup>
+                        {CATEGORIES.map((category) => (
+                          <CommandItem
+                            key={category.id}
+                            value={category.name}
+                            onSelect={(value) => {
+                              form.setValue("category", value, {
+                                shouldValidate: false,
+                              });
+                              setOpen(false);
+                            }}
+                            className="text-sm "
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                field.value === category.name
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            {category.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </ScrollArea>
                   </CommandList>
                 </Command>
               </PopoverContent>

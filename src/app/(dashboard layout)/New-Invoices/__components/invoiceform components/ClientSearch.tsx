@@ -150,8 +150,13 @@ export function ClientSearch({ form }: { form: any }) {
                             : "opacity-0"
                         )}
                       />
-                      <div className="flex flex-col">
+                      <div className="flex flex-col space-y-1">
                         <span>{client.name}</span>
+                        {client.companyName && (
+                          <span className="text-xs text-muted-foreground">
+                            {client.companyName}
+                          </span>
+                        )}
                         <span className="text-xs text-muted-foreground">
                           {client.email}
                         </span>
