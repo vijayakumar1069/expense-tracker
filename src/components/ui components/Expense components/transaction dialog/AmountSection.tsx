@@ -28,7 +28,7 @@ export const AmountSection: React.FC<FormSectionProps> = ({ form }) => {
   };
 
   return (
-    <>
+    <div className=" grid grid-cols-3 gap-2">
       {/* Amount */}
       <FormField
         control={form.control}
@@ -95,6 +95,6 @@ export const AmountSection: React.FC<FormSectionProps> = ({ form }) => {
           </FormItem>
         )}
       />
-    </>
+    </div>
   );
 };

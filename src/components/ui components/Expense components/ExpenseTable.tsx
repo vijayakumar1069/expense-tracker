@@ -71,7 +71,6 @@ const limit = 10;
 
 const ExpenseTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
-
   const [filters, setFilters] = useState<FilterState>({
     sortBy: "createdAt",
     sortDirection: "desc",
@@ -117,7 +116,6 @@ const ExpenseTable = () => {
 
   const handleApplyFilters = (newFilters: FilterState) => {
     setFilters(newFilters);
-
     setCurrentPage(1);
   };
 
@@ -162,7 +160,6 @@ const ExpenseTable = () => {
               <TransactionHeader currentFilters={filters} />
             </div>
           )}
-
           <div className="flex w-full md:w-auto items-center gap-4 justify-center">
             <TransactionFilter
               initialFilters={filters}
@@ -171,7 +168,6 @@ const ExpenseTable = () => {
           </div>
         </div>
       </div>
-
       <CardContent className="px-6 mt-0 m-0 py-0">
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
           <Table>

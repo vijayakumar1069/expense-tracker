@@ -196,3 +196,30 @@ export const TRANSACTION_TYPES = [
     { id: "EXPENSE", name: "EXPENSE" },
     { id: "INCOME", name: "INCOME" },
 ];
+
+
+export const transferModeOption = [
+    { id: 1, label: 'UPI', value: 'UPI' },
+    { id: 2, label: 'NEFT', value: 'NEFT' },
+    { id: 3, label: 'IMPS', value: 'IMPS' },
+    { id: 4, label: 'RTGS', value: 'RTGS' },
+    { id: 5, label: 'SWIFT', value: 'SWIFT' },
+    { id: 6, label: 'Paypal', value: 'Paypal' }
+];
+
+export const AvailableBanks = [
+
+    {
+        id: 1,
+        name: "HDFC Bank"
+    },
+    {
+        id: 2,
+        name: "ICICI Bank"
+    },
+    {
+        id: 3,
+        name: "SBI Bank"
+    },
+
+]

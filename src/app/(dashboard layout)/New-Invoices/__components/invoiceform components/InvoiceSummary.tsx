@@ -85,7 +85,7 @@ export function InvoiceSummary({
                     }}
                     value={
                       TAX_TYPES.find((tax) => tax.rate === field.value / 100)
-                        ?.id || ""
+                        ?.name || ""
                     }
                   >
                     <FormControl className="w-full">

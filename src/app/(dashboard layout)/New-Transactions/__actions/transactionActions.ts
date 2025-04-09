@@ -6,7 +6,7 @@ import cloudinary from "@/lib/clodinary";
 import { prisma } from "@/utils/prisma";
 import { expenseFormSchema } from "@/utils/schema/expenseSchema";
 import { UpdateTransactionResult } from "@/utils/types";
-import { PaymentMethodType, TransactionType } from "@prisma/client";
+import { PaymentMethodType, PaymentTransferMode, TransactionType } from "@prisma/client";
 import { z } from "zod";
 
 
@@ -31,6 +31,7 @@ export async function createExpense(formData: FormData) {
             taxType: formData.get("taxType"),
             total: formData.get("total"),
             paymentMethodType: formData.get("paymentMethodType"),
+            transferMode: formData.get("transferMode"),
             receivedBy: formData.get("receivedBy"),
             bankName: formData.get("bankName"),
             chequeNo: formData.get("chequeNo"),
@@ -98,6 +99,7 @@ export async function createExpense(formData: FormData) {
                                 ? new Date(String(validatedData.chequeDate))
                                 : null,
                             invoiceNo: validatedData.invoiceNo,
+                            transferMode: validatedData.transferMode as PaymentTransferMode | null,
                         },
                     },
                 },
@@ -124,7 +126,6 @@ export async function createExpense(formData: FormData) {
                 attachments: attachments
             };
         });
-
         return { success: true, data: expense };
     } catch (error) {
         console.error("Create expense error:", error);
@@ -298,6 +299,7 @@ export async function updateTransaction(
                         ? new Date(String(validatedData.chequeDate))
                         : null,
                     invoiceNo: validatedData.invoiceNo,
+                    transferMode: validatedData.transferMode as PaymentTransferMode | null,
                 },
             });
 
@@ -360,7 +362,6 @@ export async function updateTransaction(
                 },
             });
         });
-
         return {
             success: true,
             data: updatedTransaction

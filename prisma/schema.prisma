@@ -11,6 +11,14 @@ datasource db {
 }
 
 
+enum PaymentTransferMode {
+  UPI
+  NEFT
+  IMPS
+  RTGS
+  SWIFT
+  PayPal
+}
 
 
 // Transaction type enum to distinguish between income and expense
@@ -79,10 +87,12 @@ model PaymentMethod {
   chequeNo      String?         // For cheque payments
   chequeDate    DateTime?       // For cheque payments
   invoiceNo     String?         // For invoices
+  transferMode PaymentTransferMode?
   
   // Transaction relation
   transaction   Transaction     @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   transactionId String         @unique
+
 
   // Metadata
   createdAt     DateTime       @default(now())
@@ -194,3 +204,4 @@ enum InvoiceStatus {
   OVERDUE
   CANCELLED
 }
+

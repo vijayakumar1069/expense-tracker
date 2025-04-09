@@ -9,6 +9,7 @@ import { DateImageSection } from "./DateImageSection";
 import { TransactionFormSubmitButton } from "./TransActionFormSubmitButton";
 import { useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
+import DateComponent from "./DateComponent";
 
 export const TransactionForm: React.FC<{
   form: UseFormReturn<TransactionFormValues>;
@@ -40,6 +41,7 @@ export const TransactionForm: React.FC<{
           <BasicInfoSection form={form} isPending={isPending} />
           <AmountSection form={form} isPending={isPending} />
           <PaymentSection form={form} isPending={isPending} />
+          <DateComponent form={form} isPending={isPending} />
           <DateImageSection form={form} isPending={isPending} mode={mode} />
         </div>
         <div className="flex justify-end items-end w-full">

@@ -53,6 +53,7 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
       paymentMethodType: transaction?.paymentMethodType || undefined,
       receivedBy: transaction?.receivedBy || "",
       bankName: transaction?.bankName || "",
+      transferMode: transaction?.transferMode || undefined,
       chequeNo: transaction?.chequeNo || "",
       chequeDate: transaction?.chequeDate || "",
       invoiceNo: transaction?.invoiceNo || "",
