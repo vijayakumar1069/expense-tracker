@@ -1,3 +1,4 @@
+import { PaymentTransferMode } from "@prisma/client";
 import { z } from "zod";
 
 // Zod Schema
@@ -37,6 +38,6 @@ export const expenseFormSchema = z.object({
     ])).optional(),
     // For tracking deleted images
     deleteImages: z.string().optional(),
-    transferMode: z.enum(["UPI", "NEFT", "RTGS", "IMPS"]).optional(),
+    transferMode: z.nativeEnum(PaymentTransferMode).nullable().optional(),
     // attachments?: z.array(z.any()).optional().default([]),
 });
