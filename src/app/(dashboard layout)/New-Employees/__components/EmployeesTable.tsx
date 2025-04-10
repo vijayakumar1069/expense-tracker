@@ -83,9 +83,9 @@ const EmployeesTable = ({ employees }: EmployeesTableProps) => {
     }
   };
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString();
-  };
+  // const formatDate = (date: Date) => {
+  //   return new Date(date).toLocaleDateString();
+  // };
 
   if (employees.length === 0) {
     return (
@@ -102,8 +102,8 @@ const EmployeesTable = ({ employees }: EmployeesTableProps) => {
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead>Updated</TableHead>
+            {/* <TableHead>Created</TableHead>
+            <TableHead>Updated</TableHead> */}
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -112,8 +112,8 @@ const EmployeesTable = ({ employees }: EmployeesTableProps) => {
             <TableRow key={employee.id}>
               <TableCell className="font-medium">{employee.name}</TableCell>
               <TableCell>{employee.email}</TableCell>
-              <TableCell>{formatDate(employee.createdAt)}</TableCell>
-              <TableCell>{formatDate(employee.updatedAt)}</TableCell>
+              {/* <TableCell>{formatDate(employee.createdAt)}</TableCell>
+              <TableCell>{formatDate(employee.updatedAt)}</TableCell> */}
               <TableCell className="text-right">
                 <div className="flex justify-end space-x-2">
                   <Button
