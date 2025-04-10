@@ -7,10 +7,10 @@ console.log(`Building for environment: ${env}`);
 
 if (env === 'preview') {
     // Run preview-specific build command
-    execSync('prisma generate && prisma migrate deploy && next build', { stdio: 'inherit' });
+    execSync('npx prisma generate && npx prisma migrate deploy && next build', { stdio: 'inherit' });
 } else if (env === 'production') {
     // Run production-specific build command
-    execSync('prisma generate && prisma migrate deploy && next build', { stdio: 'inherit' });
+    execSync('npx prisma generate && npx prisma migrate deploy && next build', { stdio: 'inherit' });
 } else {
     // Development build
     execSync('next build', { stdio: 'inherit' });
