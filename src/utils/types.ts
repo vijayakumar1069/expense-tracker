@@ -167,3 +167,12 @@ export interface ErrorResponse {
     errors?: Record<string, string[]>;
     code?: string;
 }
+
+
+export type Employee = {
+    id: string;
+    name: string;
+    email: string;
+    createdAt: string;
+    updatedAt: string;
+};

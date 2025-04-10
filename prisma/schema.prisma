@@ -2,12 +2,13 @@
 generator client {
   provider = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  // output   = "./generated/prisma/client" // Add this line
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("POSTGRES_URL_NON_POOLING")
+  // directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 
@@ -111,6 +112,7 @@ model User {
   updatedAt   DateTime      @updatedAt
   clients     Client[]
   invoice     Invoice[]
+  employees   Employee[]
 
 }
 
@@ -204,3 +206,12 @@ enum InvoiceStatus {
   CANCELLED
 }
 
+model Employee {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
