@@ -12,7 +12,10 @@ import EmployeeForm from "./__components/EmployeeForm";
 import EmployeesTable from "./__components/EmployeesTable";
 import { Toaster } from "@/components/ui/sonner";
 
-export default async function EmployeeMainPage() {
+export const dynamic = "force-dynamic";
+
+// Change to default export and remove "use client" directive
+export default async function Page() {
   const response = await getEmployees();
   const employees = response.success ? response.data : [];
 
