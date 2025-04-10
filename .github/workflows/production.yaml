@@ -28,7 +28,7 @@ jobs:
         run: |
           npm cache clean --force
           npm install --legacy-peer-deps
-        # Run database migrations
+      # Run database migrations
       - name: Run Prisma Migrations
         run: npx prisma migrate deploy
         env:

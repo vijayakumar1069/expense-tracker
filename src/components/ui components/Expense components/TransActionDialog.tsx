@@ -176,7 +176,6 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
       mutation.mutate(data);
     });
   };
-  console.log(viewMode);
 
   return (
     <Dialog
