@@ -168,11 +168,3 @@ export interface ErrorResponse {
     code?: string;
 }
 
-
-export type Employee = {
-    id: string;
-    name: string;
-    email: string;
-    createdAt: string;
-    updatedAt: string;
-};
