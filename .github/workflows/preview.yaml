@@ -36,7 +36,7 @@ jobs:
           npx prisma migrate deploy
           env:
             DATABASE_URL: ${{ secrets.MY_DATABASE_URL }}
-            DIRECT_URL: ${{ secrets.MY_DATABASE_URL }}  # Add this line
+            DIRECT_URL: ${{ secrets.MY_DATABASE_URL }}
       # Pull Vercel environment for preview
       - name: Vercel Environment Pull
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
