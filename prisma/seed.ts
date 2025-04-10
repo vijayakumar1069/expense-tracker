@@ -224,6 +224,7 @@ async function seed() {
                 }),
                 ...(method === 'BANK' && {
                     bankName: faker.company.name(),
+                    transferMode: faker.helpers.arrayElement(['NEFT', 'RTGS', 'IMPS', 'UPI']),
                     receivedBy: null,
                     chequeNo: null,
                     chequeDate: null,
