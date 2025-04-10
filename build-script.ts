@@ -1,5 +1,5 @@
 import { execSync } from "child_process";
-
+import 'dotenv/config';
 // VERCEL_ENV is automatically set by Vercel
 const env = process.env.VERCEL_ENV || 'development';
 

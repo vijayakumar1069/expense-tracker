@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": " next dev --turbopack",
-    "build": "node build-script.js",
+    "build": "tsx build-script.ts",
     "start": " next start",
     "lint": "next lint",
     "postinstall": "prisma generate"
@@ -73,6 +73,7 @@
     "@types/number-to-words": "^1.2.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.4.7",
     "dotenv-cli": "^8.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.2.2",
