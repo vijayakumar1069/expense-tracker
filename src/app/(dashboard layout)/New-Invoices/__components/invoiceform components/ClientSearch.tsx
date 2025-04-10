@@ -65,6 +65,7 @@ export function ClientSearch({ form }: { form: any }) {
           }
 
           const data = await response.json();
+          console.log(data);
 
           setClients(data);
           setLoading(false);
@@ -94,7 +95,7 @@ export function ClientSearch({ form }: { form: any }) {
       form.setValue("clientCity", selectedClient.city);
       form.setValue("clientZip", selectedClient.zip);
       form.setValue("clientState", selectedClient.state);
-      form.setValue("clientCompanyName", selectedClient?.companyName);
+      form.setValue("clientCompanyName", selectedClient?.companyName || "");
 
       form.setValue("clientCountry", selectedClient.country);
     }
@@ -104,7 +105,7 @@ export function ClientSearch({ form }: { form: any }) {
   return (
     <FormItem className="flex flex-col">
       <FormLabel>Client</FormLabel>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover modal open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <FormControl>
             <Button
@@ -119,11 +120,15 @@ export function ClientSearch({ form }: { form: any }) {
           </FormControl>
         </PopoverTrigger>
         <PopoverContent className="w-[400px] p-0">
-          <Command shouldFilter={false}>
+          <Command>
             <CommandInput
               placeholder="Search clients..."
               value={searchQuery}
-              onValueChange={setSearchQuery}
+              onValueChange={(value) => {
+                setSearchQuery(value);
+              }}
+              // id="client-search-input"
+              // instanceId="client-search-input"
             />
             <CommandList>
               {loading ? (
@@ -152,11 +157,11 @@ export function ClientSearch({ form }: { form: any }) {
                       />
                       <div className="flex flex-col space-y-1">
                         <span>{client.name}</span>
-                        {client.companyName && (
+                        {/* {client.companyName && (
                           <span className="text-xs text-muted-foreground">
                             {client.companyName}
                           </span>
-                        )}
+                        )} */}
                         <span className="text-xs text-muted-foreground">
                           {client.email}
                         </span>
