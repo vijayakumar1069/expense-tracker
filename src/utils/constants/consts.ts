@@ -1,5 +1,5 @@
 // utils/constants/consts.ts
-import { LayoutDashboard, Receipt, Wallet, FileText, PackageCheck, Handshake, BadgePercent, Link, Code, Smartphone, ShoppingCart, BarChart3, UsersRound, Banknote, ServerCog, CloudCog, Briefcase, Code2, BrainCircuitIcon } from "lucide-react";
+import { LayoutDashboard, Receipt, Wallet, FileText, PackageCheck, Handshake, BadgePercent, Link, Code, Smartphone, ShoppingCart, BarChart3, UsersRound, Banknote, ServerCog, CloudCog, Briefcase, Code2, BrainCircuitIcon, Users2 } from "lucide-react";
 import { NavItem } from "../types";
 
 import {
@@ -39,6 +39,11 @@ export const adminNavbarValues: NavItem[] = [
         title: "Invoices",
         href: "/New-Invoices",
         icon: FileText
+    },
+    {
+        title: "Employees",
+        href: "/New-Employees",
+        icon: Users2
     }
 ];
 
