@@ -110,9 +110,11 @@ const ExpenseTable = () => {
       }
       return response.json();
     },
-    refetchOnWindowFocus: false,
-
-    staleTime: 30000,
+    enabled: !!filters, // Only run if query is not empty
+    staleTime: 1000 * 60 * 5, // 5 mins caching
+    // keepPreviousData: true, // Keeps showing old data while fetching new
+    refetchOnWindowFocus: false, // Optional: no refetch when tab focuses
+    retry: 1, // Retry once on failure
   });
 
   const handleApplyFilters = (newFilters: FilterState) => {
