@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useQuery } from "@tanstack/react-query";
+import debounce from "lodash.debounce";
 
-// Client interface
 interface Client {
   id: string;
   name: string;
@@ -42,65 +43,62 @@ interface Client {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function ClientSearch({ form }: { form: any }) {
   const [open, setOpen] = useState(false);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
-  // Fetch clients when search query changes
+  // Debounced setter to avoid spamming queries
+  const debouncedSetSearchQuery = debounce(setSearchQuery, 300);
+
+  const {
+    data: clients = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery<Client[]>({
+    queryKey: ["clients", searchQuery],
+    queryFn: async () => {
+      if (!searchQuery.trim()) return [];
+      const res = await fetch(
+        `/api/search-clients?query=${encodeURIComponent(searchQuery)}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch clients");
+      return res.json();
+    },
+    enabled: !!searchQuery.trim(), // Only run if query is not empty
+    staleTime: 1000 * 60 * 5, // 5 mins caching
+    // keepPreviousData: true, // Keeps showing old data while fetching new
+    refetchOnWindowFocus: false, // Optional: no refetch when tab focuses
+    retry: 1, // Retry once on failure
+  });
   useEffect(() => {
-    const fetchClients = async () => {
-      setLoading(true);
-      setError(null);
+    const handler = setTimeout(() => {
+      setSearchQuery(searchQuery);
+    }, 300);
 
-      try {
-        // Use a timeout to debounce the requests
-        const timeout = setTimeout(async () => {
-          const response = await fetch(
-            `/api/search-clients?query=${encodeURIComponent(searchQuery)}`
-          );
-
-          if (!response.ok) {
-            throw new Error("Failed to fetch clients");
-          }
-
-          const data = await response.json();
-          console.log(data);
-
-          setClients(data);
-          setLoading(false);
-        }, 300); // 300ms debounce
-
-        return () => clearTimeout(timeout);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-        setLoading(false);
-      }
-    };
-
-    fetchClients();
+    return () => clearTimeout(handler);
   }, [searchQuery]);
+  const handleSelect = useCallback(
+    (client: Client) => {
+      form.setValue("clientId", client.id);
+      form.setValue("clientName", client.name);
+      form.setValue("clientEmail", client.email);
+      form.setValue("clientPhone1", client.phone1);
+      form.setValue("clientPhone2", client.phone2 || "");
+      form.setValue("clientStreetName", client.streetName);
+      form.setValue("clientCity", client.city);
+      form.setValue("clientZip", client.zip);
+      form.setValue("clientState", client.state);
+      form.setValue("clientCompanyName", client.companyName || "");
+      form.setValue("clientCountry", client.country);
 
-  const handleSelect = (clientId: string) => {
-    const selectedClient = clients.find((client) => client.id === clientId);
-
-    if (selectedClient) {
-      // Update form fields with selected client data
-      form.setValue("clientId", selectedClient.id);
-      form.setValue("clientName", selectedClient.name);
-      form.setValue("clientEmail", selectedClient.email);
-      form.setValue("clientPhone1", selectedClient.phone1);
-      form.setValue("clientPhone2", selectedClient.phone2 || "");
-      form.setValue("clientStreetName", selectedClient.streetName);
-      form.setValue("clientCity", selectedClient.city);
-      form.setValue("clientZip", selectedClient.zip);
-      form.setValue("clientState", selectedClient.state);
-      form.setValue("clientCompanyName", selectedClient?.companyName || "");
-
-      form.setValue("clientCountry", selectedClient.country);
+      setOpen(false);
+    },
+    [form, setOpen]
+  );
+  useEffect(() => {
+    if (clients.length === 1 && form.watch("clientId") !== clients[0].id) {
+      handleSelect(clients[0]);
     }
-    setOpen(false);
-  };
+  }, [handleSelect, clients, form]);
 
   return (
     <FormItem className="flex flex-col">
@@ -120,32 +118,31 @@ export function ClientSearch({ form }: { form: any }) {
           </FormControl>
         </PopoverTrigger>
         <PopoverContent className="w-[400px] p-0">
-          <Command>
+          <Command shouldFilter={false}>
             <CommandInput
               placeholder="Search clients..."
-              value={searchQuery}
-              onValueChange={(value) => {
-                setSearchQuery(value);
-              }}
-              // id="client-search-input"
-              // instanceId="client-search-input"
+              onValueChange={debouncedSetSearchQuery}
+              className="text-sm"
             />
             <CommandList>
-              {loading ? (
+              {isLoading && (
                 <div className="flex items-center justify-center p-4">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
-              ) : error ? (
-                <CommandEmpty>Error: {error}</CommandEmpty>
-              ) : clients.length === 0 ? (
+              )}
+              {isError && (
+                <CommandEmpty>Error: {(error as Error)?.message}</CommandEmpty>
+              )}
+              {!isLoading && !isError && clients.length === 0 && (
                 <CommandEmpty>No clients found.</CommandEmpty>
-              ) : (
+              )}
+              {!isLoading && clients.length > 0 && (
                 <CommandGroup className="max-h-[300px] overflow-auto">
                   {clients.map((client) => (
                     <CommandItem
                       key={client.id}
                       value={client.id}
-                      onSelect={() => handleSelect(client.id)}
+                      onSelect={() => handleSelect(client)}
                     >
                       <Check
                         className={cn(
@@ -155,15 +152,13 @@ export function ClientSearch({ form }: { form: any }) {
                             : "opacity-0"
                         )}
                       />
-                      <div className="flex flex-col space-y-1">
-                        <span>{client.name}</span>
-                        {/* {client.companyName && (
-                          <span className="text-xs text-muted-foreground">
-                            {client.companyName}
-                          </span>
-                        )} */}
+                      <div className="flex flex-col space-y-0.5 justify-start items-start">
+                        <span className="text-sm font-medium">
+                          {client.name}
+                        </span>
                         <span className="text-xs text-muted-foreground">
                           {client.email}
+                          {client.companyName && ` • ${client.companyName}`}
                         </span>
                       </div>
                     </CommandItem>

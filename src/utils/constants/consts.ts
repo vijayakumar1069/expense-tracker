@@ -1,5 +1,5 @@
 // utils/constants/consts.ts
-import { LayoutDashboard, Receipt, Wallet, FileText, PackageCheck, Handshake, BadgePercent, Link, Code, Smartphone, ShoppingCart, BarChart3, UsersRound, Banknote, ServerCog, CloudCog, Briefcase, Code2, BrainCircuitIcon } from "lucide-react";
+import { LayoutDashboard, Receipt, Wallet, FileText, PackageCheck, Handshake, BadgePercent, Link, Code, Smartphone, ShoppingCart, BarChart3, UsersRound, Banknote, ServerCog, CloudCog, Briefcase, Code2, BrainCircuitIcon, TruckIcon, HouseIcon } from "lucide-react";
 import { NavItem } from "../types";
 
 import {
@@ -154,6 +154,18 @@ export const CATEGORIES = [
         id: 78,
         name: "Invoice",
         icon: Banknote,
+        color: "#059669",
+    },
+    {
+        id: 79,
+        name: "Conveyance",
+        icon: TruckIcon,
+        color: "#059669",
+    },
+    {
+        id: 80,
+        name: "Rent",
+        icon: HouseIcon,
         color: "#059669",
     }
 ];

@@ -83,7 +83,15 @@ const CATEGORIES = [
     { id: 75, name: "Freelance Software Projects" },
     { id: 76, name: "AI & ML Development" },
     { id: 77, name: "API Development & Integration" },
-    { id: 78, name: "Invoice" }
+    { id: 78, name: "Invoice" },
+    {
+        id: 79, name: "Conveyance",
+
+    },
+    {
+        id: 80, name: "Rent",
+
+    }
 ];
 
 
