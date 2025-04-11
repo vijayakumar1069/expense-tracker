@@ -65,11 +65,7 @@ model User {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   clients      Client[]
-<<<<<<< HEAD
  
-=======
-
->>>>>>> 9dd4c3e3bd0facb776a6c0107a2d21c6e315485a
   invoice      Invoice[]
   sessions     Session[]
   transactions Transaction[]
