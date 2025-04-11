@@ -29,12 +29,14 @@ export function InvoiceSummary({
 }) {
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
-      if (name === "taxRate" || name === "subtotal") {
+      if (name === "taxRate1" || name === "taxRate2" || name === "subtotal") {
         // Only handle tax rate or subtotal changes here
         const subtotal = Number(form.getValues("subtotal") || 0);
-        const taxRate = Number(form.getValues("taxRate") || 0);
+        const taxRate1 = Number(form.getValues("taxRate1") || 0);
+        const taxRate2 = Number(form.getValues("taxRate2") || 0);
+        const taxRate = (taxRate1 + taxRate2) / 100;
         console.log(subtotal, taxRate);
-        const taxAmount = subtotal * (taxRate / 100);
+        const taxAmount = subtotal * taxRate;
         form.setValue("taxAmount", taxAmount);
         const total = subtotal + taxAmount;
         form.setValue("invoiceTotal", total);
@@ -72,10 +74,10 @@ export function InvoiceSummary({
 
             <FormField
               control={form.control}
-              name="taxRate"
+              name="taxRate1"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tax Type</FormLabel>
+                  <FormLabel>Tax 1</FormLabel>
                   <Select
                     onValueChange={(value) => {
                       const selectedTax = TAX_TYPES.find(
@@ -88,6 +90,45 @@ export function InvoiceSummary({
                     value={
                       TAX_TYPES.find(
                         (tax) => Math.abs(tax.rate * 100 - field.value) < 0.01
+                      )?.id || ""
+                    }
+                  >
+                    <FormControl className="w-full">
+                      <SelectTrigger className="border-primary/20 w-full focus:border-primary/30">
+                        <SelectValue placeholder="Select tax type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {TAX_TYPES.map((tax) => (
+                        <SelectItem key={tax.id} value={tax.id}>
+                          {tax.name} ({(tax.rate * 100).toFixed(0)}%)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="taxRate2"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tax 2</FormLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      const selectedTax = TAX_TYPES.find(
+                        (tax) => tax.id === value
+                      );
+                      // Update the tax rate value in the form
+                      field.onChange((selectedTax?.rate || 0) * 100);
+                    }}
+                    // Fix the value comparison to match the selected tax rate
+                    value={
+                      TAX_TYPES.find(
+                        (tax) =>
+                          Math.abs(tax.rate * 100 - (field.value || 0)) < 0.01
                       )?.id || ""
                     }
                   >

@@ -69,8 +69,12 @@ const RenderInvoiceDetails = ({
         </div>
         <div className="flex justify-between">
           <p className="text-muted-foreground">
-            Tax ({invoice.taxRate.toFixed(2)}%)
+            Tax1 ({invoice.taxRate1.toFixed(2)}%)
           </p>
+          <p className="text-muted-foreground">
+            Tax2 ({invoice.taxRate2.toFixed(2)}%)
+          </p>
+
           <p>{invoice.taxAmount.toFixed(2)}</p>
         </div>
         <div className="flex justify-between font-medium text-lg">

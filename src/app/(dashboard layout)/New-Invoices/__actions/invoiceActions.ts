@@ -38,7 +38,8 @@ const invoiceSchema = z.object({
     status: z.nativeEnum(InvoiceStatus).default("SENT"),
     invoiceContents: z.array(invoiceItemSchema).min(1, "At least one item is required"),
     subtotal: z.number().min(0),
-    taxRate: z.number().min(0).max(100),
+    taxRate1: z.number().min(0).max(100),
+    taxRate2: z.number().min(0).max(100).optional(),
     taxAmount: z.number().min(0),
     invoiceTotal: z.number().min(0),
 });
@@ -108,7 +109,8 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
 
                     status: validatedData.status,
                     subtotal: validatedData.subtotal,
-                    taxRate: validatedData.taxRate,
+                    taxRate1: validatedData.taxRate1,
+                    taxRate2: validatedData.taxRate2 ?? undefined,
                     taxAmount: validatedData.taxAmount,
                     invoiceTotal: validatedData.invoiceTotal,
                     userId: user.id,
@@ -222,7 +224,8 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
 
                     status: validatedData.status,
                     subtotal: validatedData.subtotal,
-                    taxRate: validatedData.taxRate,
+                    taxRate1: validatedData.taxRate1,
+                    taxRate2: validatedData.taxRate2 ?? undefined,
                     taxAmount: validatedData.taxAmount,
                     invoiceTotal: validatedData.invoiceTotal,
                     // Create new invoice contents
@@ -499,7 +502,8 @@ export async function createInvoiceAction(formData: FormData) {
             status: rawData.status as InvoiceStatus,
             invoiceContents: JSON.parse(rawData.invoiceContents as string),
             subtotal: parseFloat(rawData.subtotal as string),
-            taxRate: parseFloat(rawData.taxRate as string),
+            taxRate1: parseFloat(rawData.taxRate1 as string),
+            taxRate2: parseFloat(rawData.taxRate2 as string),
             taxAmount: parseFloat(rawData.taxAmount as string),
             invoiceTotal: parseFloat(rawData.invoiceTotal as string),
         };

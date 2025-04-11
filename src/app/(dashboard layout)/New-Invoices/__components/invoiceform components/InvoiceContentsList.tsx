@@ -24,9 +24,14 @@ export function InvoiceContentsList({
     name: "invoiceContents",
   });
 
-  const taxRate = useWatch({
+  const taxRate1 = useWatch({
     control: form.control,
-    name: "taxRate",
+    name: "taxRate1",
+  });
+
+  const taxRate2 = useWatch({
+    control: form.control,
+    name: "taxRate2",
   });
 
   useEffect(() => {
@@ -47,6 +52,7 @@ export function InvoiceContentsList({
 
     // Update subtotal in form WITHOUT triggering validation (to avoid loops)
     form.setValue("subtotal", subtotal);
+    const taxRate = taxRate1 + (taxRate2 || 0);
 
     // Calculate tax, ensuring subtotal is a number
     const taxAmount = subtotal * ((Number(taxRate) || 0) / 100);
@@ -55,7 +61,7 @@ export function InvoiceContentsList({
     // Calculate total, ensuring taxAmount is a number
     const total = subtotal + taxAmount;
     form.setValue("invoiceTotal", total);
-  }, [form, invoiceContents, taxRate]);
+  }, [form, invoiceContents, taxRate1, taxRate2]);
 
   return (
     <Card className="mt-6">
