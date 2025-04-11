@@ -56,8 +56,10 @@ const InvoiceDialog = ({
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
+      setShowPasswordVerification(false);
       setTimeout(() => setIsEditMode(isNewInvoice), 100);
     } else {
+      setShowPasswordVerification(false);
       setIsEditMode(isNewInvoice);
     }
     onOpenChange(open);
@@ -125,6 +127,7 @@ const InvoiceDialog = ({
         duration: 2500,
       });
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      setShowPasswordVerification(false);
       handleOpenChange(false);
     },
     onError: (error, _, context) => {
@@ -202,6 +205,7 @@ const InvoiceDialog = ({
         duration: 2500,
       });
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      setShowPasswordVerification(false);
       setIsEditMode(false);
     },
     onError: (error, _, context) => {
@@ -261,6 +265,7 @@ const InvoiceDialog = ({
         duration: 2500,
       });
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      setShowPasswordVerification(false);
       setIsEditMode(false);
       onOpenChange(false);
       setDeleteDialogOpen(false);

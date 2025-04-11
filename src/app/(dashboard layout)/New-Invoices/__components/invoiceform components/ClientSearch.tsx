@@ -102,7 +102,7 @@ export function ClientSearch({ form }: { form: any }) {
 
   return (
     <FormItem className="flex flex-col">
-      <FormLabel>Company</FormLabel>
+      <FormLabel>Company Name</FormLabel>
       <Popover modal open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <FormControl>

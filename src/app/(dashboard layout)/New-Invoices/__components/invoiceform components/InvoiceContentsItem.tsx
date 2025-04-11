@@ -50,10 +50,38 @@ export function InvoiceContentsItem({
               <FormControl>
                 <Input
                   type="number"
-                  {...field}
-                  placeholder="0.00"
+                  value={
+                    typeof field.value === "undefined" ||
+                    field.value === null ||
+                    field.value === 0
+                      ? ""
+                      : field.value.toString()
+                  }
                   onChange={(e) => {
-                    field.onChange(Number(e.target.value) || "0"); // Convert to number here
+                    const inputValue = e.target.value;
+
+                    // If the user clears the input (backspace), allow empty string
+                    if (inputValue === "") {
+                      field.onChange(0);
+                      return;
+                    }
+
+                    // Remove leading zeros
+                    const cleanedValue = inputValue.replace(/^0+(?=\d)/, "");
+
+                    // Update field value
+                    field.onChange(Number(cleanedValue));
+                  }}
+                  placeholder="0.00"
+                  onBlur={() => {
+                    // On blur, if the field is empty, reset to 0
+                    if (
+                      field.value === 0 ||
+                      typeof field.value === "undefined" ||
+                      field.value === null
+                    ) {
+                      field.onChange(0);
+                    }
                   }}
                 />
               </FormControl>
