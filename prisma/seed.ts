@@ -315,27 +315,13 @@ async function seed() {
             invoices.push(invoice);
         }
 
-        const employees = [];
 
-
-        for (let i = 0; i < 5; i++) {
-            const firstName = faker.person.firstName();
-            const lastName = faker.person.lastName();
-            const employee = await prisma.employee.create({
-                data: {
-                    name: `${firstName} ${lastName}`,
-                    email: faker.internet.email({ firstName, lastName, provider: 'company.com' }),
-                    userId: user.id
-                }
-            });
-            employees.push(employee);
-        }
 
 
 
 
         console.log('Successfully seeded for FY 2025-2026:');
-        console.log(`- ${employees.length} employees`);
+
         console.log(`- 1 user`);
         console.log(`- ${clients.length} clients`);
         console.log(`- ${transactions.length} transactions`);
