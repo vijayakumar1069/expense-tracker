@@ -368,10 +368,10 @@ const InvoiceDialog = ({
             </div>
             <div className="flex items-center gap-3">
               <Button
+                variant="outline"
                 onClick={() => setShowPasswordVerification(true)}
-                className="hover:bg-purple-400"
               >
-                <Pencil className="h-4 w-4 mr-2" />
+                <Pencil className="h-4 w-4 mr-2 " />
                 Edit
               </Button>
               <Button
@@ -379,7 +379,7 @@ const InvoiceDialog = ({
                 onClick={() => handleOpenChange(false)}
                 className="mr-2 hover:bg-ring"
               >
-                <X className="h-4 w-4 mr-2" />
+                <X className="h-4 w-4 mr-2 " />
                 Close
               </Button>
             </div>
@@ -398,7 +398,6 @@ const InvoiceDialog = ({
         )}
       </DialogContent>
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        {/* <DialogTitle>Confirm Deletion</DialogTitle> */}
         <DialogContent className="sm:max-w-[425px] bg-white">
           {showPasswordVerification ? (
             <PasswordVerification

@@ -270,7 +270,7 @@ const TransactionFilter = ({
           </svg>
         </div> */}
 
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <Popover modal={true} open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="gap-2 group">
               <Filter className="h-4 w-4 text-white group-hover:text-primary " />
@@ -289,14 +289,14 @@ const TransactionFilter = ({
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[340px] p-0"
+            className="w-[340px] p-0 mb-5 overflow-y-auto max-h-[500px]"
             align="end"
             // onInteractOutside={(e) => {
             //   e.preventDefault();
             // }}
           >
             <Card className="border-0">
-              <CardContent className="p-4 grid gap-4">
+              <CardContent className="p-4 grid gap-4 ">
                 <div className="space-y-2">
                   <Label htmlFor="type">Transaction Type</Label>
                   <Select

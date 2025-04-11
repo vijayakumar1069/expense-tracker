@@ -389,11 +389,11 @@ const ClientDialog = ({
                 </div>
                 <div className="flex items-center gap-3">
                   <Button
+                    variant="outline"
                     onClick={() => setShowPasswordVerification(true)}
-                    className="hover:bg-purple-400"
                   >
-                    <Pencil className="h-4 w-4 mr-2" />
-                    Edit
+                    <Pencil className="h-4 w-4 mr-2 " />
+                    <span className="">Edit</span>
                   </Button>
                   <Button
                     variant="outline"
