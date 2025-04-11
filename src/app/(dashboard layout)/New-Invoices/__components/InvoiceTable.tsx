@@ -82,7 +82,11 @@ const InvoiceTable = () => {
 
       return response.json();
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: !!filters, // Only run if query is not empty
+    staleTime: 1000 * 60 * 5, // 5 mins caching
+    // keepPreviousData: true, // Keeps showing old data while fetching new
+    refetchOnWindowFocus: false, // Optional: no refetch when tab focuses
+    retry: 1, // Retry once on failure
   });
 
   const handleAddNew = () => {

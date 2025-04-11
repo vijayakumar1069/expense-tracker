@@ -7,26 +7,12 @@ import { prisma } from "@/utils/prisma";
 import { PaymentMethodType } from "@prisma/client";
 import { format, subMonths } from "date-fns";
 
-// Types definitions
-// type TransactionType = 'INCOME' | 'EXPENSE';
 type InvoiceStatus = "DRAFT" | "SENT" | "OVERDUE" | "PAID" | "CANCELLED";
 
 type IncomeData = {
   totalIncome: number;
   incomeChange: number;
 };
-
-// type ExpenseCategory = {
-//   name: string;
-//   amount: number;
-//   percentage: number;
-//   color: string;
-// };
-
-// type ExpenseData = {
-//   totalExpense: number;
-//   topExpenseCategories: ExpenseCategory[];
-// };
 
 type MonthlyData = {
   name: string;

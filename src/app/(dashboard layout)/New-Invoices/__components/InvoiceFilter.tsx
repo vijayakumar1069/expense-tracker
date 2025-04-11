@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { InvoiceStatus } from "@prisma/client";
+import { debounce } from "lodash";
 
 const InvoiceFilter = ({
   onFilterChange,
@@ -35,16 +36,19 @@ const InvoiceFilter = ({
   const [invoiceNumber, setInvoiceNumber] = useState("");
   const [status, setStatus] = useState<InvoiceStatus | "">("");
 
-  const handleApplyFilters = (e: React.FormEvent) => {
-    e.preventDefault();
-    onFilterChange({
-      clientName: clientName || undefined,
-      clientCompanyName: companyName || undefined,
-      invoiceNumber: invoiceNumber || undefined,
-      status: status || undefined,
-    });
-    setIsOpen(false);
-  };
+  const handleApplyFilters = useMemo(
+    () =>
+      debounce(() => {
+        onFilterChange({
+          clientName: clientName || undefined,
+          clientCompanyName: companyName || undefined,
+          invoiceNumber: invoiceNumber || undefined,
+          status: status || undefined,
+        });
+        setIsOpen(false);
+      }, 300),
+    [clientName, companyName, invoiceNumber, status, onFilterChange]
+  );
 
   const handleClearFilters = () => {
     setClientName("");

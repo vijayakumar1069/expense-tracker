@@ -1,4 +1,3 @@
-// app/dashboard/@expense/page.tsx
 import { fetchExpenseData } from "../__actions/cardsActions";
 import { TrendingDown, Calendar } from "lucide-react";
 import TopCategories from "./TopCategories";
