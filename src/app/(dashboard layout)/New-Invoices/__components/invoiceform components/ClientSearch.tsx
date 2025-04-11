@@ -102,7 +102,7 @@ export function ClientSearch({ form }: { form: any }) {
 
   return (
     <FormItem className="flex flex-col">
-      <FormLabel>Client</FormLabel>
+      <FormLabel>Company</FormLabel>
       <Popover modal open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <FormControl>
@@ -112,7 +112,7 @@ export function ClientSearch({ form }: { form: any }) {
               aria-expanded={open}
               className="w-full justify-between font-normal"
             >
-              {form.watch("clientName") || "Select a client..."}
+              {form.watch("clientCompanyName") || "Select a client..."}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </FormControl>
@@ -120,7 +120,7 @@ export function ClientSearch({ form }: { form: any }) {
         <PopoverContent className="w-[400px] p-0">
           <Command shouldFilter={false}>
             <CommandInput
-              placeholder="Search clients..."
+              placeholder="Search company..."
               onValueChange={debouncedSetSearchQuery}
               className="text-sm"
             />
@@ -134,7 +134,7 @@ export function ClientSearch({ form }: { form: any }) {
                 <CommandEmpty>Error: {(error as Error)?.message}</CommandEmpty>
               )}
               {!isLoading && !isError && clients.length === 0 && (
-                <CommandEmpty>No clients found.</CommandEmpty>
+                <CommandEmpty>No companies found.</CommandEmpty>
               )}
               {!isLoading && clients.length > 0 && (
                 <CommandGroup className="max-h-[300px] overflow-auto">

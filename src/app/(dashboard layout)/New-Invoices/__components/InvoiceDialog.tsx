@@ -23,6 +23,7 @@ import {
 import RenderInvoiceDetails from "./RenderInvoiceDetails";
 import { InvoiceWithContents } from "./InvoiceTable";
 import { InvoiceFormValues } from "@/utils/types";
+import { PasswordVerification } from "@/components/ui components/PasswordVerification";
 
 // Response type for your API
 type InvoiceResponse = {
@@ -49,7 +50,8 @@ const InvoiceDialog = ({
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [invoiceToDelete, setInvoiceToDelete] = useState<string | null>(null);
-
+  const [showPasswordVerification, setShowPasswordVerification] =
+    useState(false);
   const isNewInvoice = !invoice?.id;
 
   const handleOpenChange = (open: boolean) => {
@@ -308,7 +310,9 @@ const InvoiceDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-5xl bg-primary-foreground max-h-[90vh] overflow-y-auto text-center">
+      <DialogContent
+        className={`${showPasswordVerification ? "sm:max-w-[435px]" : "sm:max-w-5xl"}  bg-primary-foreground max-h-[90vh] overflow-y-auto p-2`}
+      >
         <DialogHeader className="text-center">
           <DialogTitle className="text-center">
             {isNewInvoice
@@ -319,23 +323,36 @@ const InvoiceDialog = ({
           </DialogTitle>
         </DialogHeader>
 
-        {isEditMode || isNewInvoice ? (
-          <InvoiceForm
-            defaultValues={invoice}
-            onSubmit={handleSubmit}
-            isSubmitting={addMutation.isPending || updateMutation.isPending}
+        {showPasswordVerification ? (
+          <PasswordVerification
+            onVerificationSuccess={() => {
+              setIsEditMode(true);
+              setShowPasswordVerification(false);
+            }}
+            onCancel={() => setShowPasswordVerification(false)}
           />
         ) : (
-          <RenderInvoiceDetails invoice={invoice} />
+          <>
+            {isEditMode || isNewInvoice ? (
+              <InvoiceForm
+                defaultValues={invoice}
+                onSubmit={handleSubmit}
+                isSubmitting={addMutation.isPending || updateMutation.isPending}
+              />
+            ) : (
+              <RenderInvoiceDetails invoice={invoice} />
+            )}
+          </>
         )}
 
-        {!isNewInvoice && !isEditMode && (
+        {!showPasswordVerification && !isNewInvoice && !isEditMode && (
           <DialogFooter className="flex justify-between sm:justify-between">
             <div>
               <Button
                 variant="destructive"
                 onClick={(e) => {
                   handleDelete(invoice.id, e);
+                  setShowPasswordVerification(true);
                 }}
                 disabled={deleteMutation.isPending}
                 className="mr-2"
@@ -346,7 +363,7 @@ const InvoiceDialog = ({
             </div>
             <div className="flex items-center gap-3">
               <Button
-                onClick={() => setIsEditMode(true)}
+                onClick={() => setShowPasswordVerification(true)}
                 className="hover:bg-purple-400"
               >
                 <Pencil className="h-4 w-4 mr-2" />
@@ -376,32 +393,45 @@ const InvoiceDialog = ({
         )}
       </DialogContent>
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        {/* <DialogTitle>Confirm Deletion</DialogTitle> */}
         <DialogContent className="sm:max-w-[425px] bg-white">
-          <DialogHeader>
-            <DialogTitle className="text-red-600 dark:text-red-400">
-              Confirm Deletion
-            </DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete invoice #{invoice?.invoiceNumber}?
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex items-center justify-between sm:justify-between mt-4">
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDelete}
-              className="bg-red-500 hover:bg-red-600 text-white"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Invoice
-            </Button>
-          </DialogFooter>
+          {showPasswordVerification ? (
+            <PasswordVerification
+              onVerificationSuccess={() => {
+                setIsEditMode(true);
+                setShowPasswordVerification(false);
+              }}
+              onCancel={() => setShowPasswordVerification(false)}
+            />
+          ) : (
+            <div className="">
+              <DialogHeader>
+                <DialogTitle className="text-red-600 dark:text-red-400">
+                  Confirm Deletion
+                </DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete invoice #
+                  {invoice?.invoiceNumber}? This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="flex items-center justify-between sm:justify-between mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={confirmDelete}
+                  className="bg-red-500 hover:bg-red-600 text-white"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Invoice
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </Dialog>

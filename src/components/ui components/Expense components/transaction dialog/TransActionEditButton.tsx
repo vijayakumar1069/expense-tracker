@@ -22,6 +22,7 @@ import { useTransition } from "react";
 import { z } from "zod";
 import { TransactionForm } from "./TransactionForm";
 import { updateTransaction } from "@/app/(dashboard layout)/New-Transactions/__actions/transactionActions";
+import { PasswordVerification } from "../../PasswordVerification";
 
 type TransactionFormValues = z.infer<typeof expenseFormSchema>;
 
@@ -35,6 +36,8 @@ export const TransActionEditButton: React.FC<{
     TransactionFormValues | undefined
   >(undefined);
   const [viewMode, setViewMode] = useState(viewTransaction);
+  // Add password verification state
+  const [isPasswordVerified, setIsPasswordVerified] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -248,6 +251,7 @@ export const TransActionEditButton: React.FC<{
       onOpenChange={(isOpen) => {
         setViewMode(true); // Reset viewMode when closing
         setOpen(isOpen);
+        setIsPasswordVerified(false);
       }}
     >
       <DialogTrigger asChild>
@@ -261,18 +265,23 @@ export const TransActionEditButton: React.FC<{
         </Button>
       </DialogTrigger>
       <DialogContent
-        className="w-full sm:max-w-[700px] bg-primary-foreground p-5 max-h-[90vh] overflow-y-auto"
+        className={`${isPasswordVerified ? "sm:max-w-4xl" : "sm:max-w-[435px]"}  bg-primary-foreground max-h-[90vh] overflow-y-auto p-2`}
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
       >
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-[#8b5cf6] bg-clip-text text-transparent">
+          <DialogTitle className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-[#8b5cf6] bg-clip-text text-transparent">
             Edit Transaction
           </DialogTitle>
         </DialogHeader>
 
-        {isLoading ? (
+        {!isPasswordVerified ? (
+          <PasswordVerification
+            onVerificationSuccess={() => setIsPasswordVerified(true)}
+            description="Please enter your password to view this transaction"
+          />
+        ) : isLoading ? (
           <div className="flex justify-center items-center h-40">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>

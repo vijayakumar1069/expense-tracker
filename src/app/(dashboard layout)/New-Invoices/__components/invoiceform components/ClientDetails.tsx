@@ -35,10 +35,10 @@ export function ClientDetails({
       />
       <FormField
         control={form.control}
-        name="clientCompanyName"
+        name="clientName"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Client Company Name</FormLabel>
+            <FormLabel>Client Name</FormLabel>
             <FormControl>
               <Input
                 {...field}

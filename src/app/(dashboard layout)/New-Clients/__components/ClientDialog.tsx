@@ -19,6 +19,7 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, X } from "lucide-react";
+import { PasswordVerification } from "@/components/ui components/PasswordVerification";
 
 const ClientDialog = ({
   client,
@@ -33,7 +34,8 @@ const ClientDialog = ({
   const [isEditMode, setIsEditMode] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<string | null>(null);
-
+  const [showPasswordVerification, setShowPasswordVerification] =
+    useState(false);
   // Set edit mode based on if we're adding a new client or viewing existing
   const isNewClient = !client?.id;
 
@@ -332,7 +334,7 @@ const ClientDialog = ({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="sm:max-w-4xl bg-primary-foreground max-h-[90vh] overflow-y-auto p-2 "
+        className={`${showPasswordVerification ? "sm:max-w-[435px]" : "sm:max-w-4xl"}  bg-primary-foreground max-h-[90vh] overflow-y-auto p-2`}
         onInteractOutside={(e) => {
           e.preventDefault();
         }}
@@ -345,105 +347,126 @@ const ClientDialog = ({
                 ? "Edit Client"
                 : "Client Details"}
           </DialogTitle>
-          {/* <DialogDescription>
-            {isNewClient
-              ? "Fill out the form below to add a new client."
-              : isEditMode
-                ? "Update the client's information below."
-                : "View client information below."}
-          </DialogDescription> */}
         </DialogHeader>
 
-        {isEditMode || isNewClient ? (
-          <ClientForm
-            defaultValues={formDefaultValues}
-            onSubmit={handleSubmit}
-            isSubmitting={addMutation.isPending || updateMutation.isPending}
-            isEditMode={isEditMode}
+        {showPasswordVerification ? (
+          <PasswordVerification
+            onVerificationSuccess={() => {
+              setIsEditMode(true);
+              setShowPasswordVerification(false);
+            }}
+            onCancel={() => setShowPasswordVerification(false)}
           />
         ) : (
-          renderClientDetails()
-        )}
+          <>
+            {isEditMode || isNewClient ? (
+              <ClientForm
+                defaultValues={formDefaultValues}
+                onSubmit={handleSubmit}
+                isSubmitting={addMutation.isPending || updateMutation.isPending}
+                isEditMode={isEditMode}
+              />
+            ) : (
+              renderClientDetails()
+            )}
 
-        {/* Footer only shows in view mode */}
-        {!isNewClient && !isEditMode && (
-          <DialogFooter className="flex justify-between sm:justify-between px-4 pb-4">
-            <div>
-              <Button
-                variant="destructive"
-                onClick={(e) => {
-                  handleDelete(client.id, e);
-                }}
-                disabled={deleteMutation.isPending}
-                className="mr-2"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={() => setIsEditMode(true)}
-                className="hover:bg-purple-400"
-              >
-                <Pencil className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => handleOpenChange(false)}
-                className="mr-2 hover:bg-ring"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Close
-              </Button>
-            </div>
-          </DialogFooter>
-        )}
+            {/* Footer only shows in view mode */}
+            {!isNewClient && !isEditMode && (
+              <DialogFooter className="flex justify-between sm:justify-between px-4 pb-4">
+                <div>
+                  <Button
+                    variant="destructive"
+                    onClick={(e) => {
+                      handleDelete(client.id, e);
+                      setShowPasswordVerification(true);
+                    }}
+                    disabled={deleteMutation.isPending}
+                    className="mr-2"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Button
+                    onClick={() => setShowPasswordVerification(true)}
+                    className="hover:bg-purple-400"
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleOpenChange(false)}
+                    className="mr-2 hover:bg-ring"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Close
+                  </Button>
+                </div>
+              </DialogFooter>
+            )}
 
-        {/* Cancel button for edit mode */}
-        {!isNewClient && isEditMode && (
-          <div className="flex justify-end ">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsEditMode(false);
-                handleOpenChange(false);
-              }}
-              className="mr-2"
-            >
-              Cancel
-            </Button>
-          </div>
+            {/* Cancel button for edit mode */}
+            {!isNewClient && isEditMode && (
+              <div className="flex justify-end ">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditMode(false);
+                    handleOpenChange(false);
+                  }}
+                  className="mr-2"
+                >
+                  Cancel
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </DialogContent>
+
+      {/* Delete confirmation dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        {/* <DialogTitle>Confirm Deletion</DialogTitle> */}
         <DialogContent className="sm:max-w-[425px] bg-white">
-          <DialogHeader>
-            <DialogTitle className="text-red-600 dark:text-red-400">
-              Confirm Deletion
-            </DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this client? This action cannot be
-              undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex items-center justify-between sm:justify-between mt-4">
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={confirmDelete}
-              className="bg-red-500 hover:bg-red-600 text-white"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Client
-            </Button>
-          </DialogFooter>
+          {showPasswordVerification ? (
+            <PasswordVerification
+              onVerificationSuccess={() => {
+                setIsEditMode(true);
+                setShowPasswordVerification(false);
+              }}
+              onCancel={() => setShowPasswordVerification(false)}
+            />
+          ) : (
+            <div className="">
+              <DialogHeader>
+                <DialogTitle className="text-red-600 dark:text-red-400">
+                  Confirm Deletion
+                </DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete this client? This action
+                  cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="flex items-center justify-between sm:justify-between mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setDeleteDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={confirmDelete}
+                  className="bg-red-500 hover:bg-red-600 text-white"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Client
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </Dialog>

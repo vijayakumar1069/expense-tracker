@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { deleteExpense } from "@/app/(dashboard layout)/New-Transactions/__actions/transactionActions";
 import { Trash2 } from "lucide-react";
+import { PasswordVerification } from "../PasswordVerification";
 
 interface DeleteTransactionButtonProps {
   transactionId: string;
@@ -26,7 +27,7 @@ const DeleteTransactionButton: React.FC<DeleteTransactionButtonProps> = ({
 }) => {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
-
+  const [isPasswordVerified, setIsPasswordVerified] = useState(false);
   const deleteMutation = useMutation({
     mutationFn: () => deleteExpense(transactionId),
     onMutate: async () => {
@@ -162,38 +163,57 @@ const DeleteTransactionButton: React.FC<DeleteTransactionButtonProps> = ({
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent
-          className="sm:max-w-[425px] bg-primary border-none "
+          className="sm:max-w-[425px] bg-white border-none"
           onInteractOutside={(e) => {
             e.preventDefault();
           }}
         >
+          {/* Accessible hidden title for screen readers */}
           <DialogHeader>
-            <DialogTitle className="text-white">Confirm Deletion</DialogTitle>
-            <DialogDescription className="text-white">
-              Are you sure you want to delete this transaction? This action
-              cannot be undone.
-            </DialogDescription>
+            <DialogTitle>
+              <div className="sr-only">Delete Transaction</div>
+            </DialogTitle>
           </DialogHeader>
-          <DialogFooter className="flex items-center gap-2 pt-4">
-            <Button
-              variant="outline"
-              onClick={handleCancelDelete}
-              disabled={deleteMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmDelete}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? "Deleting..." : "Delete"}
-            </Button>
-          </DialogFooter>
+
+          {!isPasswordVerified ? (
+            <DialogHeader>
+              <PasswordVerification
+                onVerificationSuccess={() => setIsPasswordVerified(true)}
+                description="Please enter your password to view this transaction"
+              />
+            </DialogHeader>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-black">
+                  Confirm Deletion
+                </DialogTitle>
+                <DialogDescription className="text-black">
+                  Are you sure you want to delete this transaction? This action
+                  cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter className="flex items-center gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelDelete}
+                  disabled={deleteMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleConfirmDelete}
+                  disabled={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </>
   );
 };
-
 export default DeleteTransactionButton;
