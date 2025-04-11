@@ -1,10 +1,12 @@
 import { fetchExpenseData } from "../__actions/cardsActions";
 import { TrendingDown, Calendar } from "lucide-react";
 import TopCategories from "./TopCategories";
+import { requireAuth } from "@/lib/auth";
 
 export default async function ExpenseCard() {
+  const user = await requireAuth();
   const { totalExpense, topExpenseCategories, financialYear, monthlyExpenses } =
-    await fetchExpenseData();
+    await fetchExpenseData({ id: user.id });
 
   // Array of 12 unique color gradients for each month
   const monthColors = [

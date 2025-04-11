@@ -5,7 +5,8 @@ import { requireAuth } from "@/lib/auth";
 import { CATEGORIES } from "@/utils/constants/consts";
 import { prisma } from "@/utils/prisma";
 import { PaymentMethodType } from "@prisma/client";
-import { format, subMonths } from "date-fns";
+import { endOfYear, format, startOfYear, subMonths } from "date-fns";
+import { unstable_cache } from "next/cache";
 
 type InvoiceStatus = "DRAFT" | "SENT" | "OVERDUE" | "PAID" | "CANCELLED";
 
@@ -126,150 +127,88 @@ export async function fetchIncomeData(): Promise<IncomeData> {
   }
 }
 
-// Expense data
-export async function fetchExpenseData(): Promise<FinancialYearExpenseData> {
-  try {
-    const user = await requireAuth();
-    if (!user) {
-      throw new Error("Not authenticated");
-    }
+export const fetchExpenseData = unstable_cache(
+  async (user: { id: string }): Promise<FinancialYearExpenseData> => {
+    const financialYearStart = startOfYear(new Date());
+    const financialYearEnd = endOfYear(new Date());
 
-    // Calculate financial year dates (April 1 to March 31)
-    const today = new Date();
-    const currentYear = today.getFullYear();
-    const currentMonth = today.getMonth() + 1; // JavaScript months are 0-indexed
+    const [totalExpenseResult, expensesByCategory, monthlyExpenses] =
+      await Promise.all([
+        prisma.transaction.aggregate({
+          where: {
+            type: "EXPENSE",
+            userId: user.id,
+            date: {
+              gte: financialYearStart,
+              lte: financialYearEnd,
+            },
+          },
+          _sum: {
+            amount: true,
+          },
+        }),
 
-    // Determine if we're in the current financial year or need to go back
-    // Financial year runs from April 1 to March 31
-    const financialYearStart = new Date(
-      currentMonth >= 4 ? currentYear : currentYear - 1,
-      3, // April (0-indexed, so 3)
-      1
-    );
+        prisma.transaction.groupBy({
+          by: ["category"],
+          where: {
+            type: "EXPENSE",
+            userId: user.id,
+            date: {
+              gte: financialYearStart,
+              lte: financialYearEnd,
+            },
+          },
+          _sum: {
+            amount: true,
+          },
+        }),
 
-    const financialYearEnd = new Date(
-      currentMonth >= 4 ? currentYear + 1 : currentYear,
-      2, // March (0-indexed, so 2)
-      31,
-      23,
-      59,
-      59
-    );
-
-    // Get total expenses for the financial year
-    const totalExpenseResult = await prisma.transaction.aggregate({
-      where: {
-        type: "EXPENSE",
-        userId: user.id,
-        date: {
-          gte: financialYearStart,
-          lte: financialYearEnd,
-        },
-      },
-      _sum: {
-        amount: true,
-      },
-    });
+        getMonthlyExpensesForFinancialYear(user.id, financialYearStart),
+      ]);
 
     const totalExpense = Math.abs(totalExpenseResult._sum.amount || 0);
 
-    // Get expenses by category for the financial year
-    const expensesByCategory = await prisma.transaction.groupBy({
-      by: ["category"],
-      where: {
-        type: "EXPENSE",
-        userId: user.id,
-        date: {
-          gte: financialYearStart,
-          lte: financialYearEnd,
-        },
-      },
-      _sum: {
-        amount: true,
-      },
-    });
-
-    // Map categories to colors and calculate percentages
-
     const topExpenseCategories = expensesByCategory
-      .map((category) => ({
-        name: category.category,
-        amount: Math.abs(category._sum.amount || 0),
-        percentage: Math.round(
-          (Math.abs(category._sum.amount || 0) / totalExpense) * 100
-        ),
-        color:
-          CATEGORIES.find((c) => c.name === category.category)?.color ||
-          "var(--color-muted)",
-      }))
+      .map((category) => {
+        const categoryAmount = Math.abs(category._sum.amount || 0);
+        const categoryPercentage = totalExpense
+          ? Math.round((categoryAmount / totalExpense) * 100)
+          : 0;
+
+        return {
+          name: category.category,
+          amount: categoryAmount,
+          percentage: categoryPercentage,
+          color:
+            CATEGORIES.find((c) => c.name === category.category)?.color ||
+            "var(--color-muted)",
+        };
+      })
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 3);
 
-    // Get monthly expense data for the financial year
-    const monthlyExpenses = await getMonthlyExpensesForFinancialYear(
-      user.id,
-      financialYearStart
-      // financialYearEnd
-    );
+    const financialYear = {
+      startDate: financialYearStart.toISOString(),
+      endDate: financialYearEnd.toISOString(),
+      label: `${format(financialYearStart, "MMMM yyyy")} - ${format(
+        financialYearEnd,
+        "MMMM yyyy"
+      )}`,
+    };
 
     return {
       totalExpense,
       topExpenseCategories,
-      financialYear: {
-        startDate: financialYearStart.toISOString(),
-        endDate: financialYearEnd.toISOString(),
-        label: `FY ${financialYearStart.getFullYear()}-${financialYearEnd.getFullYear().toString().substr(2)}`,
-      },
+      financialYear,
       monthlyExpenses,
     };
-  } catch (error) {
-    console.error("Error fetching expense data:", error);
-
-    // Fallback data - you should adjust this to match your actual data structure
-    return {
-      totalExpense: 32410.32,
-      topExpenseCategories: [
-        {
-          name: "Housing",
-          amount: 12500,
-          percentage: 38,
-          color: "var(--color-housing)",
-        },
-        {
-          name: "Food",
-          amount: 8200,
-          percentage: 25,
-          color: "var(--color-food)",
-        },
-        {
-          name: "Transport",
-          amount: 6100,
-          percentage: 19,
-          color: "var(--color-transport)",
-        },
-      ],
-      financialYear: {
-        startDate: new Date(new Date().getFullYear(), 3, 1).toISOString(),
-        endDate: new Date(new Date().getFullYear() + 1, 2, 31).toISOString(),
-        label: `FY ${new Date().getFullYear()}-${(new Date().getFullYear() + 1).toString().substr(2)}`,
-      },
-      monthlyExpenses: [
-        { month: "Apr", amount: 2500 },
-        { month: "May", amount: 2800 },
-        { month: "Jun", amount: 2600 },
-        { month: "Jul", amount: 2700 },
-        { month: "Aug", amount: 2900 },
-        { month: "Sep", amount: 2750 },
-        { month: "Oct", amount: 2650 },
-        { month: "Nov", amount: 2950 },
-        { month: "Dec", amount: 3500 },
-        { month: "Jan", amount: 2100 },
-        { month: "Feb", amount: 2300 },
-        { month: "Mar", amount: 2400 },
-      ],
-    };
+  },
+  ["fetch-expense-data"],
+  {
+    revalidate: 60 * 5, // cache for 5 minutes
+    tags: ["expenses"],
   }
-}
+);
 
 // Helper function to get monthly expenses for the financial year
 async function getMonthlyExpensesForFinancialYear(
