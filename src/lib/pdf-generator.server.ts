@@ -6,7 +6,7 @@ const toWords = new ToWords({
     localeCode: 'en-IN',
     converterOptions: {
         currency: true,
-        ignoreDecimal: false,
+        ignoreDecimal: true,
         ignoreZeroCurrency: false,
         doNotAddOnly: false,
         currencyOptions: {
@@ -15,10 +15,11 @@ const toWords = new ToWords({
             plural: 'Rupees',
             symbol: '₹',
             fractionalUnit: {
-                name: 'Paisa',
-                plural: 'Paise',
-                symbol: '',
-            },
+                name: "",
+                plural: "",
+                singular: "",
+                symbol: ""
+            }
         },
     },
 });
@@ -255,7 +256,7 @@ export async function generateInvoicePDF(invoice: any) {
         // ====== Items Table ======
         const tableStartY = yPosition;
         const rowCount = invoice.invoiceContents.length;
-        const totalsRowCount = 3; // Subtotal, Tax, Total
+        const totalsRowCount = 4; // Subtotal, Tax, Total
         const totalTableHeight =
             tableConfig.headerHeight +
             (rowCount * tableConfig.rowHeight) +
@@ -387,12 +388,15 @@ export async function generateInvoicePDF(invoice: any) {
 
 
 
-
+        const cgst = (invoice.subtotal * invoice.taxRate1) / 100;
+        const sgst = (invoice.subtotal * invoice.taxRate2) / 100;
 
         let totalsStartY = currentY - (rowCount * tableConfig.rowHeight) - 20;
         const totals = [
             { label: "Subtotal : ", value: invoice.subtotal },
-            { label: `Tax (${invoice.taxRate}%) : `, value: invoice.taxAmount },
+            { label: `CGST @ ${invoice.taxRate1}% : `, value: cgst },
+            { label: `SGST @ ${invoice.taxRate2}% : `, value: sgst },
+            // { label: "Total Tax Amount : ", value: Math.round(invoice.taxAmount) },
             { label: "Total : ", value: Math.round(invoice?.invoiceTotal ?? 0) }
         ];
 
@@ -458,7 +462,7 @@ export async function generateInvoicePDF(invoice: any) {
             const maxWidth = 260; // Adjust based on your layout
             const lineHeight = 15;
             const startX = margin.left + 8;
-            let currentY = totalsStartY - 0;
+            let currentY = totalsStartY - 15;
 
             // Split into multiple lines if needed`
             const words = amountWords.split(' ');
@@ -517,7 +521,7 @@ export async function generateInvoicePDF(invoice: any) {
         }
 
         // Payment Details Section with compact layout
-        const paymentY = totalsStartY - 115; // Reduced distance from totals section
+        const paymentY = totalsStartY - 125; // Reduced distance from totals section
 
         // Background rectangle - reduced height
         page.drawRectangle({

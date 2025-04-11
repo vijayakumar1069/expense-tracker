@@ -42,7 +42,8 @@ const invoiceSchema = z.object({
     .array(invoiceItemSchema)
     .min(1, "At least one item is required"),
   subtotal: z.number().min(0),
-  taxRate: z.number().min(0).max(100),
+  taxRate1: z.number().min(0).max(100),
+  taxRate2: z.number().min(0).max(100).optional(),
   taxAmount: z.number().min(0),
   invoiceTotal: z.number().min(0),
 });
@@ -79,7 +80,8 @@ export default function InvoiceForm({
       status: defaultValues?.status || "DRAFT",
       invoiceContents: [{ description: "", total: 0 }],
       subtotal: 0,
-      taxRate: 0,
+      taxRate1: 0,
+      taxRate2: 0,
       taxAmount: 0,
       invoiceTotal: 0,
       ...defaultValues,
@@ -97,8 +99,11 @@ export default function InvoiceForm({
     form.setValue("subtotal", subtotal, { shouldValidate: true });
 
     // Calculate tax
-    const taxRate = form.getValues("taxRate") || 0;
-    const taxAmount = subtotal * (taxRate / 100);
+    const taxRate1 = form.getValues("taxRate1") || 0;
+    const taxRate2 = form.getValues("taxRate2") || 0;
+    const taxAmount1 = subtotal * (taxRate1 / 100);
+    const taxAmount2 = subtotal * (taxRate2 / 100);
+    const taxAmount = taxAmount1 + taxAmount2;
     form.setValue("taxAmount", taxAmount, { shouldValidate: true });
 
     // Calculate total

@@ -119,7 +119,8 @@ model Invoice {
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @default(now()) @updatedAt
   subtotal          Float
-  taxRate           Float             @default(0)
+  taxRate1           Float             @default(0)
+  taxRate2           Float             @default(0)
   taxAmount         Float             @default(0)
   invoiceTotal      Float
   client            Client            @relation(fields: [clientId], references: [id])
