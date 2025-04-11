@@ -1,7 +1,7 @@
 import { LucideIcon } from "lucide-react";
 import { z } from "zod";
 import { expenseFormSchema } from "./schema/expenseSchema";
-import { Invoice, Transaction as PrismaTransaction } from "@prisma/client";
+import { Invoice, InvoiceContents, Transaction as PrismaTransaction } from "@prisma/client";
 // types/index.ts
 export interface NavItem {
     title: string;
@@ -168,3 +168,26 @@ export interface ErrorResponse {
     code?: string;
 }
 
+
+type InvoiceWithContents = Invoice & {
+    invoiceContents: InvoiceContents[];
+};
+
+export type InvoiceFormValues = Omit<
+    InvoiceWithContents,
+    "id" | "createdAt" | "updatedAt" | "userId"
+> & {
+    clientCompanyName?: string;
+    clientPhone1: string;
+    clientPhone2?: string;
+    // Override the invoiceContents to match what the form uses
+    invoiceContents: {
+        id?: string;
+        description: string;
+
+        total: number;
+        createdAt?: Date;
+        updatedAt?: Date;
+        invoiceId?: string;
+    }[];
+};
