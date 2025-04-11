@@ -11,14 +11,7 @@ try {
     console.log("Generating Prisma client...");
     execSync('npx prisma generate', { stdio: 'inherit' });
 
-    // if (env === 'preview' || env === 'production') {
-    //     // Add more verbose output for debugging
-    //     console.log(`Running migrations for ${env} environment...`);
-    //     execSync('npx prisma migrate deploy', {
-    //         stdio: 'inherit',
-    //         env: { ...process.env, NODE_ENV: env === 'preview' ? 'development' : env }
-    //     });
-    // }
+
 
     console.log("Building Next.js application...");
     execSync('next build', { stdio: 'inherit' });

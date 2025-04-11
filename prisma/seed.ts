@@ -83,7 +83,15 @@ const CATEGORIES = [
     { id: 75, name: "Freelance Software Projects" },
     { id: 76, name: "AI & ML Development" },
     { id: 77, name: "API Development & Integration" },
-    { id: 78, name: "Invoice" }
+    { id: 78, name: "Invoice" },
+    {
+        id: 79, name: "Conveyance",
+
+    },
+    {
+        id: 80, name: "Rent",
+
+    }
 ];
 
 
@@ -315,13 +323,36 @@ async function seed() {
             invoices.push(invoice);
         }
 
+<<<<<<< HEAD
 
 
+=======
+        // const employees = [];
+
+
+        // for (let i = 0; i < 5; i++) {
+        //     const firstName = faker.person.firstName();
+        //     const lastName = faker.person.lastName();
+        //     const employee = await prisma.employee.create({
+        //         data: {
+        //             name: `${firstName} ${lastName}`,
+        //             email: faker.internet.email({ firstName, lastName, provider: 'company.com' }),
+        //             userId: user.id
+        //         }
+        //     });
+        //     employees.push(employee);
+        // }
+
+>>>>>>> 9dd4c3e3bd0facb776a6c0107a2d21c6e315485a
 
 
 
         console.log('Successfully seeded for FY 2025-2026:');
+<<<<<<< HEAD
 
+=======
+        // console.log(`- ${employees.length} employees`);
+>>>>>>> 9dd4c3e3bd0facb776a6c0107a2d21c6e315485a
         console.log(`- 1 user`);
         console.log(`- ${clients.length} clients`);
         console.log(`- ${transactions.length} transactions`);

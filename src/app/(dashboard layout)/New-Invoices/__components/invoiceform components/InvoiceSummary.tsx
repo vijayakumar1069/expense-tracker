@@ -33,6 +33,7 @@ export function InvoiceSummary({
         // Only handle tax rate or subtotal changes here
         const subtotal = Number(form.getValues("subtotal") || 0);
         const taxRate = Number(form.getValues("taxRate") || 0);
+        console.log(subtotal, taxRate);
         const taxAmount = subtotal * (taxRate / 100);
         form.setValue("taxAmount", taxAmount);
         const total = subtotal + taxAmount;
@@ -80,11 +81,14 @@ export function InvoiceSummary({
                       const selectedTax = TAX_TYPES.find(
                         (tax) => tax.id === value
                       );
+                      // Update the tax rate value in the form
                       field.onChange((selectedTax?.rate || 0) * 100);
                     }}
+                    // Fix the value comparison to match the selected tax rate
                     value={
-                      TAX_TYPES.find((tax) => tax.rate === field.value / 100)
-                        ?.name || ""
+                      TAX_TYPES.find(
+                        (tax) => Math.abs(tax.rate * 100 - field.value) < 0.01
+                      )?.id || ""
                     }
                   >
                     <FormControl className="w-full">

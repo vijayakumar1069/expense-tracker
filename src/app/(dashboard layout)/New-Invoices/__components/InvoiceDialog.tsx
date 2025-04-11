@@ -9,7 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Invoice, InvoiceContents } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -21,33 +20,9 @@ import {
   deleteInvoice,
   updateInvoice,
 } from "../__actions/invoiceActions";
-// import { formatCurrency, formatDate } from "@/lib/utils";
-
-// Define the type for invoice with its contents
-type InvoiceWithContents = Invoice & {
-  invoiceContents: InvoiceContents[];
-};
-
-// Type for the form values (similar to your InvoiceFormValues)
-// Change your InvoiceFormValues type definition to match what InvoiceForm expects
-type InvoiceFormValues = Omit<
-  InvoiceWithContents,
-  "id" | "createdAt" | "updatedAt" | "userId"
-> & {
-  clientCompanyName?: string;
-  clientPhone1: string;
-  clientPhone2?: string;
-  // Override the invoiceContents to match what the form uses
-  invoiceContents: {
-    id?: string;
-    description: string;
-
-    total: number;
-    createdAt?: Date;
-    updatedAt?: Date;
-    invoiceId?: string;
-  }[];
-};
+import RenderInvoiceDetails from "./RenderInvoiceDetails";
+import { InvoiceWithContents } from "./InvoiceTable";
+import { InvoiceFormValues } from "@/utils/types";
 
 // Response type for your API
 type InvoiceResponse = {
@@ -284,7 +259,9 @@ const InvoiceDialog = ({
         duration: 2500,
       });
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      handleOpenChange(false);
+      setIsEditMode(false);
+      onOpenChange(false);
+      setDeleteDialogOpen(false);
     },
     onError: (error, _, context) => {
       if (context?.previousDataMap) {
@@ -329,83 +306,6 @@ const InvoiceDialog = ({
     }
   };
 
-  const renderInvoiceDetails = () => {
-    if (!invoice) return null;
-
-    const statusColors = {
-      DRAFT: "bg-gray-200 text-gray-800",
-      Raised: "bg-yellow-100 text-yellow-800",
-      SENT: "bg-blue-100 text-blue-800",
-      PAID: "bg-green-100 text-green-800",
-      OVERDUE: "bg-red-100 text-red-800",
-      CANCELLED: "bg-yellow-100 text-yellow-800",
-    };
-
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div className="space-y-1">
-            <h3 className="text-sm font-medium text-muted-foreground">
-              Invoice Number
-            </h3>
-            <p className="text-base font-medium">{invoice.invoiceNumber}</p>
-          </div>
-          <div>
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                statusColors[invoice.status]
-              }`}
-            >
-              {invoice.status}
-            </span>
-          </div>
-        </div>
-
-        <div className="space-y-1">
-          <h3 className="text-sm font-medium text-muted-foreground">Client</h3>
-          <p className="text-base font-medium">{invoice.clientName}</p>
-          <p className="text-sm">{invoice.clientEmail}</p>
-          <p className="text-sm">{invoice.clientPhone1}</p>
-          <p className="text-sm whitespace-pre-wrap">{invoice.clientCountry}</p>
-        </div>
-
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-muted-foreground">Items</h3>
-          <div className="border rounded-md divide-y">
-            {invoice.invoiceContents.map((item, index) => (
-              <div key={index} className="p-3 flex justify-between">
-                <div>
-                  <p className="font-medium">{item.description}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {item.total.toFixed(2)}
-                  </p>
-                </div>
-                <p className="font-medium">{item.total.toFixed(2)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2 pt-3 border-t">
-          <div className="flex justify-between">
-            <p className="text-muted-foreground">Subtotal</p>
-            <p>{invoice.subtotal.toFixed(2)}</p>
-          </div>
-          <div className="flex justify-between">
-            <p className="text-muted-foreground">
-              Tax ({invoice.taxRate.toFixed(2)}%)
-            </p>
-            <p>{invoice.taxAmount.toFixed(2)}</p>
-          </div>
-          <div className="flex justify-between font-medium text-lg">
-            <p>Total</p>
-            <p>{invoice.invoiceTotal.toFixed(2)}</p>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-5xl bg-primary-foreground max-h-[90vh] overflow-y-auto text-center">
@@ -417,13 +317,6 @@ const InvoiceDialog = ({
                 ? "Edit Invoice"
                 : "Invoice Details"}
           </DialogTitle>
-          {/* <DialogDescription>
-            {isNewInvoice
-              ? "Fill out the form below to create a new invoice."
-              : isEditMode
-                ? "Update the invoice information below."
-                : `Invoice #${invoice?.invoiceNumber}`}
-          </DialogDescription> */}
         </DialogHeader>
 
         {isEditMode || isNewInvoice ? (
@@ -433,7 +326,7 @@ const InvoiceDialog = ({
             isSubmitting={addMutation.isPending || updateMutation.isPending}
           />
         ) : (
-          renderInvoiceDetails()
+          <RenderInvoiceDetails invoice={invoice} />
         )}
 
         {!isNewInvoice && !isEditMode && (
@@ -452,13 +345,6 @@ const InvoiceDialog = ({
               </Button>
             </div>
             <div className="flex items-center gap-3">
-              {/* <Button
-             
-                variant="outline"
-              >
-                <Printer className="h-4 w-4 mr-2" />
-                Print
-              </Button> */}
               <Button
                 onClick={() => setIsEditMode(true)}
                 className="hover:bg-purple-400"

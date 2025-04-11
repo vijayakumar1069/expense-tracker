@@ -16,6 +16,7 @@ export function ClientDetails({
 }: {
   form: UseFormReturn<InvoiceFormValues>;
 }) {
+  console.log("ClientDetails component rendered", form.getValues());
   return (
     <div className="grid grid-cols-2 gap-4 mt-4">
       {/* Client Email */}
