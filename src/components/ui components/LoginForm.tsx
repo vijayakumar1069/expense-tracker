@@ -1,4 +1,3 @@
-// components/auth/LoginForm.tsx
 "use client";
 
 import { useCallback, useState, useTransition } from "react";
@@ -32,81 +31,72 @@ export const LoginForm = () => {
 
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
+  const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
+    // mode: "onChange", // ✅ instant validation
   });
 
   const onSubmit = useCallback(
     async (data: LoginFormValues) => {
-      // Clear previous errors
       setError(null);
       setFieldErrors({});
 
-      try {
-        // Show loading toast
-        toast.loading("Authenticating...", {
-          id: "login",
-          duration: 3000, // Will be dismissed on success/error
-        });
+      toast.loading("Authenticating...", {
+        id: "login",
+        duration: 3000,
+      });
 
-        // Wrap the server action in startTransition
-        startTransition(async () => {
+      startTransition(async () => {
+        try {
           const response = await loginFunction(data);
 
           if (!response.success) {
-            // Handle field-specific validation errors
             if (response.errors) {
               setFieldErrors(response.errors);
 
-              // Set the errors in the form
-              Object.entries(response.errors).forEach(([field, messages]) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                form.setError(field as any, {
+              for (const [field, messages] of Object.entries(response.errors)) {
+                form.setError(field as keyof LoginFormValues, {
                   type: "manual",
                   message: messages[0],
                 });
-              });
+              }
             }
 
-            // Display the general error message
-            setError(response.message || "Authentication failed");
+            const errorMessage = response.message || "Authentication failed";
+            setError(errorMessage);
 
-            toast.error(response.message || "Authentication failed", {
+            toast.error(errorMessage, {
               id: "login",
               duration: 3000,
             });
-
             return;
           }
 
-          // Dismiss loading toast and show success
           toast.success("Welcome back!", {
             id: "login",
             duration: 3000,
             position: "top-center",
           });
 
-          // Redirect to dashboard
           router.push("/dashboard");
-        });
-      } catch (error) {
-        // Handle unexpected errors
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "An unexpected error occurred";
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "An unexpected error occurred";
 
-        setError(errorMessage);
+          setError(errorMessage);
 
-        toast.error(errorMessage, {
-          id: "login",
-          duration: 3000,
-        });
-      }
+          toast.error(errorMessage, {
+            id: "login",
+            duration: 3000,
+          });
+        }
+      });
     },
     [router, form]
   );
@@ -136,18 +126,18 @@ export const LoginForm = () => {
                   className="border-red-500 bg-red-50"
                 >
                   <ShieldAlert className="h-4 w-4 text-red-600 mr-2" />
-                  <AlertDescription className="text-red-700">
-                    {error}
-                    {fieldErrors && Object.keys(fieldErrors).length > 0 && (
-                      <div className="list-disc pl-4">
+                  <AlertDescription className="text-red-700 space-y-1">
+                    <div>{error}</div>
+                    {Object.keys(fieldErrors).length > 0 && (
+                      <ul className="list-disc pl-4">
                         {Object.entries(fieldErrors).map(([field, errors]) => (
-                          <div key={field}>
+                          <li key={field}>
                             {errors.map((error, index) => (
                               <span key={index}>{error}</span>
                             ))}
-                          </div>
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     )}
                   </AlertDescription>
                 </Alert>
@@ -155,9 +145,14 @@ export const LoginForm = () => {
             )}
           </form>
         </Form>
-        <div className="flex justify-center mt-4 flex-col gap-2 items-center">
-          <div>User Name : v@gmail.com</div>
-          <div>Password : 2</div>
+
+        <div className="flex justify-center mt-4 flex-col gap-2 items-center text-sm text-muted-foreground">
+          <div>
+            Username: <code>v@gmail.com</code>
+          </div>
+          <div>
+            Password: <code>2</code>
+          </div>
         </div>
       </Card>
     </div>
