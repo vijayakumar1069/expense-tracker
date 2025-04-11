@@ -4,18 +4,12 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-// import { Buffer } from "buffer";
+
 import { InvoiceStatus } from "@prisma/client";
 
 import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/utils/prisma";
-// import { gettingAccessToken } from "@/lib/access_token_generation";
-// import { render } from "@react-email/components";
-// import InvoiceEmail from "@/emails/InvoiceEmail";
-// import { mailSendFunction } from "@/lib/mail_send_Function";
-// import { renderToBuffer } from "@react-pdf/renderer";
-// import InvoicePDF from "../__components/invoiceform components/InvoicePDF";
-// import { generateInvoicePDF } from "@/lib/pdf-generator.server";
+
 
 // Zod schemas for validation
 const invoiceItemSchema = z.object({
@@ -134,98 +128,9 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
 
             return invoice;
         });
-        // // Generate email HTML from React Email template
-        // const invoiceEmailHtml = await render(
-        //     InvoiceEmail({
-        //         invoice: newInvoice,
-        //         previewUrl: `${process.env.NEXT_PUBLIC_APP_URL}/invoices/preview`,
-        //     })
-        // );
 
-        // // Validate environment variables
-        // if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.TENANT_ID) {
-        //     throw new Error("Missing required environment variables");
-        // }
 
-        // // Get Microsoft Graph API access token
-        // const tokenResponse = await gettingAccessToken({
-        //     ClientId: process.env.CLIENT_ID,
-        //     ClientSecret: process.env.CLIENT_SECRET,
-        //     TenantID: process.env.TENANT_ID,
-        // });
 
-        // // Check token acquisition
-        // if (!tokenResponse?.message?.access_token) {
-        //     throw new Error("Error getting access token");
-        // }
-
-        // const accessToken = tokenResponse.message.access_token;
-
-        // // Generate PDF buffer with server-compatible method
-        // let pdfBuffer: Buffer;
-        // try {
-        //     // Use our server-compatible PDF generator instead of client component
-        //     const pdfData = await generateInvoicePDF(newInvoice);
-        //     pdfBuffer = Buffer.from(pdfData);
-        // } catch (error) {
-        //     console.error("PDF generation failed:", error);
-        //     throw new Error("Failed to generate invoice PDF");
-        // }
-
-        // // Create a proper filename for the attachment
-        // const pdfFilename = `Invoice-${newInvoice.invoiceNumber}.pdf`;
-
-        // // Convert buffer to base64 efficiently
-        // const base64PDF = pdfBuffer.toString("base64");
-
-        // // Prepare email payload for Microsoft Graph API
-        // const emailPayload = {
-        //     message: {
-        //         subject: `Invoice #${newInvoice.invoiceNumber} from Gliggo`,
-        //         body: {
-        //             contentType: "HTML",
-        //             content: invoiceEmailHtml,
-        //         },
-        //         toRecipients: [
-        //             {
-        //                 emailAddress: {
-        //                     address: validatedData.clientEmail,
-        //                 },
-        //             },
-        //         ],
-        //         attachments: [
-        //             {
-        //                 "@odata.type": "#microsoft.graph.fileAttachment",
-        //                 name: pdfFilename,
-        //                 contentType: "application/pdf",
-        //                 contentBytes: base64PDF,
-        //                 isInline: false,
-        //             },
-        //         ],
-        //     },
-        //     saveToSentItems: true,
-        // };
-
-        // // Send email via Microsoft Graph API
-        // const graphResponse = await mailSendFunction(emailPayload, accessToken);
-
-        // if (graphResponse.status === 200) {
-        //     // Update invoice status to SENT
-        //     await prisma.invoice.update({
-        //         where: { id: newInvoice.id },
-        //         data: { status: "SENT" },
-        //     });
-
-        //     return {
-        //         success: true,
-        //         data: newInvoice,
-        //     };
-        // } else {
-        //     return {
-        //         success: false,
-        //         error: graphResponse.message || "Failed to send email",
-        //     };
-        // }
         await prisma.invoice.update({
             where: { id: newInvoice.id },
             data: { status: "Raised" },
@@ -337,94 +242,6 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
         });
 
 
-        // // Send email only if status is changing from DRAFT to SENT
-        // if (isStatusChangingToSent) {
-        //     try {
-        //         // Generate email HTML from React Email template
-        //         const invoiceEmailHtml = await render(
-        //             InvoiceEmail({
-        //                 invoice: updatedInvoice,
-        //                 previewUrl: `${process.env.NEXT_PUBLIC_APP_URL}/invoices/preview`,
-        //             })
-        //         );
-
-        //         // Validate environment variables
-        //         if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.TENANT_ID) {
-        //             throw new Error("Missing required environment variables");
-        //         }
-
-        //         // Get Microsoft Graph API access token
-        //         const tokenResponse = await gettingAccessToken({
-        //             ClientId: process.env.CLIENT_ID,
-        //             ClientSecret: process.env.CLIENT_SECRET,
-        //             TenantID: process.env.TENANT_ID,
-        //         });
-
-        //         // Check token acquisition
-        //         if (!tokenResponse?.message?.access_token) {
-        //             throw new Error("Error getting access token");
-        //         }
-
-        //         const accessToken = tokenResponse.message.access_token;
-
-        //         // Generate PDF buffer with server-compatible method
-        //         let pdfBuffer: Buffer;
-        //         try {
-        //             // Use our server-compatible PDF generator
-        //             const pdfData = await generateInvoicePDF(updatedInvoice);
-        //             pdfBuffer = Buffer.from(pdfData);
-        //         } catch (error) {
-        //             console.error("PDF generation failed:", error);
-        //             throw new Error("Failed to generate invoice PDF");
-        //         }
-
-        //         // Create a proper filename for the attachment
-        //         const pdfFilename = `Invoice-${updatedInvoice.invoiceNumber}.pdf`;
-
-        //         // Convert buffer to base64 efficiently
-        //         const base64PDF = pdfBuffer.toString("base64");
-
-        //         // Prepare email payload for Microsoft Graph API
-        //         const emailPayload = {
-        //             message: {
-        //                 subject: `Invoice #${updatedInvoice.invoiceNumber} from Gliggo`,
-        //                 body: {
-        //                     contentType: "HTML",
-        //                     content: invoiceEmailHtml,
-        //                 },
-        //                 toRecipients: [
-        //                     {
-        //                         emailAddress: {
-        //                             address: validatedData.clientEmail,
-        //                         },
-        //                     },
-        //                 ],
-        //                 attachments: [
-        //                     {
-        //                         "@odata.type": "#microsoft.graph.fileAttachment",
-        //                         name: pdfFilename,
-        //                         contentType: "application/pdf",
-        //                         contentBytes: base64PDF,
-        //                         isInline: false,
-        //                     },
-        //                 ],
-        //             },
-        //             saveToSentItems: true,
-        //         };
-
-        //         // Send email via Microsoft Graph API
-        //         const graphResponse = await mailSendFunction(emailPayload, accessToken);
-
-        //         if (graphResponse.status !== 200) {
-        //             console.error("Email sending failed:", graphResponse.message);
-        //             // We don't return error here because the invoice update was successful
-        //             // Just log the error and continue
-        //         }
-        //     } catch (error) {
-        //         console.error("Error sending invoice email:", error);
-        //         // Similarly, we don't return error here as the invoice update was successful
-        //     }
-        // }
 
         return {
             success: true,
