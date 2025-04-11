@@ -4,7 +4,7 @@ import { NavItem } from "../types";
 
 import {
     Monitor, FileCode, Printer, Armchair,
-    Zap, Wifi, Droplets, Building, Wrench,
+    Zap, Wifi, Droplets, Wrench,
     Users, Heart, GraduationCap, Car, Stethoscope,
     Scale, Calculator, BrainCircuit, Server, Shield,
     Megaphone, Palette, CalendarDays, PartyPopper, Gift,
@@ -56,7 +56,7 @@ export const CATEGORIES = [
     { id: 6, name: "Electricity Bills", icon: Zap, color: "#ea580c" },
     { id: 7, name: "Internet & Telecom", icon: Wifi, color: "#0284c7" },
     { id: 8, name: "Water Bills", icon: Droplets, color: "#0891b2" },
-    { id: 9, name: "Rent & Lease", icon: Building, color: "#4f46e5" },
+
     { id: 10, name: "Office Maintenance", icon: Wrench, color: "#b45309" },
 
     // Employee Related

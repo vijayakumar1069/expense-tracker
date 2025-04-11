@@ -14,7 +14,7 @@ const CATEGORIES = [
     { id: 6, name: "Electricity Bills" },
     { id: 7, name: "Internet & Telecom" },
     { id: 8, name: "Water Bills" },
-    { id: 9, name: "Rent & Lease" },
+
     { id: 10, name: "Office Maintenance" },
     { id: 11, name: "Salaries & Wages" },
     { id: 12, name: "Employee Benefits" },
