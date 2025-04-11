@@ -37,7 +37,7 @@ export const LoginForm = () => {
       email: "",
       password: "",
     },
-    mode: "onChange", // ✅ instant validation
+    // mode: "onChange", // ✅ instant validation
   });
 
   const onSubmit = useCallback(
