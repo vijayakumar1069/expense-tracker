@@ -32,7 +32,11 @@ export default function Home() {
             spending habits with our easy-to-use expense tracker.
           </p>
           <div className="flex flex-wrap gap-4 pt-2">
-            <Button size="lg" asChild>
+            <Button
+              size="lg"
+              asChild
+              className="bg-yellow-300 text-black hover:bg-yellow-400"
+            >
               <Link href="/login">
                 Login <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
