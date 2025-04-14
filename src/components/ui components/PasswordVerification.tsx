@@ -53,7 +53,7 @@ export function PasswordVerification({
       formData.append("password", data.password);
       const isVerified = await verifyPassword(formData);
 
-      if (isVerified) {
+      if (isVerified.success) {
         passwordForm.reset();
         onVerificationSuccess();
       } else {
