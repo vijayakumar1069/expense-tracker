@@ -108,12 +108,18 @@ const ClientTable = () => {
       </Alert>
     );
   }
-
+  const handleDialogOpenChange = (open: boolean) => {
+    setDialogOpen(open);
+    // Reset selected client when dialog closes
+    if (!open) {
+      setSelectedClient(undefined);
+    }
+  };
   const clients = data?.data || [];
   const totalPages = data?.pagination?.totalPages || 1;
 
   return (
-    <div>
+    <div className="flex flex-col">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
         {/* Left Side - Title */}
         <h1 className="text-2xl lg:text-3xl font-bold text-primary lg:order-1">
@@ -139,9 +145,10 @@ const ClientTable = () => {
       </div>
 
       <ClientDialog
+        key={selectedClient?.id || "new-client"} // Force remount on client change
         client={selectedClient}
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={handleDialogOpenChange}
       />
 
       <Card>
@@ -263,5 +270,4 @@ const ClientTable = () => {
     </div>
   );
 };
-
 export default ClientTable;

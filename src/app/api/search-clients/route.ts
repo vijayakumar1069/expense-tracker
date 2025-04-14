@@ -15,19 +15,21 @@ export async function GET(req: NextRequest) {
         return new Response('Unauthorized', { status: 401 });
     }
 
-    // Fetch clients from the database matching name, email, or companyName
+    // Fetch clients from the database
     const clients = await prisma.client.findMany({
         where: {
             userId: user.id,
-            OR: [
-                { name: { contains: query, mode: 'insensitive' } },
-                { email: { contains: query, mode: 'insensitive' } },
-                { companyName: { contains: query, mode: 'insensitive' } },
-
-            ],
+            ...(query !== "" && {
+                OR: [
+                    { name: { contains: query, mode: 'insensitive' } },
+                    { email: { contains: query, mode: 'insensitive' } },
+                    { companyName: { contains: query, mode: 'insensitive' } },
+                ],
+            }),
         },
+        skip: 0,
+        take: 10,
     });
-
 
     // Return matching clients as JSON
     return new Response(JSON.stringify(clients), {

@@ -128,7 +128,7 @@ const InvoiceDialog = ({
       });
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
       setShowPasswordVerification(false);
-      handleOpenChange(false);
+      // handleOpenChange(false);
     },
     onError: (error, _, context) => {
       if (context?.previousDataMap) {

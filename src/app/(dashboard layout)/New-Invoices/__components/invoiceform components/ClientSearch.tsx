@@ -56,14 +56,14 @@ export function ClientSearch({ form }: { form: any }) {
   } = useQuery<Client[]>({
     queryKey: ["clients", searchQuery],
     queryFn: async () => {
-      if (!searchQuery.trim()) return [];
+      // if (!searchQuery.trim()) return [];
       const res = await fetch(
         `/api/search-clients?query=${encodeURIComponent(searchQuery)}`
       );
       if (!res.ok) throw new Error("Failed to fetch clients");
       return res.json();
     },
-    enabled: !!searchQuery.trim(), // Only run if query is not empty
+    // enabled: !!searchQuery.trim(), // Only run if query is not empty
     staleTime: 1000 * 60 * 5, // 5 mins caching
     // keepPreviousData: true, // Keeps showing old data while fetching new
     refetchOnWindowFocus: false, // Optional: no refetch when tab focuses

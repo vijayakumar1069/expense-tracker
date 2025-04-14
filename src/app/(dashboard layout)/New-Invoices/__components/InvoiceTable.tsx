@@ -143,7 +143,13 @@ const InvoiceTable = () => {
       // Add your error handling here
     }
   }
-
+  const handleDialogOpenChange = (open: boolean) => {
+    setDialogOpen(open);
+    // Reset selected client when dialog closes
+    if (!open) {
+      setSelectedInvoice(undefined);
+    }
+  };
   if (isError) {
     return (
       <Alert variant="destructive" className="mb-4">
@@ -182,9 +188,10 @@ const InvoiceTable = () => {
       {/* <InvoiceFilter onFilterChange={setFilters} /> */}
 
       <InvoiceDialog
+        key={selectedInvoice?.id || "new invoice"}
         invoice={selectedInvoice}
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={handleDialogOpenChange}
       />
 
       <Card>

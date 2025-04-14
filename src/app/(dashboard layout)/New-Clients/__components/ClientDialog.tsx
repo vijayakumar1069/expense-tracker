@@ -62,6 +62,7 @@ const ClientDialog = ({
       setTimeout(() => setIsEditMode(isNewClient), 10);
     } else {
       setIsEditMode(isNewClient);
+      setShowPasswordVerification(false);
     }
     onOpenChange(open);
   };
@@ -120,14 +121,21 @@ const ClientDialog = ({
       return { previousDataMap, optimisticClient };
     },
     onSuccess: () => {
+      // First update states
+      setIsEditMode(false);
+      setShowPasswordVerification(false);
+
+      // Then show toast and invalidate queries
       toast.success("Client added successfully!", {
         id: "add-client-toast",
         duration: 2500,
       });
+
+      // Finally close/navigate away
       queryClient.invalidateQueries({ queryKey: ["clients"] });
-      setIsEditMode(false);
       handleOpenChange(false);
     },
+
     onError: (error, _, context) => {
       if (context?.previousDataMap) {
         context.previousDataMap.forEach((data, queryKey) => {
@@ -187,8 +195,9 @@ const ClientDialog = ({
         id: "update-client-toast",
         duration: 2500,
       });
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
       setIsEditMode(false);
+      setShowPasswordVerification(false);
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
       handleOpenChange(false);
     },
     onError: (error, _, context) => {
@@ -249,6 +258,7 @@ const ClientDialog = ({
         duration: 2500,
       });
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      setShowPasswordVerification(false);
       handleOpenChange(false);
     },
     onError: (error, _, context) => {
@@ -289,6 +299,7 @@ const ClientDialog = ({
       deleteMutation.mutate(clientToDelete);
       setDeleteDialogOpen(false);
       setClientToDelete(null);
+      setShowPasswordVerification(false);
     }
   };
   // Render client detail view (read-only mode)
