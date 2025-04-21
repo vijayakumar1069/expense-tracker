@@ -206,6 +206,17 @@ async function seed() {
             }
         }
 
+        let incomeCounter = 1;
+        let expenseCounter = 1;
+
+        function generateTransactionNumber(type: TransactionType) {
+            if (type === 'INCOME') {
+                return `INC-${String(incomeCounter++).padStart(3, '0')}`;
+            } else {
+                return `EXP-${String(expenseCounter++).padStart(3, '0')}`;
+            }
+        }
+
         // Helper function to create transactions
         async function createTransaction(
             type: TransactionType,
@@ -257,6 +268,7 @@ async function seed() {
             return prisma.transaction.create({
                 data: {
                     type,
+                    transactionNumber: generateTransactionNumber(type), // Add this line
                     name: `${type} Transaction ${method} ${formatDate(monthStart, 'MMM yyyy')}`,
                     description: faker.finance.transactionDescription(),
                     amount,

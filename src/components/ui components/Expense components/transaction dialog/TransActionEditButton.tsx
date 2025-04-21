@@ -71,6 +71,7 @@ export const TransActionEditButton: React.FC<{
       total: "",
       transferMode: undefined,
       paymentMethodType: "CASH",
+      transactionNumber: "",
       receivedBy: "",
       bankName: "",
       chequeNo: "",
@@ -100,7 +101,7 @@ export const TransActionEditButton: React.FC<{
         amount: transaction.amount?.toString() || "",
         taxType: transaction.tax || "",
         total: transaction.total?.toString() || "",
-
+        transactionNumber: transaction.transactionNumber || "",
         paymentMethodType: transaction.paymentMethod.type || "CASH",
         receivedBy: transaction.paymentMethod.receivedBy || "",
         bankName: transaction.paymentMethod.bankName || "",

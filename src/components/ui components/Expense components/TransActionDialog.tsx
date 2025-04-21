@@ -57,6 +57,7 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
       transferMode: transaction?.transferMode || undefined,
       chequeNo: transaction?.chequeNo || "",
       chequeDate: transaction?.chequeDate || "",
+      transactionNumber: transaction?.transactionNumber || "",
       invoiceNo: transaction?.invoiceNo || "",
       date: transaction?.date || new Date().toISOString().split("T")[0],
       images: [],

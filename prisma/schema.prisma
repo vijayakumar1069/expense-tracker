@@ -12,6 +12,7 @@ datasource db {
 
 model Transaction {
   id            String          @id @unique @default(cuid())
+  transactionNumber String @unique
   type          TransactionType
   name          String
   description   String?
