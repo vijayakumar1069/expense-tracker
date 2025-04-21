@@ -97,10 +97,10 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    // Add transaction number filter
-    if (transactionNumber) {
-      where.transactionNumber = transactionNumber;
-    }
+    // // Add transaction number filter
+    // if (transactionNumber) {
+    //   where.transactionNumber = transactionNumber;
+    // }
 
     // Add date range filters
     if (startDate || endDate) {
@@ -130,8 +130,15 @@ export async function GET(request: NextRequest) {
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
+        { description: { contains: search, mode: 'insensitive' } },
+        { transactionNumber: { contains: search, mode: 'insensitive' } },
       ];
+    }
+    if (transactionNumber) {
+      where.transactionNumber = {
+        contains: transactionNumber,
+        mode: 'insensitive',
+      };
     }
 
     // Build the orderBy parameter based on sortBy and sortDirection
