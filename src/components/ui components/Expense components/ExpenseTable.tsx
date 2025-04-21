@@ -180,7 +180,7 @@ const ExpenseTable = () => {
             <TableHeader className="bg-gray-50 dark:bg-gray-900/60 p-0">
               <TableRow className="border-b border-gray-200 dark:border-gray-800">
                 <TableHead className="font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400 ">
-                  Transaction ID
+                  Transaction No
                 </TableHead>
                 <TableHead className="font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400">
                   Category

@@ -36,7 +36,7 @@ export async function loginFunction(data: z.infer<typeof LoginSchema>) {
 
         // 2. Check JWT secret is configured
         if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length === 0) {
-            console.error("JWT_SECRET is not configured");
+
             return {
                 success: false,
                 message: "Server configuration error",
@@ -126,10 +126,7 @@ export async function loginFunction(data: z.infer<typeof LoginSchema>) {
             message: "Login successful"
         };
     } catch (error) {
-        console.error("Login error:", {
-            error: error instanceof Error ? error.message : String(error),
-            stack: error instanceof Error ? error.stack : undefined
-        });
+
 
         return {
             success: false,

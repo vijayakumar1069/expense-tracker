@@ -46,7 +46,7 @@ export async function createExpense(formData: FormData) {
 
         // Validate the data
         const validatedData = expenseFormSchema.parse(formDataObj);
-        console.log("Validated data:", validatedData);
+
 
         // Upload images to Cloudinary first
         const uploadedImageUrls: string[] = [];
@@ -83,6 +83,7 @@ export async function createExpense(formData: FormData) {
                 validatedData.transactionType as TransactionType,
 
             );
+
             // First create the transaction without attachments
             const createdExpense = await tx.transaction.create({
                 data: {
@@ -235,7 +236,6 @@ export async function updateTransaction(
                 return {
                     success: false,
                     error: "Validation error",
-
                 };
             }
             throw validationError;
@@ -256,6 +256,51 @@ export async function updateTransaction(
 
         if (existingTransaction.userId !== user.id) {
             return { success: false, error: "You don't have permission to update this transaction" };
+        }
+
+        // Check if transaction type has changed
+        const newTransactionType = validatedData.transactionType as TransactionType;
+        const typeChanged = existingTransaction.type !== newTransactionType;
+
+        // Initialize transaction number
+        let transactionNumber = validatedData.transactionNumber;
+
+        // Generate new transaction number if type changed
+        if (typeChanged) {
+
+
+            // Use the improved function with built-in duplicate prevention
+            transactionNumber = await generateTransactionNumber(newTransactionType);
+
+
+            // Double-check the number doesn't already exist (extra safety)
+            let isUnique = false;
+            let attempts = 0;
+            const maxAttempts = 10;
+
+            while (!isUnique && attempts < maxAttempts) {
+                const exists = await prisma.transaction.findFirst({
+                    where: {
+                        transactionNumber,
+                        id: { not: transactionId }
+                    }
+                });
+
+                if (!exists) {
+                    isUnique = true;
+
+                } else {
+
+                    const prefix = newTransactionType === 'INCOME' ? 'INC-' : 'EXP-';
+                    const currentNum = parseInt(transactionNumber.substring(prefix.length), 10);
+                    transactionNumber = `${prefix}${(currentNum + 1).toString().padStart(3, '0')}`;
+                    attempts++;
+                }
+            }
+
+            if (!isUnique) {
+                throw new Error("Unable to generate a unique transaction number after multiple attempts");
+            }
         }
 
         // Process all new images
@@ -350,16 +395,16 @@ export async function updateTransaction(
                 });
             }
 
-            // 4. Update main transaction
+            // 4. Update main transaction - use the new transaction number when type has changed
             return await tx.transaction.update({
                 where: { id: transactionId },
                 data: {
                     name: validatedData.name,
-                    type: validatedData.transactionType as TransactionType,
+                    type: newTransactionType,
                     description: validatedData.description,
                     amount: parseFloat(String(validatedData.amount)),
                     tax: validatedData.taxType as string,
-                    transactionNumber: validatedData.transactionNumber,
+                    transactionNumber: transactionNumber, // Use the new transaction number
                     total: parseFloat(String(validatedData.total)),
                     date: new Date(String(validatedData.date)),
                     category: validatedData.category,
@@ -370,18 +415,25 @@ export async function updateTransaction(
                 },
             });
         });
+
+
+
         return {
             success: true,
             data: updatedTransaction
         };
 
     } catch (error: unknown) {
-        // Detailed error handling
+        console.error("Transaction update error:", error);
+
+        // Check for Prisma unique constraint error
+
+
+        // Handle other validation errors
         if (error instanceof z.ZodError) {
             return {
                 success: false,
                 error: "Validation error",
-
             };
         }
 
@@ -390,38 +442,58 @@ export async function updateTransaction(
             error: error instanceof Error ? error.message : "Failed to update transaction",
         };
     }
-
 }
-async function generateTransactionNumber(transactionType: TransactionType,) {
+
+async function generateTransactionNumber(transactionType: TransactionType) {
     // Get the prefix based on transaction type
     const prefix = transactionType === 'INCOME' ? 'INC-' : 'EXP-';
 
-    // Find the latest transaction of this type
-    const latestTransaction = await prisma.transaction.findFirst({
+    // Find the highest existing transaction number using a more reliable approach
+    const highestNumber = await findHighestTransactionNumber(prefix);
+
+    // Generate a new unique transaction number
+    const newTransactionNumber = `${prefix}${(highestNumber + 1).toString().padStart(3, '0')}`;
+
+    return newTransactionNumber;
+}
+
+async function findHighestTransactionNumber(prefix: string): Promise<number> {
+    // Get all transaction numbers with this prefix
+    const transactions = await prisma.transaction.findMany({
         where: {
-            type: transactionType,
             transactionNumber: {
                 startsWith: prefix
             }
         },
-        orderBy: {
-            transactionNumber: 'desc'
+        select: {
+            transactionNumber: true
         }
     });
 
-    // Get the next number in sequence
-    let nextNumber = 1;
 
-    if (latestTransaction) {
-        // Extract the number part (e.g. "001" from "EXP-001")
-        const currentNumberStr = latestTransaction.transactionNumber.substring(prefix.length);
-        // Convert to number and increment
-        nextNumber = parseInt(currentNumberStr, 10) + 1;
+
+    // If no transactions found, start from 0
+    if (transactions.length === 0) {
+        return 0;
     }
 
-    // Format with leading zeros (001, 002, etc.)
-    return `${prefix}${nextNumber.toString().padStart(3, '0')}`;
+    // Extract and find the highest number
+    let highestNumber = 0;
+
+    for (const transaction of transactions) {
+        const numberPart = transaction.transactionNumber.substring(prefix.length);
+        const numericValue = parseInt(numberPart, 10);
+
+        // Check if it's a valid number and higher than current highest
+        if (!isNaN(numericValue) && numericValue > highestNumber) {
+            highestNumber = numericValue;
+        }
+    }
+
+
+    return highestNumber;
 }
+
 
 
 

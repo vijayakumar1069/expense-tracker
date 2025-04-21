@@ -180,7 +180,7 @@ export const TransActionEditButton: React.FC<{
         id: "update-transaction-toast",
       });
 
-      // Cancel any outgoing refetches to avoid them overwriting our optimistic update
+      // Cancel any outgoing reFetches to avoid them overwriting our optimistic update
       await queryClient.cancelQueries({
         queryKey: ["transactions"],
         exact: false,
