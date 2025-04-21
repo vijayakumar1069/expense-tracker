@@ -10,6 +10,7 @@ const QuerySchema = z.object({
   limit: z.string().transform(Number).default("10"),
   type: z.enum(['INCOME', 'EXPENSE', 'ALL']).optional(),
   category: z.string().optional(),
+  transactionNumber: z.string().optional(),
 
   paymentMethodType: z.enum(['CASH', 'BANK', 'CHEQUE', 'INVOICE']).optional(),
   startDate: z.string().optional(),
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
       limit: searchParams.get("limit") || undefined,
       type: searchParams.get("type") || undefined,
       category: searchParams.get("category") || undefined,
-
+      transactionNumber: searchParams.get("transactionNumber") || undefined,
       paymentMethodType: searchParams.get("paymentMethodType") || undefined,
       startDate: searchParams.get("startDate") || undefined,
       endDate: searchParams.get("endDate") || undefined,
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
       limit,
       type,
       category,
-
+      transactionNumber,
       paymentMethodType,
       startDate,
       endDate,
@@ -94,6 +95,11 @@ export async function GET(request: NextRequest) {
       where.paymentMethod = {
         type: paymentMethodType
       };
+    }
+
+    // Add transaction number filter
+    if (transactionNumber) {
+      where.transactionNumber = transactionNumber;
     }
 
     // Add date range filters

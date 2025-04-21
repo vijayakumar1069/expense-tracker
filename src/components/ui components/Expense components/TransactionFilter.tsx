@@ -43,6 +43,7 @@ interface FilterProps {
     maxAmount?: string;
     search?: string;
     sortBy?: string;
+    transactionNumber?: string;
     sortDirection?: "asc" | "desc";
     byMonth?: string;
   }) => void;
@@ -55,6 +56,8 @@ interface FilterProps {
     minAmount?: string;
     maxAmount?: string;
     search?: string;
+    transactionNumber?: string;
+
     sortBy?: string;
     sortDirection?: "asc" | "desc";
     byMonth?: string;
@@ -116,6 +119,7 @@ const TransactionFilter = ({
     type: initialFilters.type || "",
     category: initialFilters.category || "",
     paymentMethodType: initialFilters.paymentMethodType || "",
+    transactionNumber: initialFilters.transactionNumber || "",
     startDate: initialFilters.startDate
       ? new Date(initialFilters.startDate)
       : undefined,
@@ -197,6 +201,7 @@ const TransactionFilter = ({
       sortBy: "createdAt",
       sortDirection: "desc" as "asc" | "desc",
       byMonth: "",
+      transactionNumber: "",
     };
 
     setFilters(resetValues);
@@ -311,6 +316,17 @@ const TransactionFilter = ({
                       <SelectItem value="EXPENSE">Expense</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="transactionNumber">Transaction Number</Label>
+                  <Input
+                    id="transactionNumber"
+                    placeholder="EXP-001 or INC-001"
+                    value={filters.transactionNumber}
+                    onChange={(e) =>
+                      handleFilterChange("transactionNumber", e.target.value)
+                    }
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="byMonth">Transaction By Month</Label>

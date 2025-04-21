@@ -66,6 +66,7 @@ interface FilterState {
   sortBy?: string;
   sortDirection?: "asc" | "desc";
   byMonth?: string;
+  transactionNumber?: string;
 }
 const limit = 7;
 
@@ -100,6 +101,8 @@ const ExpenseTable = () => {
       if (filters.sortDirection)
         params.append("sortDirection", filters.sortDirection);
       if (filters.byMonth) params.append("byMonth", filters.byMonth);
+      if (filters.transactionNumber)
+        params.append("transactionNumber", filters.transactionNumber);
 
       const response = await fetch(
         `/api/get-all-transactions?${params.toString()}`
@@ -177,7 +180,7 @@ const ExpenseTable = () => {
             <TableHeader className="bg-gray-50 dark:bg-gray-900/60 p-0">
               <TableRow className="border-b border-gray-200 dark:border-gray-800">
                 <TableHead className="font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400 ">
-                  Transaction
+                  Transaction ID
                 </TableHead>
                 <TableHead className="font-semibold text-xs uppercase tracking-wider text-gray-600 dark:text-gray-400">
                   Category
@@ -213,7 +216,7 @@ const ExpenseTable = () => {
                     >
                       <TableCell className="font-medium max-w-60 text-wrap ">
                         <div className="flex flex-col">
-                          {transaction.name}
+                          {transaction.transactionNumber}
                           {/* {transaction.description && (
                             <span className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1  transition-all duration-300 ">
                               {transaction.description}

@@ -30,6 +30,7 @@ export async function createExpense(formData: FormData) {
             amount: formData.get("amount"),
             taxType: formData.get("taxType"),
             total: formData.get("total"),
+            transactionNumber: formData.get("transactionNumber"),
             paymentMethodType: formData.get("paymentMethodType"),
             transferMode: formData.get("transferMode"),
             receivedBy: formData.get("receivedBy"),
@@ -45,6 +46,7 @@ export async function createExpense(formData: FormData) {
 
         // Validate the data
         const validatedData = expenseFormSchema.parse(formDataObj);
+        console.log("Validated data:", validatedData);
 
         // Upload images to Cloudinary first
         const uploadedImageUrls: string[] = [];
@@ -77,6 +79,10 @@ export async function createExpense(formData: FormData) {
 
         // Create the transaction and related records in a transaction
         const expense = await prisma.$transaction(async (tx) => {
+            const transactionNumber = await generateTransactionNumber(
+                validatedData.transactionType as TransactionType,
+
+            );
             // First create the transaction without attachments
             const createdExpense = await tx.transaction.create({
                 data: {
@@ -86,6 +92,7 @@ export async function createExpense(formData: FormData) {
                     amount: parseFloat(String(validatedData.amount)),
                     tax: validatedData.taxType,
                     total: parseFloat(String(validatedData.total)),
+                    transactionNumber: transactionNumber,
                     date: new Date(String(validatedData.date)),
                     category: String(validatedData.category),
                     userId: user.id,
@@ -352,6 +359,7 @@ export async function updateTransaction(
                     description: validatedData.description,
                     amount: parseFloat(String(validatedData.amount)),
                     tax: validatedData.taxType as string,
+                    transactionNumber: validatedData.transactionNumber,
                     total: parseFloat(String(validatedData.total)),
                     date: new Date(String(validatedData.date)),
                     category: validatedData.category,
@@ -384,6 +392,39 @@ export async function updateTransaction(
     }
 
 }
+async function generateTransactionNumber(transactionType: TransactionType,) {
+    // Get the prefix based on transaction type
+    const prefix = transactionType === 'INCOME' ? 'INC-' : 'EXP-';
+
+    // Find the latest transaction of this type
+    const latestTransaction = await prisma.transaction.findFirst({
+        where: {
+            type: transactionType,
+            transactionNumber: {
+                startsWith: prefix
+            }
+        },
+        orderBy: {
+            transactionNumber: 'desc'
+        }
+    });
+
+    // Get the next number in sequence
+    let nextNumber = 1;
+
+    if (latestTransaction) {
+        // Extract the number part (e.g. "001" from "EXP-001")
+        const currentNumberStr = latestTransaction.transactionNumber.substring(prefix.length);
+        // Convert to number and increment
+        nextNumber = parseInt(currentNumberStr, 10) + 1;
+    }
+
+    // Format with leading zeros (001, 002, etc.)
+    return `${prefix}${nextNumber.toString().padStart(3, '0')}`;
+}
+
+
+
 
 
 
