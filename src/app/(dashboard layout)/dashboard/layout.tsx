@@ -1,6 +1,6 @@
 // app/dashboard/layout.tsx
 
-import { getAuthUser } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import ClientLayout from "./__components/ClientLayout";
 import { redirect } from "next/navigation";
 
@@ -19,11 +19,8 @@ export default async function DashboardLayout({
   income_expense: React.ReactNode;
   category_distribution: React.ReactNode;
 }) {
-  // Server-side auth check
-  const user = await getAuthUser();
-
-  // Single redirect point for the entire dashboard
-  if (!user) {
+  const { user, authenticated } = await requireAuth();
+  if (!authenticated || !user) {
     redirect("/login");
   }
   return (

@@ -7,7 +7,7 @@ export default async function AdminDashboard_Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const {  authenticated } = await requireAuth();
+  const { authenticated } = await requireAuth();
   if (!authenticated) {
     redirect("/login");
   }

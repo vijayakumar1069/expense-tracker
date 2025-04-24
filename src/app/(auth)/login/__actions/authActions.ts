@@ -115,7 +115,7 @@ export async function loginFunction(data: z.infer<typeof LoginSchema>) {
         const cookieStore = await cookies();
         cookieStore.set("Expense-tracker-session", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_DEV === "production",
             sameSite: "lax",
             expires: expiresAt
         });
@@ -131,7 +131,7 @@ export async function loginFunction(data: z.infer<typeof LoginSchema>) {
 
         return {
             success: false,
-            message: process.env.NODE_ENV === "development"
+            message: process.env.NODE_DEV === "development"
                 ? (error instanceof Error ? error.message : "Unknown error")
                 : "An unexpected error occurred",
             code: "AUTH_SERVER_ERROR"
@@ -185,10 +185,12 @@ export async function logoutFunction(): Promise<ReturnResponse> {
             name: "Expense-tracker-session",
             path: "/",
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: process.env.NODE_DEV === "production",
             sameSite: "lax"
         });
-        revalidatePath("/dashboard");
+        revalidatePath("/")
+        revalidatePath("/login")
+        revalidatePath("/dashboard")
 
         return {
             success: true,
@@ -211,7 +213,7 @@ export async function logoutFunction(): Promise<ReturnResponse> {
             success: false,
             message: "Logout encountered an error",
             errors: {
-                general: [process.env.NODE_ENV === "development"
+                general: [process.env.NODE_DEV === "development"
                     ? (error as Error).message
                     : "Internal server error"]
             }
