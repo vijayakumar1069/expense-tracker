@@ -14,8 +14,8 @@ export async function addClient(
 ): Promise<UpdateTransactionResult> {
     try {
         // Authenticate user
-        const user = await requireAuth();
-        if (!user) {
+        const { user, authenticated } = await requireAuth();
+        if (!authenticated) {
             return {
                 success: false,
                 error: "Unauthorized",
@@ -30,7 +30,7 @@ export async function addClient(
         const newClient = await prisma.client.create({
             data: {
                 ...validatedData,
-                userId: user.id,
+                userId: user?.id || "",
             },
         });
 
@@ -65,8 +65,8 @@ export async function updateClient(
 ): Promise<UpdateTransactionResult> {
     try {
         // Authenticate user
-        const user = await requireAuth();
-        if (!user) {
+        const { user, authenticated } = await requireAuth();
+        if (!authenticated) {
             return {
                 success: false,
                 error: "Unauthorized",
@@ -96,7 +96,7 @@ export async function updateClient(
             };
         }
 
-        if (existingClient.userId !== user.id) {
+        if (existingClient.userId !== user?.id) {
             return {
                 success: false,
                 error: "You don't have permission to update this client",
@@ -151,8 +151,8 @@ export async function deleteClient(
 ): Promise<UpdateTransactionResult> {
     try {
         // Authenticate user
-        const user = await requireAuth();
-        if (!user) {
+        const { user, authenticated } = await requireAuth();
+        if (!authenticated) {
             return {
                 success: false,
                 error: "Unauthorized",
@@ -171,7 +171,7 @@ export async function deleteClient(
             };
         }
 
-        if (existingClient.userId !== user.id) {
+        if (existingClient.userId !== user?.id) {
             return {
                 success: false,
                 error: "You don't have permission to delete this client",

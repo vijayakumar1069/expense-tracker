@@ -27,8 +27,8 @@ export async function getCategoryDistribution(
   timeRange: "7d" | "30d" | "90d"
 ): Promise<CategoryData[]> {
   try {
-    const user = await requireAuth()
-    if (!user) {
+    const { user, authenticated } = await requireAuth()
+    if (!authenticated) {
       throw new Error("Not authenticated")
     }
     const now = new Date()
@@ -41,7 +41,7 @@ export async function getCategoryDistribution(
       by: ["category"],
       where: {
         type,
-        userId: user.id,
+        userId: user?.id,
         date: { gte: startDate, lte: endDate }
       },
       _sum: { amount: true },
@@ -94,12 +94,12 @@ type ApiResponse<T> =
 
 export async function recentTransactionsData(): Promise<ApiResponse<TransactionWithRelations[]>> {
   try {
-    const user = await requireAuth()
-    if (!user) {
+    const { user, authenticated } = await requireAuth()
+    if (!authenticated) {
       throw new Error("Not authenticated")
     }
     const transactions = await prisma.transaction.findMany({
-      where: { userId: user.id },
+      where: { userId: user?.id },
       take: 5,
       orderBy: { createdAt: 'desc' },
       include: {

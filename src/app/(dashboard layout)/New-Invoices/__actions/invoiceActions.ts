@@ -55,9 +55,9 @@ type ActionResponse = {
  * Helper function to get the current authenticated user
  */
 const getCurrentUser = async () => {
-    const user = await requireAuth();
+    const { user, authenticated } = await requireAuth();
 
-    if (!user) {
+    if (!authenticated) {
         throw new Error("Unauthorized: You must be signed in to perform this action");
     }
 
@@ -113,7 +113,7 @@ export async function createInvoice(formData: z.infer<typeof invoiceSchema>): Pr
                     taxRate2: validatedData.taxRate2 ?? undefined,
                     taxAmount: validatedData.taxAmount,
                     invoiceTotal: validatedData.invoiceTotal,
-                    userId: user.id,
+                    userId: user ? user.id : "",
                     // Create the invoice contents
                     invoiceContents: {
                         create: validatedData.invoiceContents.map(item => ({
@@ -177,7 +177,7 @@ export async function updateInvoice(formData: z.infer<typeof invoiceSchema>): Pr
         const existingInvoice = await prisma.invoice.findUnique({
             where: {
                 id: validatedData.id,
-                userId: user.id
+                userId: user?.id
             },
             include: {
                 invoiceContents: true,
@@ -269,7 +269,7 @@ export async function deleteInvoice(id: string): Promise<ActionResponse> {
         const existingInvoice = await prisma.invoice.findUnique({
             where: {
                 id,
-                userId: user.id,
+                userId: user?.id,
             }
         });
 
@@ -446,7 +446,7 @@ export async function generateInvoiceNumber(): Promise<ActionResponse> {
 
         // Get the latest invoice number
         const latestInvoice = await prisma.invoice.findFirst({
-            where: { userId: user.id },
+            where: { userId: user?.id },
             orderBy: { createdAt: 'desc' },
             select: { invoiceNumber: true },
         });

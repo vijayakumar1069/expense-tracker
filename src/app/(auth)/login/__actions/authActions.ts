@@ -8,6 +8,7 @@ import { prisma } from "@/utils/prisma"
 import { LoginSchema } from "@/utils/schema/LoginSchema"
 import { getCookie } from "@/lib/sessiongetter"
 import { z } from "zod"
+import { revalidatePath } from "next/cache"
 
 export type LoginFormValues = {
     email: string;
@@ -180,7 +181,14 @@ export async function logoutFunction(): Promise<ReturnResponse> {
             console.warn("JWT verification failed during logout:", jwtError);
         }
 
-        cookieStore.delete("Expense-tracker-session");
+        cookieStore.delete({
+            name: "Expense-tracker-session",
+            path: "/",
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax"
+        });
+        revalidatePath("/dashboard");
 
         return {
             success: true,
@@ -189,13 +197,14 @@ export async function logoutFunction(): Promise<ReturnResponse> {
 
     } catch (error) {
         // Log error for monitoring but don't expose details to client
-        console.error("Logout error:", error);
+
 
         // Attempt to clear cookie even if other operations fail
         try {
             cookieStore.delete("Expense-tracker-session");
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (cookieError) {
-            console.error("Failed to clear cookie:", cookieError);
+
         }
 
         return {
@@ -208,4 +217,4 @@ export async function logoutFunction(): Promise<ReturnResponse> {
             }
         };
     }
-}   
+}

@@ -19,9 +19,9 @@ export async function getTransactionChartData(
   timeRange: "7d" | "30d" | "90d" | "1yr"
 ): Promise<returnType[]> {
   try {
-    const user = await requireAuth();
-    if (!user) {
-      throw new Error("Not authenticated");
+    const { user, authenticated } = await requireAuth();
+    if (!authenticated) {
+      return [];
     }
     if (!["7d", "30d", "90d", "1yr"].includes(timeRange)) {
       throw new Error("Invalid time range specified");
@@ -42,7 +42,7 @@ export async function getTransactionChartData(
     // Fetch transactions
     const transactions = await prisma.transaction.findMany({
       where: {
-        userId: user.id,
+        userId: user?.id,
         date: { gte: startDate, lte: endDate },
       },
       select: { date: true, type: true, amount: true },

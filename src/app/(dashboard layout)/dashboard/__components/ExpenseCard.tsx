@@ -4,7 +4,10 @@ import TopCategories from "./TopCategories";
 import { requireAuth } from "@/lib/auth";
 
 export default async function ExpenseCard() {
-  const user = await requireAuth();
+  const { user, authenticated } = await requireAuth();
+  if (!authenticated || !user?.id) {
+    return null; // Handle unauthenticated state or missing user ID
+  }
   const { totalExpense, topExpenseCategories, financialYear, monthlyExpenses } =
     await fetchExpenseData({ id: user.id });
 

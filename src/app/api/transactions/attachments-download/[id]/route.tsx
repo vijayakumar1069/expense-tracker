@@ -10,13 +10,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth();
-    if (!user) return new Response("Unauthorized", { status: 401 });
+    const { user, authenticated } = await requireAuth();
+    if (!authenticated) return new Response("Unauthorized", { status: 401 });
 
     const { id } = (await params) || {};
 
     const transaction = await prisma.transaction.findUnique({
-      where: { id: id },
+      where: { id: id, userId: user?.id },
       include: { attachments: true },
     });
 

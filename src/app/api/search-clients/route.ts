@@ -10,15 +10,15 @@ export async function GET(req: NextRequest) {
     const query = searchParams.get('query')?.toLowerCase() || '';
 
     // Authenticate user
-    const user = await requireAuth();
-    if (!user) {
+    const { user, authenticated } = await requireAuth();
+    if (!authenticated) {
         return new Response('Unauthorized', { status: 401 });
     }
 
     // Fetch clients from the database
     const clients = await prisma.client.findMany({
         where: {
-            userId: user.id,
+            userId: user?.id,
             ...(query !== "" && {
                 OR: [
                     { name: { contains: query, mode: 'insensitive' } },

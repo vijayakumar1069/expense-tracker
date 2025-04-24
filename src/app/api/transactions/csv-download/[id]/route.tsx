@@ -49,8 +49,8 @@ export async function GET(
 ) {
   try {
     // Authenticate user
-    const user = await requireAuth();
-    if (!user) {
+    const { user, authenticated } = await requireAuth();
+    if (!authenticated) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const { id } = (await params) || {};
@@ -59,6 +59,7 @@ export async function GET(
     const transactions = await prisma.transaction.findMany({
       where: {
         id: id,
+        userId: user?.id,
       },
       orderBy: {
         date: "desc",

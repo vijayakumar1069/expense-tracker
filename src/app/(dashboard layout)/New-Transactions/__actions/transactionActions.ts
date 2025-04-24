@@ -13,8 +13,8 @@ import { z } from "zod";
 
 export async function createExpense(formData: FormData) {
     try {
-        const user = await requireAuth();
-        if (!user) {
+        const { user, authenticated } = await requireAuth();
+        if (!authenticated) {
             throw new Error("Authentication required");
         }
 
@@ -62,7 +62,7 @@ export async function createExpense(formData: FormData) {
                     const dataURI = `data:${imageFile.type};base64,${base64String}`;
 
                     const uploadResponse = await cloudinary.uploader.upload(dataURI, {
-                        folder: `transactions/${user.id}`,
+                        folder: `transactions/${user?.id}`,
                         resource_type: "auto",
                         transformation: [
                             { quality: "auto:best" },
@@ -96,7 +96,7 @@ export async function createExpense(formData: FormData) {
                     transactionNumber: transactionNumber,
                     date: new Date(String(validatedData.date)),
                     category: String(validatedData.category),
-                    userId: user.id,
+                    userId: user?.id || "",
                     paymentMethod: {
                         create: {
                             type: validatedData.paymentMethodType as PaymentMethodType,
@@ -146,8 +146,8 @@ export async function createExpense(formData: FormData) {
 
 export async function deleteExpense(transactionId: string) {
     try {
-        const user = await requireAuth();
-        if (!user) {
+        const { user, authenticated } = await requireAuth();
+        if (!authenticated) {
             throw new Error("Unauthorized");
         }
 
@@ -161,7 +161,7 @@ export async function deleteExpense(transactionId: string) {
             throw new Error("Expense not found");
         }
 
-        if (expense.userId !== user.id) {
+        if (expense.userId !== user?.id) {
             throw new Error("Not authorized to delete this expense");
         }
 
@@ -198,8 +198,8 @@ export async function updateTransaction(
 ): Promise<UpdateTransactionResult> {
     try {
         // Authentication check
-        const user = await requireAuth();
-        if (!user) {
+        const { user, authenticated } = await requireAuth();
+        if (!authenticated) {
             return { success: false, error: "Authentication required" };
         }
 
@@ -254,7 +254,7 @@ export async function updateTransaction(
             return { success: false, error: "Transaction not found" };
         }
 
-        if (existingTransaction.userId !== user.id) {
+        if (existingTransaction.userId !== user?.id) {
             return { success: false, error: "You don't have permission to update this transaction" };
         }
 

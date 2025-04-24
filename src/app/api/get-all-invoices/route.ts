@@ -19,8 +19,8 @@ const querySchema = z.object({
 export async function GET(request: NextRequest) {
     try {
         // Authenticate user
-        const user = await requireAuth();
-        if (!user) {
+        const { user, authenticated } = await requireAuth();
+        if (!authenticated) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 
         // Build where clause for filtering
         const where: Prisma.InvoiceWhereInput = {
-            userId: user.id,
+            userId: user?.id,
         };
 
         // Add clientName filter if provided

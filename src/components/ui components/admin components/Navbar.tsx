@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { motion } from "motion/react";
 import { Wallet, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect, useTransition } from "react";
 import { NavItem } from "@/utils/types";
 import { adminNavbarValues } from "@/utils/constants/consts";
@@ -15,7 +15,7 @@ import { toast } from "sonner";
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
+
   const [isPending, startTransition] = useTransition();
 
   const NavLink = ({ item }: { item: NavItem }) => {
@@ -67,12 +67,14 @@ const Navbar = () => {
         id: "logout-toast",
       });
       if (res.success) {
-        router.push("/");
         toast.success("logged out successfully", {
           duration: 2000,
           position: "top-center",
           id: "logout-toast",
         });
+        // Add these two lines:
+        window.location.href = "/login";
+        window.location.reload();
       } else {
         toast.error("Failed to log out", {
           duration: 2000,

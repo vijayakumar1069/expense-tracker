@@ -9,8 +9,8 @@ export async function verifyPassword(
 ): Promise<{ success: boolean; message: string }> {
   try {
     // Check if user is authenticated
-    const user = await requireAuth();
-    if (!user) {
+    const { user, authenticated } = await requireAuth();
+    if (!authenticated) {
       return {
         success: false,
         message: "User not authenticated",
@@ -28,7 +28,7 @@ export async function verifyPassword(
 
     // Fetch user from the database
     const existingUser = await prisma.user.findUnique({
-      where: { id: user.id },
+      where: { id: user?.id },
     });
 
     if (!existingUser || !existingUser.password) {
@@ -55,11 +55,11 @@ export async function verifyPassword(
       success: true,
       message: "Password verified",
     };
-  } catch (error) {
-    console.error("Error verifying password:", error);
+  } catch (error: unknown) {
     return {
       success: false,
-      message: "Error verifying password",
+      message:
+        error instanceof Error ? error.message : "An unknown error occurred",
     };
   }
 }

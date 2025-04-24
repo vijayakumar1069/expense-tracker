@@ -63,8 +63,8 @@ const QuerySchema = z.object({
 export async function GET(request: NextRequest) {
     try {
         // Authenticate user
-        const user = await requireAuth();
-        if (!user) {
+        const { user, authenticated } = await requireAuth();
+        if (!authenticated) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -103,7 +103,7 @@ export async function GET(request: NextRequest) {
 
         // Build the where condition for Prisma
         const where: Prisma.TransactionWhereInput = {
-            userId: user.id,
+            userId: user?.id,
         };
 
         // Add filters

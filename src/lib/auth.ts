@@ -12,7 +12,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
 
 
         if (!sessionToken) {
-            return null;
+            redirect("/login");
         }
 
         // Verify JWT token
@@ -31,7 +31,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         });
 
         if (!session) {
-            return null;
+            redirect("/login");
         }
 
 
@@ -43,7 +43,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         };
     } catch (error) {
         console.error("Auth error:", error);
-        return null;
+        redirect("/login");
     }
 }
 
@@ -51,8 +51,8 @@ export async function getAuthUser(): Promise<AuthUser | null> {
 export async function requireAuth() {
     const user = await getAuthUser();
 
-    if (!user) {
-        redirect("/login");
-    }
-    return user;
+    return {
+        user,
+        authenticated: !!user
+    };
 }

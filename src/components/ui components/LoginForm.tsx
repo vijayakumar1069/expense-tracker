@@ -83,6 +83,7 @@ export const LoginForm = () => {
           });
 
           router.push("/dashboard");
+          router.refresh();
         } catch (error) {
           const errorMessage =
             error instanceof Error
@@ -146,14 +147,14 @@ export const LoginForm = () => {
           </form>
         </Form>
 
-        <div className="flex justify-center mt-4 flex-col gap-2 items-center text-sm text-muted-foreground">
+        {/* <div className="flex justify-center mt-4 flex-col gap-2 items-center text-sm text-muted-foreground">
           <div>
             Username: <code>v@gmail.com</code>
           </div>
           <div>
             Password: <code>2</code>
           </div>
-        </div>
+        </div> */}
       </Card>
     </div>
   );

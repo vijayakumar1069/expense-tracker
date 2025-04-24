@@ -19,8 +19,8 @@ export async function GET(
         }
 
         // Authenticate user
-        const user = await requireAuth();
-        if (!user) {
+        const { user, authenticated } = await requireAuth();
+        if (!authenticated) {
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -41,7 +41,7 @@ export async function GET(
         }
 
         // Check if client belongs to user
-        if (client.userId !== user.id) {
+        if (client.userId !== user?.id) {
             return NextResponse.json(
                 { error: "You don't have permission to access this client" },
                 { status: 403 }

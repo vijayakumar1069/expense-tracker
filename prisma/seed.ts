@@ -347,8 +347,9 @@ async function seed() {
         console.log(`- ${transactions.length} transactions`);
         console.log(`- ${invoices.length} invoices`);
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-        console.error('Seeding failed:', error);
+
         process.exit(1);
     } finally {
         await prisma.$disconnect();

@@ -107,7 +107,7 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
         id: "add-transaction-toast",
       });
 
-      // Cancel any outgoing refetches for all transaction queries
+      // Cancel any outgoing reFetches for all transaction queries
       await queryClient.cancelQueries({
         queryKey: ["transactions"],
         exact: false, // This will match all queries that start with "transactions"

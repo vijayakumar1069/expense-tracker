@@ -69,16 +69,19 @@ export async function fetchIncomeData(): Promise<IncomeData> {
     // Calculate date ranges
     const today = new Date();
     const lastMonth = subMonths(today, 1);
-    const user = await requireAuth();
-    if (!user) {
-      throw new Error("Not authenticated");
+    const { user, authenticated } = await requireAuth();
+    if (!authenticated) {
+      return {
+        totalIncome: 0,
+        incomeChange: 0,
+      };
     }
 
     // Get total income for current month
     const currentMonthIncome = await prisma.transaction.aggregate({
       where: {
         type: "INCOME",
-        userId: user.id,
+        userId: user?.id,
         date: {
           gte: new Date(today.getFullYear(), today.getMonth(), 1),
           lt: new Date(today.getFullYear(), today.getMonth() + 1, 0),
@@ -118,15 +121,14 @@ export async function fetchIncomeData(): Promise<IncomeData> {
       totalIncome,
       incomeChange,
     };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
-    console.error("Error fetching income data:", error);
     return {
       totalIncome: 58750.85,
       incomeChange: 12.3,
     };
   }
 }
-
 export const fetchExpenseData = unstable_cache(
   async (user: { id: string }): Promise<FinancialYearExpenseData> => {
     const financialYearStart = startOfYear(new Date());
@@ -297,8 +299,8 @@ interface FinancialYearExpenseData {
 // Profit data
 export async function fetchProfitData(): Promise<ProfitData> {
   try {
-    const user = await requireAuth();
-    if (!user) {
+    const { user, authenticated } = await requireAuth();
+    if (!authenticated) {
       throw new Error("Not authenticated");
     }
     // Calculate net profit
@@ -321,7 +323,7 @@ export async function fetchProfitData(): Promise<ProfitData> {
       const incomeResult = await prisma.transaction.aggregate({
         where: {
           type: "INCOME",
-          userId: user.id,
+          userId: user?.id,
           date: {
             gte: startDate,
             lte: endDate,
@@ -405,15 +407,15 @@ export async function fetchProfitData(): Promise<ProfitData> {
 // Invoice data
 export async function fetchInvoiceData(): Promise<InvoiceData> {
   try {
-    const user = await requireAuth();
-    if (!user) {
+    const { user, authenticated } = await requireAuth();
+    if (!authenticated) {
       throw new Error("Not authenticated");
     }
 
     // Fetch count of invoices for the authenticated user
     const pendingInvoicesCount = await prisma.invoice.count({
       where: {
-        userId: user.id,
+        userId: user?.id,
         status: { in: ["SENT", "PAID", "OVERDUE"] },
       },
     });
@@ -527,8 +529,8 @@ export async function fetchInvoiceData(): Promise<InvoiceData> {
 // Get all transactions
 export async function fetchAllTransactions() {
   try {
-    const user = await requireAuth();
-    if (!user) {
+    const { user, authenticated } = await requireAuth();
+    if (!authenticated) {
       throw new Error("Not authenticated");
     }
     const today = new Date();
@@ -536,7 +538,7 @@ export async function fetchAllTransactions() {
     // Recent transactions count (last 30 days)
     const recentCount = await prisma.transaction.count({
       where: {
-        userId: user.id,
+        userId: user?.id,
         date: {
           gte: new Date(today.setDate(today.getDate() - 30)),
         },
@@ -659,9 +661,22 @@ export async function fetchClientData() {
 // Function to fetch expenses by payment method for current month
 export async function fetchExpensesByPaymentMethod(): Promise<PaymentMethodExpenses> {
   try {
-    const user = await requireAuth();
-    if (!user) {
-      throw new Error("Not authenticated");
+    // Use the updated requireAuth that returns {user, authenticated}
+    const { user, authenticated } = await requireAuth();
+
+    if (!authenticated) {
+      // Return default/empty data instead of redirecting
+      return {
+        cash: 0,
+        bank: 0,
+        cheque: 0,
+        total: 0,
+        percentages: {
+          cash: 0,
+          bank: 0,
+          cheque: 0,
+        },
+      };
     }
 
     // Calculate current month date range
@@ -672,7 +687,7 @@ export async function fetchExpensesByPaymentMethod(): Promise<PaymentMethodExpen
     // Fetch all transactions for the current month that are expenses
     const expenses = await prisma.transaction.findMany({
       where: {
-        userId: user.id,
+        userId: user?.id, // Now using user.id from the returned object
         type: "EXPENSE",
         date: {
           gte: startOfMonth,
