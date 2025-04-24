@@ -188,7 +188,9 @@ export async function logoutFunction(): Promise<ReturnResponse> {
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax"
         });
-        revalidatePath("/dashboard");
+        revalidatePath("/")
+        revalidatePath("/login")
+        revalidatePath("/dashboard")
 
         return {
             success: true,
