@@ -3,7 +3,6 @@ import { prisma } from "@/utils/prisma";
 import { AuthUser } from "@/utils/types";
 import { jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 export async function getAuthUser(): Promise<AuthUser | null> {
     try {
@@ -12,7 +11,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
 
 
         if (!sessionToken) {
-            redirect("/login");
+            return null;
         }
 
         // Verify JWT token
@@ -31,7 +30,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         });
 
         if (!session) {
-            redirect("/login");
+            return null;
         }
 
 
@@ -43,7 +42,7 @@ export async function getAuthUser(): Promise<AuthUser | null> {
         };
     } catch (error) {
         console.error("Auth error:", error);
-        redirect("/login");
+        return null;
     }
 }
 
