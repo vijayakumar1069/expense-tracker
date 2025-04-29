@@ -79,9 +79,9 @@ export async function createExpense(formData: FormData) {
 
         // Create the transaction and related records in a transaction
         const expense = await prisma.$transaction(async (tx) => {
-            const transactionNumber = await generateTransactionNumber(
+            const { financialYear, transactionNumber } = await generateTransactionNumber(
                 validatedData.transactionType as TransactionType,
-
+                new Date(String(validatedData.date))
             );
 
             // First create the transaction without attachments
@@ -94,8 +94,10 @@ export async function createExpense(formData: FormData) {
                     tax: validatedData.taxType,
                     total: parseFloat(String(validatedData.total)),
                     transactionNumber: transactionNumber,
+                    financialYear: financialYear,
                     date: new Date(String(validatedData.date)),
                     category: String(validatedData.category),
+
                     userId: user?.id || "",
                     paymentMethod: {
                         create: {
@@ -133,8 +135,7 @@ export async function createExpense(formData: FormData) {
                 ...createdExpense,
                 attachments: attachments
             };
-        });
-        return { success: true, data: expense };
+        }); return { success: true, data: expense };
     } catch (error) {
         console.error("Create expense error:", error);
         return {
@@ -266,12 +267,10 @@ export async function updateTransaction(
         let transactionNumber = validatedData.transactionNumber;
 
         // Generate new transaction number if type changed
+        const { transactionNumber: newTransactionNumber, financialYear } = await generateTransactionNumber(newTransactionType, new Date(validatedData.date));
+        transactionNumber = newTransactionNumber;
         if (typeChanged) {
-
-
             // Use the improved function with built-in duplicate prevention
-            transactionNumber = await generateTransactionNumber(newTransactionType);
-
 
             // Double-check the number doesn't already exist (extra safety)
             let isUnique = false;
@@ -405,6 +404,7 @@ export async function updateTransaction(
                     amount: parseFloat(String(validatedData.amount)),
                     tax: validatedData.taxType as string,
                     transactionNumber: transactionNumber, // Use the new transaction number
+                    financialYear: financialYear,
                     total: parseFloat(String(validatedData.total)),
                     date: new Date(String(validatedData.date)),
                     category: validatedData.category,
@@ -416,8 +416,6 @@ export async function updateTransaction(
             });
         });
 
-
-
         return {
             success: true,
             data: updatedTransaction
@@ -425,9 +423,6 @@ export async function updateTransaction(
 
     } catch (error: unknown) {
         console.error("Transaction update error:", error);
-
-        // Check for Prisma unique constraint error
-
 
         // Handle other validation errors
         if (error instanceof z.ZodError) {
@@ -443,34 +438,48 @@ export async function updateTransaction(
         };
     }
 }
+async function generateTransactionNumber(
+    transactionType: TransactionType,
+    transactionDate: Date = new Date()
+): Promise<{ financialYear: string; transactionNumber: string }> {
+    // Get current financial year based on transaction date
+    const financialYear = getFinancialYear(transactionDate);
 
-async function generateTransactionNumber(transactionType: TransactionType) {
     // Get the prefix based on transaction type
     const prefix = transactionType === 'INCOME' ? 'INC-' : 'EXP-';
 
-    // Find the highest existing transaction number using a more reliable approach
-    const highestNumber = await findHighestTransactionNumber(prefix);
+    // Find the highest transaction number for this financial year and type
+    const highestNumber = await findHighestTransactionNumber(prefix, financialYear);
 
-    // Generate a new unique transaction number
-    const newTransactionNumber = `${prefix}${(highestNumber + 1).toString().padStart(3, '0')}`;
+    // Generate the new sequential number
+    const sequentialNumber = (highestNumber + 1).toString().padStart(3, '0');
 
-    return newTransactionNumber;
+    // Combine to create the full transaction number
+    const transactionNumber = `${prefix}${sequentialNumber}`;
+
+    return {
+        financialYear,
+        transactionNumber
+    };
 }
 
-async function findHighestTransactionNumber(prefix: string): Promise<number> {
-    // Get all transaction numbers with this prefix
+
+/**
+ * Finds the highest transaction number for a specific prefix and financial year
+ */
+async function findHighestTransactionNumber(prefix: string, financialYear: string): Promise<number> {
+    // Get all transactions for this financial year with this prefix
     const transactions = await prisma.transaction.findMany({
         where: {
-            transactionNumber: {
-                startsWith: prefix
-            }
+            AND: [
+                { financialYear },
+                { transactionNumber: { startsWith: prefix } }
+            ]
         },
         select: {
             transactionNumber: true
         }
     });
-
-
 
     // If no transactions found, start from 0
     if (transactions.length === 0) {
@@ -490,12 +499,49 @@ async function findHighestTransactionNumber(prefix: string): Promise<number> {
         }
     }
 
-
     return highestNumber;
 }
 
 
 
+
+/**
+ * Determines the financial year based on a date
+ * In most countries, financial year starts on April 1st, but you can adjust as needed
+ */
+function getFinancialYear(date: Date = new Date()): string {
+    const month = date.getMonth() + 1; // JavaScript months are 0-based
+    const year = date.getFullYear();
+
+    // For April 1st to March 31st financial year
+    if (month >= 4) { // April or later
+        return `${year}-${year + 1}`;
+    } else { // January to March
+        return `${year - 1}-${year}`;
+    }
+
+    // For calendar year (Jan-Dec), use this instead:
+    // return `${year}-${year + 1}`;
+}
+
+
+// /**
+//  * Determines if a transaction date falls within a given financial year
+//  */
+// function isInFinancialYear(date: Date, financialYear: string): boolean {
+//     const [startYearStr, endYearStr] = financialYear.split('-');
+//     const startYear = parseInt(startYearStr);
+//     const endYear = parseInt(endYearStr);
+
+//     const month = date.getMonth() + 1;
+//     const year = date.getFullYear();
+
+//     // For April-March financial year
+//     if (year === startYear && month >= 4) return true;
+//     if (year === endYear && month < 4) return true;
+
+//     return false;
+// }
 
 
 

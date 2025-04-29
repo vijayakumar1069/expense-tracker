@@ -38,6 +38,8 @@ import TransactionFilter from "./TransactionFilter";
 import TransactionHeader from "./TransactionHeader";
 import TransActionDialog from "./TransActionDialog";
 import DownloadProofButton from "./DownloadProofButton";
+import { useFinancialYear } from "@/app/context/FinancialYearContext";
+import { FinancialYearDialog } from "./FinancialYearDialog";
 
 // Helper function to format payment method names
 export const formatPaymentMethodName = (method: string) => {
@@ -71,6 +73,8 @@ interface FilterState {
 const limit = 7;
 
 const ExpenseTable = () => {
+  const { financialYear } = useFinancialYear();
+  const [dialogOpen, setDialogOpen] = useState(false); // Renamed state variable
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<FilterState>({
     sortBy: "createdAt",
@@ -79,12 +83,13 @@ const ExpenseTable = () => {
 
   // Fetch transactions with React Query
   const { data, isLoading, isError } = useQuery<TransactionResponse>({
-    queryKey: ["transactions", currentPage, limit, filters],
+    queryKey: ["transactions", currentPage, limit, filters, financialYear],
     queryFn: async () => {
       // Build query parameters
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: limit.toString(),
+        financialYear: financialYear,
       });
 
       // Add filter parameters if they exist
@@ -113,13 +118,12 @@ const ExpenseTable = () => {
       }
       return response.json();
     },
-    enabled: !!filters, // Only run if query is not empty
+    enabled: !!filters && !!financialYear, // Only fetch when financial year is selected, // Only run if query is not empty
     staleTime: 1000 * 60 * 5, // 5 mins caching
     // keepPreviousData: true, // Keeps showing old data while fetching new
     refetchOnWindowFocus: false, // Optional: no refetch when tab focuses
     retry: 1, // Retry once on failure
   });
-
   const handleApplyFilters = (newFilters: FilterState) => {
     setFilters(newFilters);
     setCurrentPage(1);
@@ -150,31 +154,64 @@ const ExpenseTable = () => {
       </Card>
     );
   }
+  if (!financialYear) {
+    return (
+      <div className="p-6 text-center">
+        <FinancialYearDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+        <p className="mt-4 text-gray-500">
+          Please select a financial year to view transactions
+        </p>
+      </div>
+    );
+  }
 
   return (
     <Card className="w-full flex flex-col relative overflow-hidden border-0 space-y-0 gap-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 mb-0">
       <div className="w-full mb-4 px-6">
-        <div className="flex flex-wrap md:flex-nowrap gap-4 items-center justify-end w-full">
-          <div className="w-full md:w-auto">
-            <TransActionDialog mode="add" />
-          </div>
-          {Object.values(filters).some(
-            (value) =>
-              value && value !== "" && value !== "createdAt" && value !== "desc"
-          ) && (
-            <div className="">
-              <TransactionHeader currentFilters={filters} />
-            </div>
-          )}
-          <div className="flex w-full md:w-auto items-center gap-4 justify-center">
-            <TransactionFilter
-              initialFilters={filters}
-              onApplyFilters={handleApplyFilters}
+        <div className="flex flex-wrap md:flex-nowrap gap-4 items-center justify-between w-full">
+          <div className="flex items-center gap-4 ">
+            <FinancialYearDialog
+              open={dialogOpen}
+              onOpenChange={setDialogOpen}
             />
+
+            <div className="flex items-center gap-4 ">
+              <h2 className="text-xl font-semibold">
+                Financial Year: {financialYear}
+              </h2>
+              <Button
+                variant="outline"
+                onClick={() => setDialogOpen(true)}
+                className="hover:text-black text-white"
+              >
+                Change Year
+              </Button>
+            </div>
+          </div>
+          <div className="w-full md:w-auto flex gap-3">
+            <TransActionDialog mode="add" />
+            {Object.values(filters).some(
+              (value) =>
+                value &&
+                value !== "" &&
+                value !== "createdAt" &&
+                value !== "desc"
+            ) && (
+              <div className="">
+                <TransactionHeader currentFilters={filters} />
+              </div>
+            )}
+            <div className="flex w-full md:w-auto items-center gap-4 justify-center">
+              <TransactionFilter
+                initialFilters={filters}
+                onApplyFilters={handleApplyFilters}
+              />
+            </div>
           </div>
         </div>
       </div>
-      <CardContent className="px-6 mt-0 m-0 py-0">
+
+      <CardContent className=" mt-0 m-0 py-0">
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm">
           <Table>
             <TableHeader className="bg-gray-50 dark:bg-gray-900/60 p-0">

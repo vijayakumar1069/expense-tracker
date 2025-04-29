@@ -1,7 +1,7 @@
 // seed.ts
 import { PrismaClient, TransactionType, PaymentMethodType, InvoiceStatus } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { formatDate } from 'date-fns';
+import { format } from 'date-fns';
 
 const prisma = new PrismaClient();
 
@@ -123,10 +123,13 @@ const TAX_TYPES = [
 ];
 
 const FY_PERIODS = [
-    { start: new Date('2024-04-01'), end: new Date('2025-03-31') },
-    { start: new Date('2025-04-01'), end: new Date('2026-03-31') },
-    { start: new Date('2026-04-01'), end: new Date('2027-03-31') }
+
+    { year: '2023-2024', start: new Date('2023-04-01'), end: new Date('2024-03-31') },
+    { year: '2024-2025', start: new Date('2024-04-01'), end: new Date('2025-03-31') }
 ];
+const paymentMethods = ['CASH', 'BANK', 'CHEQUE', 'INVOICE'] as const;
+const transferModes = ['UPI', 'NEFT', 'IMPS', 'RTGS'] as const;
+
 // const FY_END = new Date('2026-03-31');
 
 async function seed() {
@@ -168,130 +171,7 @@ async function seed() {
             });
             clients.push(client);
         }
-
-        const transactions = [];
-        const paymentMethods = ['CASH', 'BANK', 'CHEQUE', 'INVOICE'] as const;
-
-        // Create transactions for each fiscal year
-        for (const fiscalYear of FY_PERIODS) {
-            // Generate array of months in the financial year
-            const months = Array.from({ length: 12 }, (_, index) => {
-                const start = new Date(fiscalYear.start);
-                start.setMonth(fiscalYear.start.getMonth() + index);
-                const end = new Date(start);
-                end.setMonth(end.getMonth() + 1);
-                end.setDate(0); // Last day of the month
-                return { start, end };
-            });
-
-            // Create transactions for each month
-            for (const { start: monthStart, end: monthEnd } of months) {
-                // Create 10 transactions per month, ensuring all payment methods are covered
-                for (let i = 0; i < 10; i++) {
-                    // Determine transaction type - alternate between income and expense
-                    const type = i % 2 === 0 ? TransactionType.INCOME : TransactionType.EXPENSE;
-
-                    // Ensure all payment methods are covered by cycling through them
-                    const method = paymentMethods[i % paymentMethods.length];
-
-                    const transaction = await createTransaction(
-                        type,
-                        method,
-                        monthStart,
-                        monthEnd
-                    );
-
-                    transactions.push(transaction);
-                }
-            }
-        }
-
-        let incomeCounter = 1;
-        let expenseCounter = 1;
-
-        function generateTransactionNumber(type: TransactionType) {
-            if (type === 'INCOME') {
-                return `INC-${String(incomeCounter++).padStart(3, '0')}`;
-            } else {
-                return `EXP-${String(expenseCounter++).padStart(3, '0')}`;
-            }
-        }
-
-        // Helper function to create transactions
-        async function createTransaction(
-            type: TransactionType,
-            method: typeof paymentMethods[number],
-            monthStart: Date,
-            monthEnd: Date
-        ) {
-            const amount = faker.number.float({
-                min: 1000,
-                max: 50000,
-                fractionDigits: 2
-            });
-            const taxType = faker.helpers.arrayElement(TAX_TYPES);
-            const category = faker.helpers.arrayElement(CATEGORIES);
-
-            const paymentDetails = {
-                type: PaymentMethodType[method],
-                ...(method === 'CASH' && {
-                    receivedBy: faker.person.fullName(),
-                    bankName: null,
-                    chequeNo: null,
-                    chequeDate: null,
-                    invoiceNo: null
-                }),
-                ...(method === 'BANK' && {
-                    bankName: faker.company.name(),
-                    transferMode: faker.helpers.arrayElement(['NEFT', 'RTGS', 'IMPS', 'UPI']),
-                    receivedBy: null,
-                    chequeNo: null,
-                    chequeDate: null,
-                    invoiceNo: null
-                }),
-                ...(method === 'CHEQUE' && {
-                    chequeNo: `CHQ${faker.string.numeric(8)}`,
-                    chequeDate: faker.date.future({ years: 1 }),
-                    receivedBy: null,
-                    bankName: null,
-                    invoiceNo: null
-                }),
-                ...(method === 'INVOICE' && {
-                    invoiceNo: `INV-${faker.string.alphanumeric(6).toUpperCase()}`,
-                    receivedBy: null,
-                    bankName: null,
-                    chequeNo: null,
-                    chequeDate: null
-                })
-            };
-
-            return prisma.transaction.create({
-                data: {
-                    type,
-                    transactionNumber: generateTransactionNumber(type), // Add this line
-                    name: `${type} Transaction ${method} ${formatDate(monthStart, 'MMM yyyy')}`,
-                    description: faker.finance.transactionDescription(),
-                    amount,
-                    tax: taxType.id,
-                    total: amount + (amount * taxType.rate),
-                    date: faker.date.between({
-                        from: monthStart,
-                        to: monthEnd
-                    }),
-                    category: category.name,
-                    user: { connect: { id: user.id } },
-                    attachments: {
-                        create: Math.random() < 0.25 ? [{
-                            url: faker.internet.url()
-                        }] : undefined
-                    },
-                    paymentMethod: {
-                        create: paymentDetails
-                    }
-                }
-            });
-        }
-
+        console.log(`- ${clients.length} clients`);
         // Create 20 invoices with proper tax types
         const invoices = [];
         for (let i = 0; i < 45; i++) {
@@ -335,25 +215,261 @@ async function seed() {
             });
             invoices.push(invoice);
         }
+        console.log(`- ${invoices.length} invoices`);
+        const transactionCounters = {
+            'INCOME': {
+                '2023-2024': 1,
+                '2024-2025': 1
+            },
+            'EXPENSE': {
+                '2023-2024': 1,
+                '2024-2025': 1
+            }
+        };
+        function generateTransactionNumber(type: TransactionType, financialYear: '2023-2024' | '2024-2025') {
+            const counter = transactionCounters[type][financialYear]++;
+            if (type === 'INCOME') {
+                return `INC-${String(counter).padStart(3, '0')}`;
+            } else {
+                return `EXP-${String(counter).padStart(3, '0')}`;
+            }
+        }
+        const transactions = [];
 
+        // Transaction number counters
+        // Create transactions for each fiscal year
+        for (const fiscalYear of FY_PERIODS) {
+            // Generate monthly date ranges
+            const months = Array.from({ length: 12 }, (_, index) => {
+                const start = new Date(fiscalYear.start);
+                start.setMonth(fiscalYear.start.getMonth() + index);
+                const end = new Date(start);
+                end.setMonth(end.getMonth() + 1);
+                end.setDate(0); // Last day of the month
+                return { start, end };
+            });
 
+            // Calculate transactions per month to get 100 per year
+            const transactionsPerMonth = Math.ceil(100 / 12);
 
+            let incomeCount = 0;
+            let expenseCount = 0;
+
+            // Required totals for the year
+            const totalIncome = 25;
+            const totalExpense = 75;
+
+            for (const { start: monthStart, end: monthEnd } of months) {
+                // Calculate how many of each type to create this month to ensure year totals
+                const remainingMonths = 12 - months.indexOf({ start: monthStart, end: monthEnd });
+                const remainingIncome = totalIncome - incomeCount;
+                const remainingExpense = totalExpense - expenseCount;
+
+                let monthIncomeTarget = Math.ceil(remainingIncome / remainingMonths);
+                let monthExpenseTarget = Math.ceil(remainingExpense / remainingMonths);
+
+                // Adjust if we're overshooting
+                if (monthIncomeTarget + monthExpenseTarget > transactionsPerMonth) {
+                    const total = monthIncomeTarget + monthExpenseTarget;
+                    const ratio = transactionsPerMonth / total;
+                    monthIncomeTarget = Math.floor(monthIncomeTarget * ratio);
+                    monthExpenseTarget = Math.floor(monthExpenseTarget * ratio);
+                }
+
+                // Ensure we don't exceed yearly targets
+                monthIncomeTarget = Math.min(monthIncomeTarget, totalIncome - incomeCount);
+                monthExpenseTarget = Math.min(monthExpenseTarget, totalExpense - expenseCount);
+
+                // Create income transactions for this month
+                for (let i = 0; i < monthIncomeTarget; i++) {
+                    // Cycle through payment methods
+                    const methodIndex = (incomeCount + i) % paymentMethods.length;
+                    const method = paymentMethods[methodIndex];
+
+                    const transaction = await createTransaction(
+                        TransactionType.INCOME,
+                        method,
+                        monthStart,
+                        monthEnd,
+                        fiscalYear.year as '2023-2024' | '2024-2025',
+                        user.id
+                    );
+
+                    transactions.push(transaction);
+                }
+                incomeCount += monthIncomeTarget;
+
+                // Create expense transactions for this month
+                for (let i = 0; i < monthExpenseTarget; i++) {
+                    // Cycle through payment methods
+                    const methodIndex = (expenseCount + i) % paymentMethods.length;
+                    const method = paymentMethods[methodIndex];
+
+                    const transaction = await createTransaction(
+                        TransactionType.EXPENSE,
+                        method,
+                        monthStart,
+                        monthEnd,
+                        fiscalYear.year as '2023-2024' | '2024-2025',
+                        user.id
+                    );
+
+                    transactions.push(transaction);
+                }
+                expenseCount += monthExpenseTarget;
+            }
+
+            // If we still haven't hit our target for the year, add remaining transactions to the last month
+            const lastMonth = months[months.length - 1];
+
+            // Add remaining income transactions if needed
+            while (incomeCount < totalIncome) {
+                const methodIndex = incomeCount % paymentMethods.length;
+                const method = paymentMethods[methodIndex];
+
+                const transaction = await createTransaction(
+                    TransactionType.INCOME,
+                    method,
+                    lastMonth.start,
+                    lastMonth.end,
+                    fiscalYear.year as '2023-2024' | '2024-2025',
+                    user.id
+                );
+
+                transactions.push(transaction);
+                incomeCount++;
+            }
+
+            // Add remaining expense transactions if needed
+            while (expenseCount < totalExpense) {
+                const methodIndex = expenseCount % paymentMethods.length;
+                const method = paymentMethods[methodIndex];
+
+                const transaction = await createTransaction(
+                    TransactionType.EXPENSE,
+                    method,
+                    lastMonth.start,
+                    lastMonth.end,
+                    fiscalYear.year as '2023-2024' | '2024-2025',
+                    user.id
+                );
+
+                transactions.push(transaction);
+                expenseCount++;
+            }
+
+            async function createTransaction(
+                type: TransactionType,
+                method: typeof paymentMethods[number],
+                monthStart: Date,
+                monthEnd: Date,
+                financialYear: '2023-2024' | '2024-2025',
+                userId: string
+            ) {
+                const amount = faker.number.float({
+                    min: 1000,
+                    max: 50000,
+                    fractionDigits: 2
+                });
+
+                const taxType = faker.helpers.arrayElement(TAX_TYPES);
+                const category = faker.helpers.arrayElement(CATEGORIES);
+
+                // Create appropriate payment details based on method
+                const paymentDetails = {
+                    type: PaymentMethodType[method],
+                    ...(method === 'CASH' && {
+                        receivedBy: faker.person.fullName(),
+                        bankName: null,
+                        chequeNo: null,
+                        chequeDate: null,
+                        invoiceNo: null,
+                        transferMode: null
+                    }),
+                    ...(method === 'BANK' && {
+                        bankName: faker.company.name(),
+                        transferMode: faker.helpers.arrayElement(transferModes),
+                        receivedBy: null,
+                        chequeNo: null,
+                        chequeDate: null,
+                        invoiceNo: null
+                    }),
+                    ...(method === 'CHEQUE' && {
+                        chequeNo: `CHQ${faker.string.numeric(8)}`,
+                        chequeDate: faker.date.future({ years: 1 }),
+                        receivedBy: null,
+                        bankName: faker.company.name(),
+                        invoiceNo: null,
+                        transferMode: null
+                    }),
+                    ...(method === 'INVOICE' && {
+                        invoiceNo: `INV-${faker.string.alphanumeric(6).toUpperCase()}`,
+                        receivedBy: null,
+                        bankName: null,
+                        chequeNo: null,
+                        chequeDate: null,
+                        transferMode: null
+                    })
+                };
+
+                return prisma.transaction.create({
+                    data: {
+                        type,
+                        name: `${type} Transaction ${method} ${format(monthStart, 'MMM yyyy')}`,
+                        description: faker.finance.transactionDescription(),
+                        amount,
+                        tax: taxType.id,
+                        total: amount + (amount * taxType.rate),
+                        date: faker.date.between({
+                            from: monthStart,
+                            to: monthEnd
+                        }),
+                        transactionNumber: generateTransactionNumber(type, financialYear),
+                        financialYear,
+                        category: category.name,
+                        userId,
+                        attachments: {
+                            create: Math.random() < 0.25 ? [{
+                                url: faker.internet.url()
+                            }] : undefined
+                        },
+                        paymentMethod: {
+                            create: paymentDetails
+                        }
+                    }
+                });
+            }
+        }
 
 
 
         console.log('Successfully seeded for FY 2025-2026:');
         console.log(`- 1 user`);
-        console.log(`- ${clients.length} clients`);
+
         console.log(`- ${transactions.length} transactions`);
-        console.log(`- ${invoices.length} invoices`);
+
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-
         process.exit(1);
     } finally {
         await prisma.$disconnect();
     }
 }
 
-seed();
+
+
+
+// Helper function to create a transaction
+
+
+
+seed()
+    .then(() => {
+        console.log("✅ Seeding complete")
+        process.exit(0)
+    })
+    .catch((e) => {
+        console.error("❌ Seeding error:", e)
+        process.exit(1)
+    })

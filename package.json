@@ -74,7 +74,7 @@
     "@tanstack/react-query-devtools": "^5.69.0",
     "@types/archiver": "^6.0.3",
     "@types/lodash.debounce": "^4.0.9",
-    "@types/node": "^20",
+    "@types/node": "^20.17.32",
     "@types/number-to-words": "^1.2.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -85,7 +85,7 @@
     "prisma": "^6.6.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
-    "tsx": "^4.19.3",
+    "tsx": "^4.19.4",
     "typescript": "^5"
   }
 }

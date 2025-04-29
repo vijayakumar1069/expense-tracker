@@ -22,6 +22,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TransactionResponse } from "@/utils/types";
 import { TransactionForm } from "./transaction dialog/TransactionForm";
 import { createExpense } from "@/app/(dashboard layout)/New-Transactions/__actions/transactionActions";
+import { useFinancialYear } from "@/app/context/FinancialYearContext";
+import { format } from "date-fns";
 
 type TransactionFormValues = z.infer<typeof expenseFormSchema>;
 
@@ -30,12 +32,19 @@ interface ExpenseDialogProps {
   transaction?: TransactionFormValues;
   //   onExpenseFormSubmit: (data: ExpenseFormValues) => void;
 }
-
+const getFinancialYearDates = (financialYear: string) => {
+  const [startYear] = financialYear.split("-").map(Number);
+  return {
+    start: new Date(startYear, 3, 1), // April 1st of start year
+    end: new Date(startYear + 1, 2, 31), // March 31st of next year
+  };
+};
 const TransActionDialog: React.FC<ExpenseDialogProps> = ({
   mode,
   transaction,
   //   onExpenseFormSubmit,
 }) => {
+  const { financialYear } = useFinancialYear();
   const [open, setOpen] = useState(false);
   const [viewMode, setViewMode] = useState(false); // Add this state
   const [isPending, startTransition] = useTransition();
@@ -58,6 +67,7 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
       chequeNo: transaction?.chequeNo || "",
       chequeDate: transaction?.chequeDate || "",
       transactionNumber: transaction?.transactionNumber || "",
+      financialYear: financialYear || "",
       invoiceNo: transaction?.invoiceNo || "",
       date: transaction?.date || new Date().toISOString().split("T")[0],
       images: [],
@@ -173,6 +183,22 @@ const TransActionDialog: React.FC<ExpenseDialogProps> = ({
   });
 
   const onFormSubmit = async (data: TransactionFormValues) => {
+    if (financialYear) {
+      const { start, end } = getFinancialYearDates(financialYear);
+      const transactionDate = new Date(data.date);
+
+      if (transactionDate < start || transactionDate > end) {
+        toast.error(
+          `Date must be between ${format(start, "dd MMM yyyy")} and ${format(end, "dd MMM yyyy")} for financial year ${financialYear}`,
+          {
+            position: "top-center",
+            duration: 5000,
+          }
+        );
+        return;
+      }
+    }
+
     startTransition(() => {
       mutation.mutate(data);
     });
