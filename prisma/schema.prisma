@@ -1,8 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
-  // output   = "./node_modules/@prisma/client"
-  // output   = "./generated/prisma/client" // Add this line
 }
 
 datasource db {
@@ -11,25 +9,28 @@ datasource db {
 }
 
 model Transaction {
-  id            String          @id @unique @default(cuid())
-  transactionNumber String @unique
-  type          TransactionType
-  name          String
-  description   String?
-  amount        Float
-  tax           String?
-  total         Float
-  date          DateTime
-  category      String
-  userId        String
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  attachments   Attachment[]
-  paymentMethod PaymentMethod?
-  user          User            @relation(fields: [userId], references: [id])
+  id                String          @id @unique @default(cuid())
+  type              TransactionType
+  name              String
+  description       String?
+  amount            Float
+  tax               String?
+  total             Float
+  date              DateTime
+  category          String
+  userId            String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  transactionNumber String        
+  financialYear     String
+  attachments       Attachment[]
+  paymentMethod     PaymentMethod?
+  user              User            @relation(fields: [userId], references: [id])
 
+  @@unique([financialYear, transactionNumber], name: "Transaction_financialYear_transactionNumber_key")
   @@index([userId])
   @@index([type])
+  @@index([financialYear])
 }
 
 model Attachment {
@@ -57,6 +58,24 @@ model PaymentMethod {
 
   @@index([type])
 }
+enum PaymentTransferMode {
+  UPI
+  NEFT
+  IMPS
+  RTGS
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum PaymentMethodType {
+  CASH
+  BANK
+  CHEQUE
+  INVOICE
+}
 
 model User {
   id           String        @id @default(cuid())
@@ -66,7 +85,6 @@ model User {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   clients      Client[]
- 
   invoice      Invoice[]
   sessions     Session[]
   transactions Transaction[]
@@ -120,10 +138,10 @@ model Invoice {
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @default(now()) @updatedAt
   subtotal          Float
-  taxRate1           Float             @default(0)
-  taxRate2           Float             @default(0)
   taxAmount         Float             @default(0)
   invoiceTotal      Float
+  taxRate1          Float             @default(0)
+  taxRate2          Float             @default(0)
   client            Client            @relation(fields: [clientId], references: [id])
   user              User              @relation(fields: [userId], references: [id])
   invoiceContents   InvoiceContents[]
@@ -145,25 +163,6 @@ model InvoiceContents {
 }
 
 
-
-enum PaymentTransferMode {
-  UPI
-  NEFT
-  IMPS
-  RTGS
-}
-
-enum TransactionType {
-  INCOME
-  EXPENSE
-}
-
-enum PaymentMethodType {
-  CASH
-  BANK
-  CHEQUE
-  INVOICE
-}
 
 enum Role {
   USER

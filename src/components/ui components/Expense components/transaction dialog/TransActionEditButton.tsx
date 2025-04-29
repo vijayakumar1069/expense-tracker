@@ -23,9 +23,17 @@ import { z } from "zod";
 import { TransactionForm } from "./TransactionForm";
 import { updateTransaction } from "@/app/(dashboard layout)/New-Transactions/__actions/transactionActions";
 import { PasswordVerification } from "../../PasswordVerification";
+import { useFinancialYear } from "@/app/context/FinancialYearContext";
+import { format } from "date-fns";
 
 type TransactionFormValues = z.infer<typeof expenseFormSchema>;
-
+const getFinancialYearDates = (financialYear: string) => {
+  const [startYear] = financialYear.split("-").map(Number);
+  return {
+    start: new Date(startYear, 3, 1), // April 1st of start year
+    end: new Date(startYear + 1, 2, 31), // March 31st of next year
+  };
+};
 export const TransActionEditButton: React.FC<{
   transactionId: string;
   viewTransaction: boolean;
@@ -36,6 +44,7 @@ export const TransActionEditButton: React.FC<{
     TransactionFormValues | undefined
   >(undefined);
   const [viewMode, setViewMode] = useState(viewTransaction);
+  const { financialYear } = useFinancialYear();
   // Add password verification state
   const [isPasswordVerified, setIsPasswordVerified] = useState(false);
 
@@ -80,6 +89,7 @@ export const TransActionEditButton: React.FC<{
       date: new Date().toISOString().split("T")[0],
       images: [],
       existingImages: [],
+      financialYear: "",
     },
   });
 
@@ -121,6 +131,7 @@ export const TransActionEditButton: React.FC<{
 
         // For form validation - just the IDs as strings
         existingImages: attachmentIds,
+        financialYear: transaction.financialYear || "",
       };
       setFormValues(values);
       form.reset(values);
@@ -241,6 +252,22 @@ export const TransActionEditButton: React.FC<{
   });
 
   const onFormSubmit = async (data: TransactionFormValues) => {
+    if (financialYear) {
+      const { start, end } = getFinancialYearDates(financialYear);
+      const transactionDate = new Date(data.date);
+
+      if (transactionDate < start || transactionDate > end) {
+        toast.error(
+          `Date must be between ${format(start, "dd MMM yyyy")} and ${format(end, "dd MMM yyyy")} for financial year ${financialYear}`,
+          {
+            position: "top-center",
+            duration: 5000,
+          }
+        );
+        return;
+      }
+    }
+
     startTransition(() => {
       mutation.mutate(data);
     });

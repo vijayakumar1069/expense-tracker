@@ -40,5 +40,6 @@ export const expenseFormSchema = z.object({
     // For tracking deleted images
     deleteImages: z.string().optional(),
     transferMode: z.nativeEnum(PaymentTransferMode).nullable().optional(),
+    financialYear: z.string().optional(),
     // attachments?: z.array(z.any()).optional().default([]),
 });

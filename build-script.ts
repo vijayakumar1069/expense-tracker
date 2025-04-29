@@ -14,7 +14,7 @@ try {
     execSync('next build', { stdio: 'inherit' });
 
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
 } catch (error) {
+    console.error(error);
     process.exit(1);
 }

@@ -1,6 +1,7 @@
 import Navbar from "@/components/ui components/admin components/Navbar";
 import { requireAuth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { FinancialYearProvider } from "../context/FinancialYearContext";
 
 export default async function AdminDashboard_Layout({
   children,
@@ -13,8 +14,10 @@ export default async function AdminDashboard_Layout({
   }
   return (
     <div className="bg-primary-foreground min-h-full">
-      <Navbar />
-      {children}
+      <FinancialYearProvider>
+        <Navbar />
+        {children}
+      </FinancialYearProvider>
     </div>
   );
 }

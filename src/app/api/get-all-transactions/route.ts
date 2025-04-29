@@ -11,6 +11,7 @@ const QuerySchema = z.object({
   type: z.enum(['INCOME', 'EXPENSE', 'ALL']).optional(),
   category: z.string().optional(),
   transactionNumber: z.string().optional(),
+  financialYear: z.string().optional(),
 
   paymentMethodType: z.enum(['CASH', 'BANK', 'CHEQUE', 'INVOICE']).optional(),
   startDate: z.string().optional(),
@@ -51,6 +52,7 @@ export async function GET(request: NextRequest) {
       search: searchParams.get("search") || undefined,
       sortBy: searchParams.get("sortBy") || "createdAt",
       sortDirection: searchParams.get("sortDirection") || "desc",
+      financialYear: searchParams.get("financialYear") || undefined,
     });
 
 
@@ -69,13 +71,17 @@ export async function GET(request: NextRequest) {
       maxAmount,
       search,
       sortBy,
-      sortDirection
+      sortDirection,
+      financialYear
     } = validatedParams;
 
     // Build the where condition for Prisma
     const where: Prisma.TransactionWhereInput = {
       userId: user?.id,
     };
+    if (financialYear) {
+      where.financialYear = financialYear;
+    }
 
     // Add type filter
     if (type) {
