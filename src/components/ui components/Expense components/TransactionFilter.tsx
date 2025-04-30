@@ -31,6 +31,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useFinancialYear } from "@/app/context/FinancialYearContext";
 
 interface FilterProps {
   onApplyFilters: (filters: {
@@ -63,7 +64,18 @@ interface FilterProps {
     byMonth?: string;
   };
 }
+const getFinancialYearDateRange = (financialYear: string) => {
+  // Parse years from format "2025-2026"
+  const [startYearStr, endYearStr] = financialYear.split("-");
+  const startYear = parseInt(startYearStr);
+  const endYear = parseInt(endYearStr);
 
+  // Assuming financial year starts on April 1st and ends on March 31st
+  const startDate = new Date(startYear, 3, 1); // April 1st (month is 0-indexed)
+  const endDate = new Date(endYear, 2, 31); // March 31st
+
+  return { startDate, endDate };
+};
 const getDateRangeForMonth = (byMonth: string) => {
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -92,10 +104,7 @@ const getDateRangeForMonth = (byMonth: string) => {
       startDate = new Date(currentYear, currentMonth - 6, 1);
       endDate = new Date(currentYear, currentMonth, 0);
       break;
-    case "LastYear":
-      startDate = new Date(currentYear - 1, 0, 1);
-      endDate = new Date(currentYear - 1, 11, 31);
-      break;
+
     default:
       return { startDate: undefined, endDate: undefined };
   }
@@ -114,7 +123,9 @@ const TransactionFilter = ({
   // const initialSearch = useRef(initialFilters.search || "");
   // const effectRef = useRef(true);
   const [searchValue, setSearchValue] = useState(initialFilters.search || "");
-
+  const { financialYear } = useFinancialYear();
+  const { startDate: fyStartDate, endDate: fyEndDate } =
+    getFinancialYearDateRange(financialYear);
   const [filters, setFilters] = useState({
     type: initialFilters.type || "",
     category: initialFilters.category || "",
@@ -133,6 +144,22 @@ const TransactionFilter = ({
     sortDirection: initialFilters.sortDirection || ("desc" as "asc" | "desc"),
     byMonth: initialFilters.byMonth || "",
   });
+  useEffect(() => {
+    // Check if initial dates are outside financial year range and adjust if needed
+    if (initialFilters.startDate) {
+      const initialStartDate = new Date(initialFilters.startDate);
+      if (initialStartDate < fyStartDate || initialStartDate > fyEndDate) {
+        setFilters((prev) => ({ ...prev, startDate: undefined }));
+      }
+    }
+
+    if (initialFilters.endDate) {
+      const initialEndDate = new Date(initialFilters.endDate);
+      if (initialEndDate < fyStartDate || initialEndDate > fyEndDate) {
+        setFilters((prev) => ({ ...prev, endDate: undefined }));
+      }
+    }
+  }, [initialFilters]);
 
   const handleFilterChange = (
     field: string,
@@ -345,7 +372,6 @@ const TransactionFilter = ({
                       <SelectItem value="Last2Months">Last 2 Months</SelectItem>
                       <SelectItem value="Last3Months">Last 3 Months</SelectItem>
                       <SelectItem value="Last6Months">Last 6 Months</SelectItem>
-                      <SelectItem value="LastYear">Last Year</SelectItem>
                     </SelectContent>
                   </Select>
                   {filters.byMonth && (
@@ -456,12 +482,15 @@ const TransactionFilter = ({
                           )}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
+                      <PopoverContent className="w-full p-0">
                         <Calendar
                           mode="single"
                           selected={filters.startDate}
                           onSelect={(date) =>
                             handleFilterChange("startDate", date || undefined)
+                          }
+                          disabled={(date) =>
+                            date < fyStartDate || date > fyEndDate
                           }
                           initialFocus
                         />
@@ -488,6 +517,9 @@ const TransactionFilter = ({
                           selected={filters.endDate}
                           onSelect={(date) =>
                             handleFilterChange("endDate", date || undefined)
+                          }
+                          disabled={(date) =>
+                            date < fyStartDate || date > fyEndDate
                           }
                           initialFocus
                         />
