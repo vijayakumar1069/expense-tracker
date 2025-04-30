@@ -58,6 +58,7 @@ const QuerySchema = z.object({
     sortBy: z.enum(['date', 'amount', 'name', 'createdAt']).default('createdAt'),
     sortDirection: z.enum(['asc', 'desc']).default('desc'),
     byMonth: z.enum(['ThisMonth', 'LastMonth', 'Last2Months', 'Last3Months', 'Last6Months', 'LastYear']).optional(),
+    financialYear: z.string().optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -85,6 +86,8 @@ export async function GET(request: NextRequest) {
             sortBy: searchParams.get("sortBy") || "createdAt",
             sortDirection: searchParams.get("sortDirection") || "desc",
             byMonth: searchParams.get("byMonth") || undefined,
+            financialYear: searchParams.get("financialYear") || undefined,
+
         });
 
         const {
@@ -99,6 +102,7 @@ export async function GET(request: NextRequest) {
             sortBy,
             sortDirection,
             byMonth,
+            financialYear
         } = validatedParams;
 
         // Build the where condition for Prisma
@@ -113,6 +117,9 @@ export async function GET(request: NextRequest) {
 
         if (category) {
             where.category = category;
+        }
+        if (financialYear) {
+            where.financialYear = financialYear;
         }
 
         if (paymentMethodType) {

@@ -21,6 +21,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ShieldAlert } from "lucide-react";
+import { useFinancialYear } from "@/app/context/FinancialYearContext";
+import { getCurrentFinancialYear } from "@/utils/financialYearsHelperFunctions";
 
 type LoginFormValues = z.infer<typeof LoginSchema>;
 
@@ -28,6 +30,9 @@ export const LoginForm = () => {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
+  const { setFinancialYear } = useFinancialYear();
+  const year = getCurrentFinancialYear();
+  console.log(year);
 
   const router = useRouter();
 
@@ -75,6 +80,8 @@ export const LoginForm = () => {
             });
             return;
           }
+
+          setFinancialYear(year);
 
           toast.success("Welcome back!", {
             id: "login",

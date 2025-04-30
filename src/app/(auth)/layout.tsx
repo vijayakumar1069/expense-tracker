@@ -1,3 +1,9 @@
+import { FinancialYearProvider } from "../context/FinancialYearContext";
+
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <div>{children}</div>;
+  return (
+    <FinancialYearProvider>
+      <div>{children}</div>
+    </FinancialYearProvider>
+  );
 }

@@ -187,15 +187,16 @@ export async function GET(request: NextRequest) {
         by: ["type"],
         where,
         _sum: {
-          amount: true,
+          total: true,
         },
       }),
     ]);
 
 
     // Calculate total income and expenses
-    const totalIncome = aggregates.find(agg => agg.type === "INCOME")?._sum.amount ?? 0;
-    const totalExpenses = aggregates.find(agg => agg.type === "EXPENSE")?._sum.amount ?? 0;
+    const totalIncome = aggregates.find(agg => agg.type === "INCOME")?._sum.total ?? 0;
+    const totalExpenses = aggregates.find(agg => agg.type === "EXPENSE")?._sum.total ?? 0;
+
 
     return NextResponse.json({
       transactions,

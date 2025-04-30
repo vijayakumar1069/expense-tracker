@@ -73,6 +73,7 @@ const Navbar = () => {
           id: "logout-toast",
         });
         // Add these two lines:
+        localStorage.removeItem("selectedFinancialYear");
         window.location.href = "/login";
         window.location.reload();
       } else {

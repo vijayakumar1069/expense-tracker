@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 // import { CardHeader } from "@/components/ui/card";
 
 import { toast } from "sonner";
+import { useFinancialYear } from "@/app/context/FinancialYearContext";
 
 const TransactionHeader = ({ currentFilters = {} }) => {
   const [isDownloading, setIsDownloading] = useState(false);
+  const { financialYear } = useFinancialYear();
   // Create a ref for the download iframe
   const downloadIframeRef = useRef<HTMLIFrameElement | null>(null);
 
@@ -38,6 +40,7 @@ const TransactionHeader = ({ currentFilters = {} }) => {
 
       // Add format and cache-busting timestamp
       queryParams.append("format", "csv");
+      queryParams.append("financialYear", financialYear);
       queryParams.append("timestamp", Date.now().toString());
 
       // Create download URL
