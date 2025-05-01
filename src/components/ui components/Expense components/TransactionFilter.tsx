@@ -321,149 +321,162 @@ const TransactionFilter = ({
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[340px] p-0 mb-5 overflow-y-auto max-h-[500px]"
+            className="w-[500px] p-0  overflow-y-auto max-h-[500px]"
             align="end"
             // onInteractOutside={(e) => {
             //   e.preventDefault();
             // }}
           >
-            <Card className="border-0">
-              <CardContent className="p-4 grid gap-4 ">
-                <div className="space-y-2">
-                  <Label htmlFor="type">Transaction Type</Label>
-                  <Select
-                    value={filters.type}
-                    onValueChange={(value) => handleFilterChange("type", value)}
-                  >
-                    <SelectTrigger id="type">
-                      <SelectValue placeholder="Expense Types" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="INCOME">Income</SelectItem>
-                      <SelectItem value="EXPENSE">Expense</SelectItem>
-                    </SelectContent>
-                  </Select>
+            <Card className="border-0 p-1">
+              <CardContent className="p-2 grid gap-2 ">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="type">Transaction Type</Label>
+                    <Select
+                      value={filters.type}
+                      onValueChange={(value) =>
+                        handleFilterChange("type", value)
+                      }
+                    >
+                      <SelectTrigger id="type">
+                        <SelectValue placeholder="Expense Types" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="INCOME">Income</SelectItem>
+                        <SelectItem value="EXPENSE">Expense</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="transactionNumber">
+                      Transaction Number
+                    </Label>
+                    <Input
+                      id="transactionNumber"
+                      placeholder="EXP-001 or INC-001"
+                      value={filters.transactionNumber}
+                      onChange={(e) =>
+                        handleFilterChange("transactionNumber", e.target.value)
+                      }
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="transactionNumber">Transaction Number</Label>
-                  <Input
-                    id="transactionNumber"
-                    placeholder="EXP-001 or INC-001"
-                    value={filters.transactionNumber}
-                    onChange={(e) =>
-                      handleFilterChange("transactionNumber", e.target.value)
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="byMonth">Transaction By Month</Label>
-                  <Select
-                    value={filters.byMonth}
-                    onValueChange={(value) =>
-                      handleFilterChange("byMonth", value)
-                    }
-                  >
-                    <SelectTrigger id="byMonth">
-                      <SelectValue placeholder="Transaction By Month" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ThisMonth">This Month</SelectItem>
-                      <SelectItem value="LastMonth">Last Month</SelectItem>
-                      <SelectItem value="Last2Months">Last 2 Months</SelectItem>
-                      <SelectItem value="Last3Months">Last 3 Months</SelectItem>
-                      <SelectItem value="Last6Months">Last 6 Months</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {filters.byMonth && (
-                    <p className="text-xs text-muted-foreground">
-                      Date range selection is disabled when filtering by month
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={filters.category}
-                    onValueChange={(value) =>
-                      handleFilterChange("category", value)
-                    }
-                  >
-                    <SelectTrigger id="category">
-                      <SelectValue placeholder="Categories" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIES?.map(
-                        (category: {
-                          id: number;
-                          name: string;
-                          icon: ForwardRefExoticComponent<
-                            Omit<LucideProps, "ref"> &
-                              RefAttributes<SVGSVGElement>
-                          >;
-                          color: string;
-                        }) => (
-                          <SelectItem key={category.id} value={category.name}>
-                            {category.name}
-                          </SelectItem>
-                        )
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="paymentMethodType">Payment Method</Label>
-                  <Select
-                    value={filters.paymentMethodType}
-                    onValueChange={(value) =>
-                      handleFilterChange("paymentMethodType", value)
-                    }
-                  >
-                    <SelectTrigger id="paymentMethodType">
-                      <SelectValue placeholder="Payment Methods" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PAYMENT_METHODS?.map((method: PaymentType) => (
-                        <SelectItem key={method.id} value={method.id}>
-                          {method.name}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="byMonth">Transaction By Month</Label>
+                    <Select
+                      value={filters.byMonth}
+                      onValueChange={(value) =>
+                        handleFilterChange("byMonth", value)
+                      }
+                    >
+                      <SelectTrigger id="byMonth">
+                        <SelectValue placeholder="Transaction By Month" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ThisMonth">This Month</SelectItem>
+                        <SelectItem value="LastMonth">Last Month</SelectItem>
+                        <SelectItem value="Last2Months">
+                          Last 2 Months
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="minAmount">Min Amount</Label>
-                    <Input
-                      id="minAmount"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={filters.minAmount}
-                      onChange={(e) =>
-                        handleFilterChange("minAmount", e.target.value)
-                      }
-                    />
+                        <SelectItem value="Last3Months">
+                          Last 3 Months
+                        </SelectItem>
+                        <SelectItem value="Last6Months">
+                          Last 6 Months
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {filters.byMonth && (
+                      <p className="text-xs text-muted-foreground">
+                        Date range selection is disabled when filtering by month
+                      </p>
+                    )}
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="maxAmount">Max Amount</Label>
-                    <Input
-                      id="maxAmount"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={filters.maxAmount}
-                      onChange={(e) =>
-                        handleFilterChange("maxAmount", e.target.value)
+                    <Label htmlFor="category">Category</Label>
+                    <Select
+                      value={filters.category}
+                      onValueChange={(value) =>
+                        handleFilterChange("category", value)
                       }
-                    />
+                    >
+                      <SelectTrigger id="category">
+                        <SelectValue placeholder="Categories" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CATEGORIES?.map(
+                          (category: {
+                            id: number;
+                            name: string;
+                            icon: ForwardRefExoticComponent<
+                              Omit<LucideProps, "ref"> &
+                                RefAttributes<SVGSVGElement>
+                            >;
+                            color: string;
+                          }) => (
+                            <SelectItem key={category.id} value={category.name}>
+                              {category.name}
+                            </SelectItem>
+                          )
+                        )}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="paymentMethodType">Payment Method</Label>
+                    <Select
+                      value={filters.paymentMethodType}
+                      onValueChange={(value) =>
+                        handleFilterChange("paymentMethodType", value)
+                      }
+                    >
+                      <SelectTrigger id="paymentMethodType">
+                        <SelectValue placeholder="Payment Methods" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PAYMENT_METHODS?.map((method: PaymentType) => (
+                          <SelectItem key={method.id} value={method.id}>
+                            {method.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="minAmount">Min Amount</Label>
+                      <Input
+                        id="minAmount"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={filters.minAmount}
+                        onChange={(e) =>
+                          handleFilterChange("minAmount", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="maxAmount">Max Amount</Label>
+                      <Input
+                        id="maxAmount"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        value={filters.maxAmount}
+                        onChange={(e) =>
+                          handleFilterChange("maxAmount", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
                 <div className="space-y-2">
                   <Label>Date Range</Label>
                   <div className="grid grid-cols-2 gap-2">
